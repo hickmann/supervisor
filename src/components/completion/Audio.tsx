@@ -1,8 +1,7 @@
 import { InfoIcon, MicIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger, Button } from "@/components";
-import { AutoSpeechVAD } from "./AutoSpeechVad";
+import { VadOnly } from "./VadOnly";
 import { UseCompletionReturn } from "@/types";
-import { useApp } from "@/contexts";
 
 export const Audio = ({
   micOpen,
@@ -12,15 +11,11 @@ export const Audio = ({
   submit,
   setState,
 }: UseCompletionReturn) => {
-  const { selectedSttProvider, pluelyApiEnabled } = useApp();
-
-  const speechProviderStatus = selectedSttProvider.provider;
-
   return (
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>
-        {(pluelyApiEnabled || speechProviderStatus) && enableVAD ? (
-          <AutoSpeechVAD
+        {enableVAD ? (
+          <VadOnly
             submit={submit}
             setState={setState}
             setEnableVAD={setEnableVAD}
@@ -32,7 +27,7 @@ export const Audio = ({
               setEnableVAD(!enableVAD);
             }}
             className="cursor-pointer"
-            title="Toggle voice input"
+            title="Toggle voice input (VAD)"
           >
             <MicIcon className="h-4 w-4" />
           </Button>
@@ -42,32 +37,24 @@ export const Audio = ({
       <PopoverContent
         align="end"
         side="bottom"
-        className={`w-80 p-3 ${
-          pluelyApiEnabled || speechProviderStatus ? "hidden" : ""
-        }`}
+        className="w-80 p-3"
         sideOffset={8}
       >
         <div className="text-sm select-none">
-          <div className="font-semibold text-orange-600 mb-1">
-            Speech Provider Configuration Required
+          <div className="font-semibold text-green-600 mb-1">
+            VAD (Voice Activity Detection)
           </div>
-          <p className="text-muted-foreground">
-            {!speechProviderStatus ? (
-              <>
-                <div className="mt-2 flex flex-row gap-1 items-center text-orange-600">
-                  <InfoIcon size={16} />
-                  {selectedSttProvider.provider ? null : (
-                    <p>PROVIDER IS MISSING</p>
-                  )}
-                </div>
+          <div className="text-muted-foreground">
+            <div className="mt-2 flex flex-row gap-1 items-center text-green-600">
+              <InfoIcon size={16} />
+              <span>VOICE ACTIVITY DETECTION</span>
+            </div>
 
-                <span className="block mt-2">
-                  Please go to settings and configure your speech provider to
-                  enable voice input.
-                </span>
-              </>
-            ) : null}
-          </p>
+            <p className="block mt-2">
+              Sistema de detecção de voz usando VAD do ricky0123. 
+              Detecta quando você está falando e envia uma mensagem.
+            </p>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

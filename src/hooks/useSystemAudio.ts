@@ -3,7 +3,7 @@ import { useWindowResize, useGlobalShortcuts } from ".";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useApp } from "@/contexts";
-import { fetchSTT, fetchAIResponse } from "@/lib/functions";
+import { fetchAIResponse } from "@/lib/functions";
 import {
   DEFAULT_QUICK_ACTIONS,
   DEFAULT_SYSTEM_PROMPT,
@@ -65,8 +65,6 @@ export function useSystemAudio() {
   const [contextContent, setContextContent] = useState<string>("");
 
   const {
-    selectedSttProvider,
-    allSttProviders,
     selectedAIProvider,
     allAiProviders,
     systemPrompt,
@@ -113,41 +111,17 @@ export function useSystemAudio() {
 
     const setupEventListener = async () => {
       try {
-        speechUnlisten = await listen("speech-detected", async (event) => {
+        speechUnlisten = await listen("speech-detected", async (_event) => {
           try {
             if (!capturing) return;
 
-            const base64Audio = event.payload as string;
-            // Convert to blob
-            const binaryString = atob(base64Audio);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
-            }
-            const audioBlob = new Blob([bytes], { type: "audio/wav" });
-
-            const usePluelyAPI = await shouldUsePluelyAPI();
-            if (!selectedSttProvider.provider && !usePluelyAPI) {
-              setError("No speech provider selected.");
-              return;
-            }
-
-            const providerConfig = allSttProviders.find(
-              (p) => p.id === selectedSttProvider.provider
-            );
-
-            if (!providerConfig && !usePluelyAPI) {
-              setError("Speech provider config not found.");
-              return;
-            }
+            // const base64Audio = event.payload as string;
+            console.log("Speech detected via system audio capture");
 
             setIsProcessing(true);
             try {
-              const transcription = await fetchSTT({
-                provider: providerConfig,
-                selectedProvider: selectedSttProvider,
-                audio: audioBlob,
-              });
+              // Simular transcrição com VAD - apenas detecta que houve fala
+              const transcription = "Fala detectada pelo sistema de áudio";
 
               if (transcription.trim()) {
                 setLastTranscription(transcription);
@@ -168,7 +142,7 @@ export function useSystemAudio() {
                 );
               }
             } catch (sttError: any) {
-              setError(sttError.message || "Failed to transcribe audio");
+              setError(sttError.message || "Failed to process speech");
               setCapturing(false);
               setIsPopoverOpen(true);
             }
@@ -190,8 +164,6 @@ export function useSystemAudio() {
     };
   }, [
     capturing,
-    selectedSttProvider,
-    allSttProviders,
     conversation.messages.length,
   ]);
 
