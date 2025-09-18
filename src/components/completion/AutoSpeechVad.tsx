@@ -1,12 +1,10 @@
-import { fetchSTT } from "@/lib";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { useApp } from "@/contexts";
 import { floatArrayToWav } from "@/lib/utils";
-import { shouldUsePluelyAPI } from "@/lib/functions/pluely.api";
+import { voskLocal } from "@/lib/vosk-local";
 
 interface AutoSpeechVADProps {
   submit: UseCompletionReturn["submit"];
@@ -20,62 +18,65 @@ export const AutoSpeechVAD = ({
   setEnableVAD,
 }: AutoSpeechVADProps) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const { selectedSttProvider, allSttProviders } = useApp();
+  const [voskReady, setVoskReady] = useState(false);
+
+  // Initialize Vosk on component mount
+  useEffect(() => {
+    const initializeVosk = async () => {
+      try {
+        await voskLocal.initialize();
+        setVoskReady(true);
+        console.log("Vosk local ready for transcription");
+      } catch (error) {
+        console.error("Failed to initialize Vosk:", error);
+        setState((prev: any) => ({
+          ...prev,
+          error: "Failed to initialize local speech recognition.",
+        }));
+      }
+    };
+
+    initializeVosk();
+  }, [setState]);
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
     startOnLoad: true,
     onSpeechEnd: async (audio) => {
+      if (!voskReady) {
+        console.warn("Vosk not ready yet");
+        setState((prev: any) => ({
+          ...prev,
+          error: "Speech recognition not ready. Please wait...",
+        }));
+        return;
+      }
+
       try {
-        // convert float32array to blob
+        setIsTranscribing(true);
+        setState((prev: any) => ({ ...prev, error: "" }));
+
+        // Convert float32array to WAV blob
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
 
-        let transcription: string;
-        const usePluelyAPI = await shouldUsePluelyAPI();
+        // Transcribe using Vosk local
+        const transcription = await voskLocal.transcribe(audioBlob);
 
-        // Check if we have a configured speech provider
-        if (!selectedSttProvider.provider && !usePluelyAPI) {
-          console.warn("No speech provider selected");
-          setState((prev: any) => ({
-            ...prev,
-            error:
-              "No speech provider selected. Please select one in settings.",
-          }));
-          return;
-        }
-
-        const providerConfig = allSttProviders.find(
-          (p) => p.id === selectedSttProvider.provider
-        );
-
-        if (!providerConfig && !usePluelyAPI) {
-          console.warn("Selected speech provider configuration not found");
-          setState((prev: any) => ({
-            ...prev,
-            error:
-              "Speech provider configuration not found. Please check your settings.",
-          }));
-          return;
-        }
-
-        setIsTranscribing(true);
-
-        // Use the fetchSTT function for all providers
-        transcription = await fetchSTT({
-          provider: usePluelyAPI ? undefined : providerConfig,
-          selectedProvider: selectedSttProvider,
-          audio: audioBlob,
-        });
-
-        if (transcription) {
+        if (transcription && transcription.trim()) {
+          console.log("Vosk transcription:", transcription);
           submit(transcription);
+        } else {
+          console.warn("Empty transcription result");
+          setState((prev: any) => ({
+            ...prev,
+            error: "No speech detected. Please try speaking more clearly.",
+          }));
         }
       } catch (error) {
         console.error("Failed to transcribe audio:", error);
         setState((prev: any) => ({
           ...prev,
-          error:
-            error instanceof Error ? error.message : "Transcription failed",
+          error: error instanceof Error ? error.message : "Transcription failed",
         }));
       } finally {
         setIsTranscribing(false);
@@ -88,6 +89,11 @@ export const AutoSpeechVAD = ({
       <Button
         size="icon"
         onClick={() => {
+          if (!voskReady) {
+            console.warn("Vosk not ready yet");
+            return;
+          }
+          
           if (vad.listening) {
             vad.pause();
             setEnableVAD(false);
@@ -97,13 +103,18 @@ export const AutoSpeechVAD = ({
           }
         }}
         className="cursor-pointer"
+        disabled={!voskReady}
+        title={!voskReady ? "Initializing speech recognition..." : 
+               vad.listening ? "Stop listening" : "Start listening"}
       >
-        {isTranscribing ? (
+        {!voskReady ? (
+          <LoaderCircleIcon className="h-4 w-4 animate-spin text-blue-500" />
+        ) : isTranscribing ? (
           <LoaderCircleIcon className="h-4 w-4 animate-spin text-green-500" />
         ) : vad.userSpeaking ? (
-          <LoaderCircleIcon className="h-4 w-4 animate-spin" />
+          <LoaderCircleIcon className="h-4 w-4 animate-spin text-orange-500" />
         ) : vad.listening ? (
-          <MicOffIcon className="h-4 w-4 animate-pulse" />
+          <MicOffIcon className="h-4 w-4 animate-pulse text-red-500" />
         ) : (
           <MicIcon className="h-4 w-4" />
         )}

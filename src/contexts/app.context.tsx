@@ -1,7 +1,6 @@
 import {
   AI_PROVIDERS,
   DEFAULT_SYSTEM_PROMPT,
-  SPEECH_TO_TEXT_PROVIDERS,
   STORAGE_KEYS,
 } from "@/config";
 import { safeLocalStorage } from "@/lib";
@@ -80,17 +79,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     variables: {},
   });
 
-  // STT Providers
-  const [customSttProviders, setCustomSttProviders] = useState<TYPE_PROVIDER[]>(
-    []
-  );
-  const [selectedSttProvider, setSelectedSttProvider] = useState<{
-    provider: string;
-    variables: Record<string, string>;
-  }>({
-    provider: "",
-    variables: {},
-  });
 
   const [screenshotConfiguration, setScreenshotConfiguration] =
     useState<ScreenshotConfig>({
@@ -150,15 +138,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
     setCustomAiProviders(aiList);
 
-    // Load custom STT providers
-    const savedStt = safeLocalStorage.getItem(
-      STORAGE_KEYS.CUSTOM_SPEECH_PROVIDERS
-    );
-    let sttList: TYPE_PROVIDER[] = [];
-    if (savedStt) {
-      sttList = validateAndProcessCurlProviders(savedStt, "STT");
-    }
-    setCustomSttProviders(sttList);
 
     // Load selected AI provider
     const savedSelectedAi = safeLocalStorage.getItem(
@@ -168,13 +147,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setSelectedAIProvider(JSON.parse(savedSelectedAi));
     }
 
-    // Load selected STT provider
-    const savedSelectedStt = safeLocalStorage.getItem(
-      STORAGE_KEYS.SELECTED_STT_PROVIDER
-    );
-    if (savedSelectedStt) {
-      setSelectedSttProvider(JSON.parse(savedSelectedStt));
-    }
 
     // Load customizable state
     const customizableState = getCustomizableState();
@@ -272,15 +244,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [selectedAIProvider]);
 
-  // Sync selected STT to localStorage
-  useEffect(() => {
-    if (selectedSttProvider.provider) {
-      safeLocalStorage.setItem(
-        STORAGE_KEYS.SELECTED_STT_PROVIDER,
-        JSON.stringify(selectedSttProvider)
-      );
-    }
-  }, [selectedSttProvider]);
 
   // Computed all AI providers
   const allAiProviders: TYPE_PROVIDER[] = [
@@ -288,11 +251,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     ...customAiProviders,
   ];
 
-  // Computed all STT providers
-  const allSttProviders: TYPE_PROVIDER[] = [
-    ...SPEECH_TO_TEXT_PROVIDERS,
-    ...customSttProviders,
-  ];
 
   const onSetSelectedAIProvider = ({
     provider,
@@ -313,21 +271,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
-  // Setter for selected STT with validation
-  const onSetSelectedSttProvider = ({
-    provider,
-    variables,
-  }: {
-    provider: string;
-    variables: Record<string, string>;
-  }) => {
-    if (provider && !allSttProviders.some((p) => p.id === provider)) {
-      console.warn(`Invalid STT provider ID: ${provider}`);
-      return;
-    }
-
-    setSelectedSttProvider((prev) => ({ ...prev, provider, variables }));
-  };
 
   // Toggle handlers
   const toggleAppIconVisibility = async (isVisible: boolean) => {
@@ -372,10 +315,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     customAiProviders,
     selectedAIProvider,
     onSetSelectedAIProvider,
-    allSttProviders,
-    customSttProviders,
-    selectedSttProvider,
-    onSetSelectedSttProvider,
     screenshotConfiguration,
     setScreenshotConfiguration,
     customizable,

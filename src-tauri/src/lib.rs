@@ -3,6 +3,7 @@ mod window;
 mod shortcuts;
 mod activate;
 mod api;
+mod vosk_local;
 
 #[cfg(target_os = "macos")]
 use tauri_plugin_macos_permissions;
@@ -100,7 +101,9 @@ pub fn run() {
             speaker::start_system_audio_capture,
             speaker::stop_system_audio_capture,
             speaker::check_system_audio_access,
-            speaker::request_system_audio_access
+            speaker::request_system_audio_access,
+            vosk_local::initialize_vosk_local,
+            vosk_local::transcribe_audio_vosk
         ])
         .setup(|app| {
             // Setup main window positioning
@@ -116,9 +119,7 @@ pub fn run() {
 
     // Add macOS-specific permissions plugin
     #[cfg(target_os = "macos")]
-    {
-        builder = builder.plugin(tauri_plugin_macos_permissions::init());
-    }
+    let builder = builder.plugin(tauri_plugin_macos_permissions::init());
 
     builder
         .run(tauri::generate_context!())

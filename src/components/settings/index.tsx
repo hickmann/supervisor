@@ -14,7 +14,6 @@ import { AppIconToggle } from "./AppIconToggle";
 import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { TitleToggle } from "./TitleToggle";
 import { AIProviders } from "./ai-configs";
-import { STTProviders } from "./stt-configs";
 import { DeleteChats } from "./DeleteChats";
 import { PluelyApiSetup } from "./PluelyApiSetup";
 
@@ -66,9 +65,6 @@ export const Settings = () => {
 
             {/* Provider Selection */}
             <AIProviders {...settings} />
-
-            {/* STT Providers */}
-            <STTProviders {...settings} />
 
             {/* Disclaimer */}
             <DeleteChats {...settings} />

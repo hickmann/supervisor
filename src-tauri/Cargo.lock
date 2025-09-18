@@ -3630,6 +3630,7 @@ dependencies = [
  "futures-util",
  "hound",
  "image",
+ "lazy_static",
  "libpulse-binding",
  "libpulse-simple-binding",
  "once_cell",
