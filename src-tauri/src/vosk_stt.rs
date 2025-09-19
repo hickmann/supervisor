@@ -87,37 +87,47 @@ pub async fn transcribe_audio_with_vosk(
 
     // Decode base64 audio
     info!("🔓 VOSK: Decoding base64 audio...");
+    println!("🔓 VOSK: Decoding base64 audio...");
     let audio_data = base64::engine::general_purpose::STANDARD
         .decode(&audio_base64)
         .map_err(|e| {
             error!("❌ VOSK: Failed to decode base64 audio: {}", e);
+            println!("❌ VOSK: Failed to decode base64 audio: {}", e);
             format!("Failed to decode base64 audio: {}", e)
         })?;
 
     info!("✅ VOSK: Audio decoded successfully, size: {} bytes", audio_data.len());
+    println!("✅ VOSK: Audio decoded successfully, size: {} bytes", audio_data.len());
 
     // Convert Vec<u8> to Vec<i16> (assuming 16-bit PCM audio)
     info!("🔄 VOSK: Converting audio to 16-bit PCM samples...");
+    println!("🔄 VOSK: Converting audio to 16-bit PCM samples...");
     let audio_samples: Vec<i16> = audio_data
         .chunks_exact(2)
         .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
         .collect();
 
     info!("✅ VOSK: Audio converted to {} samples", audio_samples.len());
+    println!("✅ VOSK: Audio converted to {} samples", audio_samples.len());
 
     // Create recognizer
     info!("🤖 VOSK: Creating recognizer...");
+    println!("🤖 VOSK: Creating recognizer...");
     let mut recognizer = Recognizer::new(&model, 16000.0)
         .ok_or_else(|| {
             error!("❌ VOSK: Failed to create recognizer");
+            println!("❌ VOSK: Failed to create recognizer");
             "Failed to create VOSK recognizer".to_string()
         })?;
 
     info!("✅ VOSK: Recognizer created successfully");
+    println!("✅ VOSK: Recognizer created successfully");
 
     // Process audio data
     info!("🎯 VOSK: Processing audio with recognizer...");
+    println!("🎯 VOSK: Processing audio with recognizer...");
     let result = recognizer.accept_waveform(&audio_samples);
+    println!("🎯 VOSK: accept_waveform result: {:?}", result);
     
     match result {
         Ok(_) => {
@@ -160,7 +170,9 @@ pub async fn transcribe_audio_with_vosk(
             // Log the final transcription result
             if let Some(ref text) = transcription {
                 info!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
+                println!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
                 info!("📝 VOSK: Transcription length: {} characters", text.chars().count());
+                println!("📝 VOSK: Transcription length: {} characters", text.chars().count());
             }
             
             Ok(VoskTranscriptionResult {

@@ -147,7 +147,7 @@ export function useSystemAudio() {
 
     const setupEventListener = async () => {
       try {
-        speechUnlisten = await listen("speech-detected", async (_event) => {
+        speechUnlisten = await listen("speech-detected", async (event) => {
           try {
             if (!capturing) return;
 
