@@ -9,13 +9,13 @@ use std::io::Cursor;
 use base64::{Engine as _, engine::general_purpose::STANDARD as B64};
 use std::collections::VecDeque;
 
-// Pluely AI Speech Detection
+// Pluely AI Speech Detection - Configurações otimizadas para não cortar início/fim
 const HOP_SIZE: usize = 1024;  // Analysis chunk size (~23ms at 44.1kHz, ~21ms at 48kHz)
-const VAD_SENSITIVITY_RMS: f32 = 0.005;  // RMS sensitivity for VAD (menos sensível para sistema)
-const SPEECH_PEAK_THRESHOLD: f32 = 0.012;  // Peak threshold for VAD (menos sensível para sistema)
-const SILENCE_CHUNKS: usize = 35;  // ~0.75s silence to end speech (mais tempo para frases completas)
-const MIN_SPEECH_CHUNKS: usize = 15;  // ~0.32s min speech duration
-const PRE_SPEECH_CHUNKS: usize = 15;  // ~0.32s pre-speech buffer
+const VAD_SENSITIVITY_RMS: f32 = 0.002;  // Muito mais sensível para capturar início e fim das frases
+const SPEECH_PEAK_THRESHOLD: f32 = 0.006;  // Muito mais sensível para capturar início e fim das frases
+const SILENCE_CHUNKS: usize = 80;  // ~1.7s silence to end speech (ainda mais tempo para capturar palavras finais)
+const MIN_SPEECH_CHUNKS: usize = 10;  // ~0.21s min speech duration (menor para capturar palavras rápidas)
+const PRE_SPEECH_CHUNKS: usize = 25;  // ~0.53s pre-speech buffer (maior para capturar início)
 
 #[tauri::command]
 pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
@@ -38,7 +38,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
         let mut in_speech = false;
         let mut silence_chunks = 0;
         let mut speech_chunks = 0;
-        let max_samples = sr as usize * 45;  // Safety cap: 45s (mais tempo para frases longas)
+        let max_samples = sr as usize * 60;  // Safety cap: 60s (ainda mais tempo para frases longas)
 
         while let Some(sample) = stream.next().await {
             buffer.push_back(sample);
@@ -60,6 +60,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
                             in_speech = true;
                             speech_chunks = 0;
                             silence_chunks = 0;
+                            println!("🎤 VAD: Speech started - Pre-speech buffer: {} samples", pre_speech.len());
                             speech_buffer.extend(pre_speech.drain(..));  // Prepend pre-speech
                             let _ = app_clone.emit("speech-start", ()).map_err(|e| eprintln!("emit speech-start failed: {}", e));
                         }
@@ -80,11 +81,16 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
                             speech_buffer.extend_from_slice(&mono);
                             if silence_chunks >= SILENCE_CHUNKS {
                                 if speech_chunks >= MIN_SPEECH_CHUNKS && !speech_buffer.is_empty() {
-                                    // Trim trailing silence
-                                    let trim = (SILENCE_CHUNKS / 2) * HOP_SIZE;
-                                    if speech_buffer.len() > trim {
-                                        speech_buffer.truncate(speech_buffer.len() - trim);
-                                    }
+                                    // NÃO fazer trim do silêncio final para preservar completamente o fim das frases
+                                    // let trim = (SILENCE_CHUNKS / 3) * HOP_SIZE;  // Desabilitado
+                                    // if speech_buffer.len() > trim {
+                                    //     speech_buffer.truncate(speech_buffer.len() - trim);
+                                    // }
+                                    println!("🎤 VAD: Preserving full speech buffer without trimming - {} samples", speech_buffer.len());
+                                    println!("🎤 VAD: Speech ended - Duration: {}s, Silence: {}s, Final buffer: {} samples", 
+                                        speech_chunks as f32 * HOP_SIZE as f32 / sr as f32,
+                                        silence_chunks as f32 * HOP_SIZE as f32 / sr as f32,
+                                        speech_buffer.len());
                                     if let Ok(b64) = samples_to_wav_b64(sr, &speech_buffer) {
                                         println!("🎤 System Audio: Emitting speech - Original SR: {} Hz, Buffer: {} samples", sr, speech_buffer.len());
                                         let _ = app_clone.emit("speech-detected", b64).map_err(|e| eprintln!("emit speech-detected failed: {}", e));
