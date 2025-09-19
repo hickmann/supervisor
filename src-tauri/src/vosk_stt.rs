@@ -110,7 +110,7 @@ pub async fn transcribe_audio_with_vosk(
     info!("✅ VOSK: Audio converted to {} samples", audio_samples.len());
     println!("✅ VOSK: Audio converted to {} samples", audio_samples.len());
 
-    // Create recognizer
+    // Create recognizer with optimized settings for system audio
     info!("🤖 VOSK: Creating recognizer...");
     println!("🤖 VOSK: Creating recognizer...");
     let mut recognizer = Recognizer::new(&model, 16000.0)
@@ -119,90 +119,89 @@ pub async fn transcribe_audio_with_vosk(
             println!("❌ VOSK: Failed to create recognizer");
             "Failed to create VOSK recognizer".to_string()
         })?;
+    
+    // Configure for better system audio processing
+    recognizer.set_words(true);  // Enable word-level timestamps
+    recognizer.set_partial_words(false);  // Disable partial words for cleaner results
 
     info!("✅ VOSK: Recognizer created successfully");
     println!("✅ VOSK: Recognizer created successfully");
 
-    // Process audio data
+    // Process audio data in chunks for better system audio handling
     info!("🎯 VOSK: Processing audio with recognizer...");
     println!("🎯 VOSK: Processing audio with recognizer...");
-    let result = recognizer.accept_waveform(&audio_samples);
-    println!("🎯 VOSK: accept_waveform result: {:?}", result);
     
-    match result {
-        Ok(_) => {
-            info!("✅ VOSK: Audio processing completed successfully");
-            
-            // Get final result
-            let final_result = recognizer.final_result();
-            info!("📝 VOSK: Final result: {:?}", final_result);
-            
-            // Extract text from CompleteResult
-            let transcription = match final_result {
-                vosk::CompleteResult::Single(single) => {
-                    let text = single.text;
-                    if !text.is_empty() {
-                        Some(text.to_string())
-                    } else {
-                        None
-                    }
+    // Process in chunks of 4000 samples (~0.25s at 16kHz) for better results
+    const CHUNK_SIZE: usize = 4000;
+    let mut final_result_available = false;
+    
+    for chunk in audio_samples.chunks(CHUNK_SIZE) {
+        let result = recognizer.accept_waveform(chunk);
+        match result {
+            Ok(state) => {
+                println!("🎯 VOSK: Chunk processed, state: {:?}", state);
+                if matches!(state, vosk::DecodingState::Finalized) {
+                    final_result_available = true;
                 }
-                vosk::CompleteResult::Multiple(multiple) => {
-                    if let Some(first_alternative) = multiple.alternatives.first() {
-                        let text = first_alternative.text;
-                        if !text.is_empty() {
-                            Some(text.to_string())
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                }
-            };
-            
-            if let Some(ref text) = transcription {
-                info!("🎯 VOSK: Extracted text: '{}'", text);
-            } else {
-                warn!("⚠️ VOSK: No transcription text available");
             }
-            
-            // Log the final transcription result
-            if let Some(ref text) = transcription {
-                info!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
-                println!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
-                info!("📝 VOSK: Transcription length: {} characters", text.chars().count());
-                println!("📝 VOSK: Transcription length: {} characters", text.chars().count());
+            Err(e) => {
+                println!("⚠️ VOSK: Chunk processing error: {:?}", e);
             }
-            
-            Ok(VoskTranscriptionResult {
-                success: true,
-                transcription,
-                error: None,
-            })
-        }
-        Err(e) => {
-            warn!("⚠️ VOSK: Audio processing failed: {}", e);
-            let partial_result = recognizer.partial_result();
-            info!("📝 VOSK: Partial result: {:?}", partial_result);
-            
-            let transcription = if !partial_result.partial.is_empty() {
-                Some(partial_result.partial.to_string())
-            } else {
-                None
-            };
-            
-            if let Some(ref text) = transcription {
-                info!("🎯 VOSK: Extracted partial text: '{}'", text);
-            }
-            
-            Ok(VoskTranscriptionResult {
-                success: true,
-                transcription,
-                error: None,
-            })
         }
     }
+    
+    println!("🎯 VOSK: All chunks processed, final_result_available: {}", final_result_available);
+    
+    // Always try to get final result after processing all chunks
+    info!("✅ VOSK: Audio processing completed successfully");
+    
+    // Get final result
+    let final_result = recognizer.final_result();
+    info!("📝 VOSK: Final result: {:?}", final_result);
+    
+    // Extract text from CompleteResult
+    let transcription = match final_result {
+        vosk::CompleteResult::Single(single) => {
+            let text = single.text;
+            if !text.is_empty() {
+                Some(text.to_string())
+            } else {
+                None
+            }
+        }
+        vosk::CompleteResult::Multiple(multiple) => {
+            if let Some(first_alternative) = multiple.alternatives.first() {
+                let text = first_alternative.text;
+                if !text.is_empty() {
+                    Some(text.to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }
+    };
+    
+    if let Some(ref text) = transcription {
+        info!("🎯 VOSK: Extracted text: '{}'", text);
+    } else {
+        warn!("⚠️ VOSK: No transcription text available");
+    }
+    
+    // Log the final transcription result
+    if let Some(ref text) = transcription {
+        info!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
+        println!("📝 VOSK: FINAL TRANSCRIPTION RESULT: '{}'", text);
+        info!("📝 VOSK: Transcription length: {} characters", text.chars().count());
+        println!("📝 VOSK: Transcription length: {} characters", text.chars().count());
+    }
+    
+    Ok(VoskTranscriptionResult {
+        success: true,
+        transcription,
+        error: None,
+    })
 }
 
 #[tauri::command]

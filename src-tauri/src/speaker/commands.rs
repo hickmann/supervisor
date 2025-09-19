@@ -11,9 +11,9 @@ use std::collections::VecDeque;
 
 // Pluely AI Speech Detection
 const HOP_SIZE: usize = 1024;  // Analysis chunk size (~23ms at 44.1kHz, ~21ms at 48kHz)
-const VAD_SENSITIVITY_RMS: f32 = 0.004;  // RMS sensitivity for VAD
-const SPEECH_PEAK_THRESHOLD: f32 = 0.01;  // Peak threshold for VAD
-const SILENCE_CHUNKS: usize = 47;  // ~1s silence to end speech
+const VAD_SENSITIVITY_RMS: f32 = 0.005;  // RMS sensitivity for VAD (menos sensível para sistema)
+const SPEECH_PEAK_THRESHOLD: f32 = 0.012;  // Peak threshold for VAD (menos sensível para sistema)
+const SILENCE_CHUNKS: usize = 35;  // ~0.75s silence to end speech (mais tempo para frases completas)
 const MIN_SPEECH_CHUNKS: usize = 15;  // ~0.32s min speech duration
 const PRE_SPEECH_CHUNKS: usize = 15;  // ~0.32s pre-speech buffer
 
@@ -38,7 +38,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
         let mut in_speech = false;
         let mut silence_chunks = 0;
         let mut speech_chunks = 0;
-        let max_samples = sr as usize * 30;  // Safety cap: 30s
+        let max_samples = sr as usize * 45;  // Safety cap: 45s (mais tempo para frases longas)
 
         while let Some(sample) = stream.next().await {
             buffer.push_back(sample);
@@ -124,7 +124,7 @@ fn process_chunk(mono_chunk: &[f32]) -> (f32, f32) {
     (rms, peak)
 }
 
-// Simple resampling function for VOSK compatibility
+// Improved resampling with linear interpolation for better VOSK quality
 fn resample_to_16khz(input: &[f32], original_rate: u32) -> Vec<f32> {
     if original_rate == 16000 {
         return input.to_vec();
@@ -135,13 +135,22 @@ fn resample_to_16khz(input: &[f32], original_rate: u32) -> Vec<f32> {
     let mut output = Vec::with_capacity(output_len);
     
     for i in 0..output_len {
-        let src_index = (i as f64 * ratio) as usize;
-        if src_index < input.len() {
+        let src_pos = i as f64 * ratio;
+        let src_index = src_pos as usize;
+        let frac = src_pos - src_index as f64;
+        
+        if src_index + 1 < input.len() {
+            // Linear interpolation for better quality
+            let sample1 = input[src_index];
+            let sample2 = input[src_index + 1];
+            let interpolated = sample1 + (sample2 - sample1) * frac as f32;
+            output.push(interpolated);
+        } else if src_index < input.len() {
             output.push(input[src_index]);
         }
     }
     
-    println!("🎤 System Audio: Resampled from {} samples to {} samples", input.len(), output.len());
+    println!("🎤 System Audio: Linear interpolation resampled from {} samples to {} samples", input.len(), output.len());
     output
 }
 
