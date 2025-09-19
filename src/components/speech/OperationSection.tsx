@@ -6,7 +6,6 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   HeadphonesIcon,
-  MicIcon,
   UserIcon,
   GraduationCapIcon,
 } from "lucide-react";
@@ -14,7 +13,6 @@ import { useState } from "react";
 import { QuickActions } from "./QuickActions";
 
 type Props = {
-  lastTranscription: string;
   lastAIResponse: string;
   isAIProcessing: boolean;
   conversation: ChatConversation;
@@ -33,7 +31,6 @@ type Props = {
 };
 
 export const OperationSection = ({
-  lastTranscription,
   lastAIResponse,
   isAIProcessing,
   conversation,

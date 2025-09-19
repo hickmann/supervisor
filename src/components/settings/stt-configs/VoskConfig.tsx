@@ -115,7 +115,7 @@ export const VoskConfig = ({
               console.log("🧪 VOSK: Testing transcription...");
               try {
                 // Create a dummy audio blob for testing
-                const dummyAudio = new Blob(["dummy audio data"], { type: "audio/wav" });
+                new Blob(["dummy audio data"], { type: "audio/wav" });
                 const response = await invoke<{
                   success: boolean;
                   transcription?: string;

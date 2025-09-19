@@ -1,14 +1,9 @@
 import {
-  deepVariableReplacer,
-  getByPath,
   blobToBase64,
 } from "./common.function";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { invoke } from "@tauri-apps/api/core";
 
 import { TYPE_PROVIDER } from "@/types";
-import curl2Json from "@bany/curl-to-json";
-import { shouldUsePluelyAPI } from "./pluely.api";
 
 // Pluely STT function
 export async function fetchPluelySTT(audio: File | Blob): Promise<string> {
@@ -91,8 +86,6 @@ export interface STTParams {
  * Transcribes audio and returns either the transcription or an error/warning message as a single string.
  */
 export async function fetchSTT(params: STTParams): Promise<string> {
-  let warnings: string[] = [];
-
   console.log("🚀 STT: fetchSTT called with params:", {
     providerId: params.provider?.id,
     selectedProvider: params.selectedProvider?.provider,

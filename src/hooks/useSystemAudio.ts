@@ -215,6 +215,8 @@ export function useSystemAudio() {
       setLastTerapeutaTranscription(transcription);
       setLastTranscription(transcription);
       setError("");
+      
+      console.log("🎤 Microphone: Setting lastTerapeutaTranscription to:", transcription);
 
       // Não forçar abertura do popover - apenas processar se já estiver ativo
 
@@ -247,12 +249,17 @@ export function useSystemAudio() {
         timestamp: Date.now(),
       };
 
-      setConversation((prev) => ({
-        ...prev,
-        messages: [terapeutaMessage, ...prev.messages],
-        updatedAt: Date.now(),
-        title: prev.title || `Sessão ${new Date().toLocaleDateString()}`,
-      }));
+      setConversation((prev) => {
+        const newConversation = {
+          ...prev,
+          messages: [terapeutaMessage, ...prev.messages],
+          updatedAt: Date.now(),
+          title: prev.title || `Sessão ${new Date().toLocaleDateString()}`,
+        };
+        console.log("🎤 Microphone: Updated conversation with TERAPEUTA message:", newConversation);
+        console.log("🎤 Microphone: Total messages now:", newConversation.messages.length);
+        return newConversation;
+      });
 
       // Marcar para processar supervisão
       setPendingTerapeutaMessage(transcription);
@@ -608,15 +615,27 @@ export function useSystemAudio() {
       setupRequired ||
       isAIProcessing ||
       !!lastAIResponse ||
+      !!lastTerapeutaTranscription ||
       !!lastPacienteTranscription ||
       !!error;
     setIsPopoverOpen(shouldOpenPopover);
     resizeWindow(shouldOpenPopover);
+    
+    console.log("🎯 SystemAudio: Popover should open?", shouldOpenPopover, {
+      capturing,
+      setupRequired,
+      isAIProcessing,
+      lastAIResponse: !!lastAIResponse,
+      lastTerapeutaTranscription: !!lastTerapeutaTranscription,
+      lastPacienteTranscription: !!lastPacienteTranscription,
+      error: !!error
+    });
   }, [
     capturing,
     setupRequired,
     isAIProcessing,
     lastAIResponse,
+    lastTerapeutaTranscription,
     lastPacienteTranscription,
     error,
     resizeWindow,

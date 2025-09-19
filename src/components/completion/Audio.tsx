@@ -8,7 +8,6 @@ export const Audio = ({
   setMicOpen,
   enableVAD,
   setEnableVAD,
-  submit,
 }: UseCompletionReturn) => {
   return (
     <Popover open={micOpen} onOpenChange={setMicOpen}>

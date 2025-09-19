@@ -154,7 +154,6 @@ export const SystemAudio = ({
                 <>
                   {/* Operation Section */}
                   <OperationSection
-                    lastTranscription={lastTranscription}
                     lastAIResponse={lastAIResponse}
                     isAIProcessing={isAIProcessing}
                     conversation={conversation}
