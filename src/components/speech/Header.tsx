@@ -18,11 +18,11 @@ export const Header = ({
     <div className="flex flex-col gap-3">
       <div className="border-b border-input/50 pb-3 flex justify-between items-start">
         <div>
-          <h2 className="font-semibold text-sm">System Audio Capture</h2>
+          <h2 className="font-semibold text-sm">Supervisão Psicológica em Tempo Real</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {setupRequired
-              ? "Setup required to capture system audio"
-              : "Real-time AI assistant using system audio, until and unless sound is detected from your audio speakers no api calls will be made (expect responses in ~2-4 seconds)"}
+              ? "Setup necessário para capturar áudio do sistema"
+              : "Sistema de supervisão para psicólogos: Microfone = TERAPEUTA | Sistema = PACIENTE. O supervisor analisará as falas do terapeuta e fornecerá orientações em tempo real."}
           </p>
         </div>
         {!capturing ? (
@@ -45,9 +45,9 @@ export const Header = ({
         <div className="flex flex-row items-center gap-2">
           <InfoIcon className="w-4 h-4" />
           <p className="text-sm text-muted-foreground">
-            Pluely audio features are being actively developed and enhanced in
-            future versions. also you can always change your Audio settings for
-            better performance.
+            Sistema de supervisão psicológica em desenvolvimento ativo. 
+            Use o microfone para suas falas como terapeuta e o sistema capturará 
+            automaticamente as falas do paciente para análise supervisiva.
           </p>
         </div>
       </div>

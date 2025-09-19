@@ -9,7 +9,7 @@ export interface AttachedFile {
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "terapeuta" | "paciente";
   content: string;
   timestamp: number;
   attachedFiles?: AttachedFile[];
@@ -35,7 +35,7 @@ export interface CompletionState {
 
 // Provider-related types
 export interface Message {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "terapeuta" | "paciente";
   content:
     | string
     | Array<{

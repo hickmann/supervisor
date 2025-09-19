@@ -46,6 +46,8 @@ export const SystemAudio = ({
   showQuickActions,
   setShowQuickActions,
   handleQuickActionClick,
+  lastTerapeutaTranscription,
+  lastPacienteTranscription,
 }: useSystemAudioType) => {
   const platform = navigator.platform.toLowerCase();
   const handleToggleCapture = async () => {
@@ -165,6 +167,8 @@ export const SystemAudio = ({
                     showQuickActions={showQuickActions}
                     setShowQuickActions={setShowQuickActions}
                     handleQuickActionClick={handleQuickActionClick}
+                    lastTerapeutaTranscription={lastTerapeutaTranscription}
+                    lastPacienteTranscription={lastPacienteTranscription}
                   />
                   {/* Context Settings */}
                   <Context

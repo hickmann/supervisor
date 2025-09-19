@@ -2,11 +2,12 @@ import { fetchSTT } from "@/lib";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useApp } from "@/contexts";
 import { floatArrayToWav } from "@/lib/utils";
 import { shouldUsePluelyAPI } from "@/lib/functions/pluely.api";
+import { useSystemAudio } from "@/hooks/useSystemAudio";
 
 interface AutoSpeechVADProps {
   submit: UseCompletionReturn["submit"];
@@ -21,6 +22,7 @@ export const AutoSpeechVAD = ({
 }: AutoSpeechVADProps) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const { selectedSttProvider, allSttProviders } = useApp();
+  const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
@@ -48,9 +50,18 @@ export const AutoSpeechVAD = ({
         });
 
         if (transcription) {
-          console.log("🎯 VAD: Sending transcription to AI:", transcription);
+          console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
           console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
-          submit(transcription);
+          
+          // Sempre usar o sistema de supervisão quando disponível
+          if (systemAudio && systemAudio.processMicrophoneTranscription) {
+            console.log("🎯 VAD: Sending to psychological supervision system");
+            await systemAudio.processMicrophoneTranscription(transcription);
+          } else {
+            // Fallback para o fluxo normal apenas se supervisão não estiver disponível
+            console.log("🎯 VAD: Using normal completion flow (supervision not available)");
+            submit(transcription);
+          }
         }
       } catch (error) {
         console.error("Failed to transcribe audio:", error);
