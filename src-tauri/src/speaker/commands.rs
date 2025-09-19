@@ -68,6 +68,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
                         if speech_buffer.len() > max_samples {
                             // Force emit
                             if let Ok(b64) = samples_to_wav_b64(sr, &speech_buffer) {
+                                println!("🎤 System Audio: Emitting speech - Original SR: {} Hz, Buffer: {} samples", sr, speech_buffer.len());
                                 let _ = app_clone.emit("speech-detected", b64).map_err(|e| eprintln!("emit speech-detected failed: {}", e));
                             }
                             speech_buffer.clear();
@@ -85,6 +86,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
                                         speech_buffer.truncate(speech_buffer.len() - trim);
                                     }
                                     if let Ok(b64) = samples_to_wav_b64(sr, &speech_buffer) {
+                                        println!("🎤 System Audio: Emitting speech - Original SR: {} Hz, Buffer: {} samples", sr, speech_buffer.len());
                                         let _ = app_clone.emit("speech-detected", b64).map_err(|e| eprintln!("emit speech-detected failed: {}", e));
                                     }
                                 }
@@ -122,19 +124,48 @@ fn process_chunk(mono_chunk: &[f32]) -> (f32, f32) {
     (rms, peak)
 }
 
+// Simple resampling function for VOSK compatibility
+fn resample_to_16khz(input: &[f32], original_rate: u32) -> Vec<f32> {
+    if original_rate == 16000 {
+        return input.to_vec();
+    }
+    
+    let ratio = original_rate as f64 / 16000.0;
+    let output_len = (input.len() as f64 / ratio) as usize;
+    let mut output = Vec::with_capacity(output_len);
+    
+    for i in 0..output_len {
+        let src_index = (i as f64 * ratio) as usize;
+        if src_index < input.len() {
+            output.push(input[src_index]);
+        }
+    }
+    
+    println!("🎤 System Audio: Resampled from {} samples to {} samples", input.len(), output.len());
+    output
+}
+
 // Send samples to Pluely AI Speech
 fn samples_to_wav_b64(sample_rate: u32, mono_f32: &[f32]) -> Result<String, String> {
+    // Resample to 16000 Hz if needed for VOSK compatibility
+    let resampled_data = if sample_rate != 16000 {
+        println!("🎤 System Audio: Resampling from {} Hz to 16000 Hz", sample_rate);
+        resample_to_16khz(mono_f32, sample_rate)
+    } else {
+        mono_f32.to_vec()
+    };
+    
     let mut cursor = Cursor::new(Vec::new());
     let spec = WavSpec {
         channels: 1,
-        sample_rate,
+        sample_rate: 16000, // Always use 16000 Hz for VOSK
         bits_per_sample: 16,
         sample_format: hound::SampleFormat::Int,
     };
 
     let mut writer = WavWriter::new(&mut cursor, spec).map_err(|e| e.to_string())?;
 
-    for &s in mono_f32 {
+    for &s in &resampled_data {
         let clamped = s.clamp(-1.0, 1.0);
         let sample_i16 = (clamped * i16::MAX as f32) as i16;
         writer.write_sample(sample_i16).map_err(|e| e.to_string())?;
