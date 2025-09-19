@@ -9,25 +9,23 @@ export const Audio = ({
   enableVAD,
   setEnableVAD,
   submit,
-  setState,
 }: UseCompletionReturn) => {
   return (
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>
         {enableVAD ? (
           <VadOnly
-            submit={submit}
-            setState={setState}
             setEnableVAD={setEnableVAD}
           />
         ) : (
           <Button
             size="icon"
             onClick={() => {
-              setEnableVAD(!enableVAD);
+              console.log("🎤 Audio: Enabling VAD from main button");
+              setEnableVAD(true);
             }}
             className="cursor-pointer"
-            title="Toggle voice input (VAD)"
+            title="Ativar microfone (Sistema de Supervisão Integrado)"
           >
             <MicIcon className="h-4 w-4" />
           </Button>
@@ -42,17 +40,18 @@ export const Audio = ({
       >
         <div className="text-sm select-none">
           <div className="font-semibold text-green-600 mb-1">
-            VAD (Voice Activity Detection)
+            Sistema de Supervisão Integrado
           </div>
           <div className="text-muted-foreground">
             <div className="mt-2 flex flex-row gap-1 items-center text-green-600">
               <InfoIcon size={16} />
-              <span>VOICE ACTIVITY DETECTION</span>
+              <span>MICROFONE → SUPERVISÃO PSICOLÓGICA</span>
             </div>
 
             <p className="block mt-2">
-              Sistema de detecção de voz usando VAD do ricky0123. 
-              Detecta quando você está falando e envia uma mensagem.
+              Sistema integrado: suas falas são identificadas como TERAPEUTA e 
+              enviadas para o sistema de supervisão psicológica em tempo real.
+              Use junto com o botão de áudio do sistema para captura completa.
             </p>
           </div>
         </div>

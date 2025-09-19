@@ -2,31 +2,24 @@ import { fetchSTT } from "@/lib";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
-import { useApp } from "@/contexts";
 import { floatArrayToWav } from "@/lib/utils";
-import { shouldUsePluelyAPI } from "@/lib/functions/pluely.api";
 import { useSystemAudio } from "@/hooks/useSystemAudio";
 
 interface AutoSpeechVADProps {
-  submit: UseCompletionReturn["submit"];
-  setState: UseCompletionReturn["setState"];
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
 }
 
 export const AutoSpeechVAD = ({
-  submit,
-  setState,
   setEnableVAD,
 }: AutoSpeechVADProps) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const { selectedSttProvider, allSttProviders } = useApp();
   const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
-    startOnLoad: true,
+    startOnLoad: false, // Não iniciar automaticamente para evitar duplo clique
     onSpeechEnd: async (audio) => {
       try {
         // convert float32array to blob
@@ -53,23 +46,18 @@ export const AutoSpeechVAD = ({
           console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
           console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
           
-          // Sempre usar o sistema de supervisão quando disponível
+          // SEMPRE usar o sistema de supervisão - Sistema 1 integrado com Sistema 2
           if (systemAudio && systemAudio.processMicrophoneTranscription) {
-            console.log("🎯 VAD: Sending to psychological supervision system");
+            console.log("🎯 VAD: Sending to psychological supervision system (Sistema 1 → Sistema 2)");
             await systemAudio.processMicrophoneTranscription(transcription);
           } else {
-            // Fallback para o fluxo normal apenas se supervisão não estiver disponível
-            console.log("🎯 VAD: Using normal completion flow (supervision not available)");
-            submit(transcription);
+            console.error("❌ VAD: Sistema de supervisão não disponível! Microfone não funcionará.");
+            alert("Sistema de supervisão não disponível. Reinicie a aplicação.");
           }
         }
       } catch (error) {
-        console.error("Failed to transcribe audio:", error);
-        setState((prev: any) => ({
-          ...prev,
-          error:
-            error instanceof Error ? error.message : "Transcription failed",
-        }));
+        console.error("❌ VAD: Failed to transcribe audio:", error);
+        alert(`Erro na transcrição: ${error instanceof Error ? error.message : "Transcription failed"}`);
       } finally {
         setIsTranscribing(false);
       }
@@ -81,10 +69,13 @@ export const AutoSpeechVAD = ({
       <Button
         size="icon"
         onClick={() => {
+          console.log("🎤 AutoSpeechVAD: Button clicked, current state - listening:", vad.listening);
           if (vad.listening) {
+            console.log("🎤 AutoSpeechVAD: Pausing VAD");
             vad.pause();
             setEnableVAD(false);
           } else {
+            console.log("🎤 AutoSpeechVAD: Starting VAD");
             vad.start();
             setEnableVAD(true);
           }

@@ -5,26 +5,23 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { fetchSTT } from "@/lib/functions/stt.function";
 import { floatArrayToWav } from "@/lib/utils";
+import { useSystemAudio } from "@/hooks/useSystemAudio";
 
 interface VadOnlyProps {
-  submit: UseCompletionReturn["submit"];
-  setState: UseCompletionReturn["setState"];
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
 }
 
 export const VadOnly = ({
-  submit,
-  setState,
   setEnableVAD,
 }: VadOnlyProps) => {
   const [, setIsListening] = useState(false);
+  const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
     startOnLoad: false, // Don't start automatically
     onSpeechStart: () => {
-      console.log("Fala detectada - VAD ativado");
-      setState((prev: any) => ({ ...prev, error: "" }));
+      console.log("🎤 VadOnly: Speech detected - VAD activated");
     },
     onSpeechEnd: async (audio) => {
       console.log("Fim da fala detectado - VAD", audio.length, "samples");
@@ -42,13 +39,21 @@ export const VadOnly = ({
         });
 
         if (transcription) {
-          console.log("🎯 VAD: Sending transcription to AI:", transcription);
+          console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
           console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
-          submit(transcription);
+          
+          // SEMPRE usar o sistema de supervisão - Sistema 1 integrado com Sistema 2
+          if (systemAudio && systemAudio.processMicrophoneTranscription) {
+            console.log("🎯 VAD: Sending to psychological supervision system (Sistema 1 → Sistema 2)");
+            await systemAudio.processMicrophoneTranscription(transcription);
+          } else {
+            console.error("❌ VAD: Sistema de supervisão não disponível! Microfone não funcionará.");
+            alert("Sistema de supervisão não disponível. Reinicie a aplicação.");
+          }
         }
       } catch (error) {
-        console.error("Failed to transcribe audio:", error);
-        submit("Erro na transcrição: " + error);
+        console.error("❌ VAD: Failed to transcribe audio:", error);
+        alert(`Erro na transcrição: ${error instanceof Error ? error.message : "Transcription failed"}`);
       }
     },
   });

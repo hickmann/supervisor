@@ -526,9 +526,10 @@ export function useSystemAudio() {
       await invoke<string>("start_system_audio_capture");
       setCapturing(true);
 
-      // Ativar VAD automaticamente quando iniciar captura de sistema
-      setShouldActivateVAD(true);
-      setIsMicrophoneListening(true);
+      // NÃO ativar VAD interno - usar apenas o VAD do Sistema 1 (Completion)
+      // setShouldActivateVAD(true);
+      // setIsMicrophoneListening(true);
+      console.log("🎯 System Audio: Sistema 2 VAD desabilitado - usando apenas Sistema 1 VAD");
 
       const conversationId = `sysaudio_conv_${Date.now()}_${Math.random()
         .toString(36)
@@ -557,9 +558,10 @@ export function useSystemAudio() {
       setIsProcessing(false);
       setIsAIProcessing(false);
 
-      // Desativar VAD quando parar captura
-      setShouldActivateVAD(false);
-      setIsMicrophoneListening(false);
+      // VAD do Sistema 2 já está desabilitado - não precisa desativar
+      // setShouldActivateVAD(false);
+      // setIsMicrophoneListening(false);
+      console.log("🎯 System Audio: Parando captura - VAD do Sistema 1 continua independente");
 
       await invoke<string>("stop_system_audio_capture");
 
