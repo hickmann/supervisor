@@ -1,16 +1,33 @@
 fn main() {
-     dotenv::dotenv().ok();
+    // Configure VOSK library paths
+    println!("cargo:rustc-link-search=native=.");
+    println!("cargo:rustc-link-lib=libvosk");
     
-     if let Ok(payment_endpoint) = std::env::var("PAYMENT_ENDPOINT") {
-        println!("cargo:rustc-env=PAYMENT_ENDPOINT={}", payment_endpoint);
-    }
+    // Copy VOSK DLLs to target directory
+    let target_dir = std::env::var("OUT_DIR").unwrap();
+    let target_dir = std::path::Path::new(&target_dir)
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap();
     
-    if let Ok(api_access_key) = std::env::var("API_ACCESS_KEY") {
-        println!("cargo:rustc-env=API_ACCESS_KEY={}", api_access_key);
-    }
+    // Copy DLLs
+    let dlls = vec![
+        "libvosk.dll",
+        "libgcc_s_seh-1.dll", 
+        "libstdc++-6.dll",
+        "libwinpthread-1.dll"
+    ];
     
-    if let Ok(app_endpoint) = std::env::var("APP_ENDPOINT") {
-        println!("cargo:rustc-env=APP_ENDPOINT={}", app_endpoint);
+    for dll in dlls {
+        if std::path::Path::new(dll).exists() {
+            let dest = target_dir.join(dll);
+            if let Err(_) = std::fs::copy(dll, &dest) {
+                println!("cargo:warning=Failed to copy {}", dll);
+            }
+        }
     }
     
     tauri_build::build()

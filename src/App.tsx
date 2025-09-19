@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Settings, SystemAudio, Updater } from "./components";
+import { Card, Settings, SystemAudio, Updater, Button } from "./components";
 import { Completion } from "./components/completion";
 import { ChatHistory } from "./components/history";
 import { AudioVisualizer } from "./components/speech/audio-visualizer";
@@ -7,6 +7,7 @@ import { StatusIndicator } from "./components/speech/StatusIndicator";
 import { useTitles } from "./hooks";
 import { useSystemAudio } from "./hooks/useSystemAudio";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 
 const App = () => {
   const systemAudio = useSystemAudio();
@@ -101,6 +102,31 @@ const App = () => {
             onNewConversation={handleNewConversation}
             currentConversationId={null}
           />
+          <Button
+            onClick={async () => {
+              console.log("🧪 VOSK: Testing VOSK from App...");
+              try {
+                const response = await invoke<{
+                  success: boolean;
+                  transcription?: string;
+                  error?: string;
+                }>("transcribe_audio_with_vosk", {
+                  audioBase64: btoa("test audio data"),
+                  modelName: "vosk-model-small-pt-0.3",
+                });
+                console.log("🧪 VOSK: Test result:", response);
+                alert(`VOSK Test: ${response.success ? "SUCCESS" : "FAILED"}\nResult: ${response.transcription || response.error}`);
+              } catch (error) {
+                console.error("🧪 VOSK: Test failed:", error);
+                alert(`VOSK Test failed: ${error}`);
+              }
+            }}
+            variant="outline"
+            size="sm"
+            title="Test VOSK"
+          >
+            Test VOSK
+          </Button>
           <Settings />
         </div>
 

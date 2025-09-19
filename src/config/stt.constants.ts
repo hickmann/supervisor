@@ -102,4 +102,13 @@ export const SPEECH_TO_TEXT_PROVIDERS = [
     responseContentPath: "results[0].alternatives[0].transcript",
     streaming: false,
   },
+  {
+    id: "vosk-stt",
+    name: "VOSK Speech-to-Text (Local)",
+    curl: `curl -X POST "http://localhost:8080/transcribe" \\
+      -H "Content-Type: application/json" \\
+      -d '{"audio": "{{AUDIO}}", "model": "{{MODEL}}"}'`,
+    responseContentPath: "transcription",
+    streaming: false,
+  },
 ];

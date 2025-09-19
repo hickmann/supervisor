@@ -31,43 +31,25 @@ export const AutoSpeechVAD = ({
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
 
         let transcription: string;
-        const usePluelyAPI = await shouldUsePluelyAPI();
-
-        // Check if we have a configured speech provider
-        if (!selectedSttProvider.provider && !usePluelyAPI) {
-          console.warn("No speech provider selected");
-          setState((prev: any) => ({
-            ...prev,
-            error:
-              "No speech provider selected. Please select one in settings.",
-          }));
-          return;
-        }
-
-        const providerConfig = allSttProviders.find(
-          (p) => p.id === selectedSttProvider.provider
-        );
-
-        if (!providerConfig && !usePluelyAPI) {
-          console.warn("Selected speech provider configuration not found");
-          setState((prev: any) => ({
-            ...prev,
-            error:
-              "Speech provider configuration not found. Please check your settings.",
-          }));
-          return;
-        }
+        
+        // SEMPRE USAR VOSK - NÃO PRECISA VERIFICAR PROVIDERS
+        console.log("🎤 VAD: Using VOSK for all transcriptions");
 
         setIsTranscribing(true);
 
-        // Use the fetchSTT function for all providers
+        console.log("🎤 VAD: Starting transcription with VOSK...");
+        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
+
+        // SEMPRE USAR VOSK - FORÇAR USO
         transcription = await fetchSTT({
-          provider: usePluelyAPI ? undefined : providerConfig,
-          selectedProvider: selectedSttProvider,
+          provider: undefined,
+          selectedProvider: { provider: "vosk-stt", variables: {} },
           audio: audioBlob,
         });
 
         if (transcription) {
+          console.log("🎯 VAD: Sending transcription to AI:", transcription);
+          console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
           submit(transcription);
         }
       } catch (error) {

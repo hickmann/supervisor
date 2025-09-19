@@ -49,14 +49,23 @@ export const Providers = ({
         <Selection
           selected={selectedSttProvider?.provider}
           options={allSttProviders?.map((provider) => {
-            const json = curl2Json(provider?.curl);
-            return {
-              label: provider?.isCustom
-                ? json?.url || "Custom Provider"
-                : provider?.id || "Custom Provider",
-              value: provider?.id || "Custom Provider",
-              isCustom: provider?.isCustom,
-            };
+            try {
+              const json = curl2Json(provider?.curl);
+              return {
+                label: provider?.isCustom
+                  ? json?.url || "Custom Provider"
+                  : provider?.id || "Custom Provider",
+                value: provider?.id || "Custom Provider",
+                isCustom: provider?.isCustom,
+              };
+            } catch (error) {
+              // Fallback for providers with invalid curl (like VOSK)
+              return {
+                label: provider?.id || "Custom Provider",
+                value: provider?.id || "Custom Provider",
+                isCustom: provider?.isCustom,
+              };
+            }
           })}
           placeholder="Choose your STT provider"
           onChange={(value) => {

@@ -3,6 +3,8 @@ import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { fetchSTT } from "@/lib/functions/stt.function";
+import { floatArrayToWav } from "@/lib/utils";
 
 interface VadOnlyProps {
   submit: UseCompletionReturn["submit"];
@@ -24,11 +26,30 @@ export const VadOnly = ({
       console.log("Fala detectada - VAD ativado");
       setState((prev: any) => ({ ...prev, error: "" }));
     },
-    onSpeechEnd: (audio) => {
+    onSpeechEnd: async (audio) => {
       console.log("Fim da fala detectado - VAD", audio.length, "samples");
-      // Aqui você pode processar o áudio como quiser
-      // Por enquanto, vamos apenas mostrar uma mensagem
-      submit("Fala detectada pelo VAD (sem transcrição)");
+      
+      try {
+        // Convert float32array to blob
+        const audioBlob = floatArrayToWav(audio, 16000, "wav");
+        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
+
+        // Use VOSK for transcription
+        const transcription = await fetchSTT({
+          provider: undefined,
+          selectedProvider: { provider: "vosk-stt", variables: {} },
+          audio: audioBlob,
+        });
+
+        if (transcription) {
+          console.log("🎯 VAD: Sending transcription to AI:", transcription);
+          console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
+          submit(transcription);
+        }
+      } catch (error) {
+        console.error("Failed to transcribe audio:", error);
+        submit("Erro na transcrição: " + error);
+      }
     },
   });
 

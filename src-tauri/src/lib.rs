@@ -16,6 +16,7 @@ use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
 mod speaker;
+mod vosk_stt;
 
 #[derive(Default)]
 pub struct AudioState {
@@ -72,6 +73,7 @@ pub fn run() {
     let builder = tauri::Builder::default()
         .manage(AudioState::default())
         .manage(shortcuts::WindowVisibility(Mutex::new(false)))
+        .manage(vosk_stt::VoskState::new())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_http::init())
@@ -100,7 +102,9 @@ pub fn run() {
             speaker::start_system_audio_capture,
             speaker::stop_system_audio_capture,
             speaker::check_system_audio_access,
-            speaker::request_system_audio_access
+            speaker::request_system_audio_access,
+            vosk_stt::transcribe_audio_with_vosk,
+            vosk_stt::get_available_vosk_models
         ])
         .setup(|app| {
             // Setup main window positioning

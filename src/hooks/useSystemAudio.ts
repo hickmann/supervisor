@@ -36,6 +36,42 @@ export interface ChatConversation {
 
 export type useSystemAudioType = ReturnType<typeof useSystemAudio>;
 
+// Helper function to transcribe audio with VOSK
+async function transcribeWithVosk(audioBase64: string): Promise<string> {
+  console.log("🎤 VOSK Frontend: Starting transcription...");
+  console.log("📊 VOSK Frontend: Audio data length:", audioBase64.length);
+  console.log("📊 VOSK Frontend: Audio data preview:", audioBase64.substring(0, 50) + "...");
+  
+  try {
+    console.log("📡 VOSK Frontend: Calling Tauri command...");
+    const response = await invoke<{
+      success: boolean;
+      transcription?: string;
+      error?: string;
+    }>("transcribe_audio_with_vosk", {
+      audioBase64,
+      modelName: "vosk-model-small-pt-0.3",
+    });
+
+    console.log("📥 VOSK Frontend: Response received:", response);
+
+            if (response.success && response.transcription) {
+              console.log("✅ VOSK Frontend: Transcription successful!");
+              console.log("📝 VOSK Frontend: TRANSCRIBED TEXT:", response.transcription);
+              console.log("📝 VOSK Frontend: Text length:", response.transcription.length, "characters");
+              console.log("📝 VOSK Frontend: Text preview:", response.transcription.substring(0, 100) + (response.transcription.length > 100 ? "..." : ""));
+              return response.transcription;
+            } else {
+              console.warn("⚠️ VOSK Frontend: Transcription failed:", response.error);
+              return response.error || "VOSK transcription failed";
+            }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("❌ VOSK Frontend: Error:", errorMessage);
+    return `VOSK STT Error: ${errorMessage}`;
+  }
+}
+
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
@@ -115,15 +151,19 @@ export function useSystemAudio() {
           try {
             if (!capturing) return;
 
-            // const base64Audio = event.payload as string;
-            console.log("Speech detected via system audio capture");
+            const base64Audio = event.payload as string;
+            console.log("🎤 System Audio: Speech detected via system audio capture");
+            console.log("🎤 System Audio: Audio data length:", base64Audio.length);
 
             setIsProcessing(true);
             try {
-              // Simular transcrição com VAD - apenas detecta que houve fala
-              const transcription = "Fala detectada pelo sistema de áudio";
+              // Use VOSK for transcription
+              console.log("🎤 System Audio: Calling transcribeWithVosk...");
+              const transcription = await transcribeWithVosk(base64Audio);
 
               if (transcription.trim()) {
+                console.log("🎯 System Audio: Sending transcription to AI:", transcription);
+                console.log("🎯 System Audio: Transcription length:", transcription.length, "characters");
                 setLastTranscription(transcription);
                 setError("");
 
