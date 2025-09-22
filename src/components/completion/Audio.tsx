@@ -22,6 +22,8 @@ export const Audio = ({
             onClick={() => {
               console.log("🎤 Audio: Enabling VAD from main button");
               setEnableVAD(true);
+              // Auto-open popover to show VAD is active
+              setMicOpen(true);
             }}
             className="cursor-pointer"
             title="Ativar microfone (Sistema de Supervisão Integrado)"

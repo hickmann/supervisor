@@ -1,7 +1,7 @@
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { fetchSTT } from "@/lib/functions/stt.function";
 import { floatArrayToWav } from "@/lib/utils";
@@ -19,7 +19,7 @@ export const VadOnly = ({
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
-    startOnLoad: false, // Don't start automatically
+    startOnLoad: true, // Start automatically when component mounts
     onSpeechStart: () => {
       console.log("🎤 VadOnly: Speech detected - VAD activated");
     },
@@ -57,6 +57,15 @@ export const VadOnly = ({
       }
     },
   });
+
+  // Auto-start VAD when component mounts
+  useEffect(() => {
+    if (vad && !vad.listening) {
+      console.log("🎤 VadOnly: Auto-starting VAD on component mount");
+      vad.start();
+      setIsListening(true);
+    }
+  }, [vad]);
 
   const handleToggleVAD = () => {
     if (vad.listening) {
