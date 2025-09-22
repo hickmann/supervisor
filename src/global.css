@@ -43,71 +43,97 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Tech Theme Variables */
+  --tech-bg: rgba(15, 23, 42, 0.95); /* Dark blue tech background */
+  --tech-card: rgba(30, 41, 59, 0.9); /* Slightly lighter tech cards */
+  --tech-border: rgba(59, 130, 246, 0.3); /* Blue tech borders */
+  --tech-border-hover: rgba(59, 130, 246, 0.6); /* Brighter on hover */
+  --tech-text: #e2e8f0; /* Light text */
+  --tech-text-muted: #94a3b8; /* Muted text */
+  --tech-accent: #3b82f6; /* Blue accent */
+  --tech-accent-hover: #2563eb; /* Darker blue on hover */
+  --tech-success: #10b981; /* Green success */
+  --tech-danger: #ef4444; /* Red danger */
+  --tech-warning: #f59e0b; /* Orange warning */
+  
+  /* Override existing variables */
+  --background: var(--tech-bg);
+  --foreground: var(--tech-text);
+  --card: var(--tech-card);
+  --card-foreground: var(--tech-text);
+  --popover: var(--tech-card);
+  --popover-foreground: var(--tech-text);
+  --primary: var(--tech-accent);
+  --primary-foreground: #ffffff;
+  --secondary: rgba(51, 65, 85, 0.8);
+  --secondary-foreground: var(--tech-text);
+  --muted: rgba(51, 65, 85, 0.6);
+  --muted-foreground: var(--tech-text-muted);
+  --accent: var(--tech-accent);
+  --accent-foreground: #ffffff;
+  --destructive: var(--tech-danger);
+  --border: var(--tech-border);
+  --input: rgba(30, 41, 59, 0.8);
+  --ring: var(--tech-accent);
+  --chart-1: var(--tech-accent);
+  --chart-2: var(--tech-success);
+  --chart-3: var(--tech-warning);
+  --chart-4: var(--tech-danger);
+  --chart-5: #8b5cf6;
+  --sidebar: var(--tech-card);
+  --sidebar-foreground: var(--tech-text);
+  --sidebar-primary: var(--tech-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(51, 65, 85, 0.8);
+  --sidebar-accent-foreground: var(--tech-text);
+  --sidebar-border: var(--tech-border);
+  --sidebar-ring: var(--tech-accent);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Darker tech theme for dark mode */
+  --tech-bg: rgba(8, 16, 28, 0.98);
+  --tech-card: rgba(20, 30, 45, 0.95);
+  --tech-border: rgba(59, 130, 246, 0.4);
+  --tech-border-hover: rgba(59, 130, 246, 0.7);
+  --tech-text: #f1f5f9;
+  --tech-text-muted: #cbd5e1;
+  --tech-accent: #60a5fa;
+  --tech-accent-hover: #3b82f6;
+  
+  /* Override for dark mode */
+  --background: var(--tech-bg);
+  --foreground: var(--tech-text);
+  --card: var(--tech-card);
+  --card-foreground: var(--tech-text);
+  --popover: var(--tech-card);
+  --popover-foreground: var(--tech-text);
+  --primary: var(--tech-accent);
+  --primary-foreground: #ffffff;
+  --secondary: rgba(30, 41, 59, 0.9);
+  --secondary-foreground: var(--tech-text);
+  --muted: rgba(30, 41, 59, 0.7);
+  --muted-foreground: var(--tech-text-muted);
+  --accent: var(--tech-accent);
+  --accent-foreground: #ffffff;
+  --destructive: var(--tech-danger);
+  --border: var(--tech-border);
+  --input: rgba(20, 30, 45, 0.9);
+  --ring: var(--tech-accent);
+  --chart-1: var(--tech-accent);
+  --chart-2: var(--tech-success);
+  --chart-3: var(--tech-warning);
+  --chart-4: var(--tech-danger);
+  --chart-5: #a78bfa;
+  --sidebar: var(--tech-card);
+  --sidebar-foreground: var(--tech-text);
+  --sidebar-primary: var(--tech-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(30, 41, 59, 0.9);
+  --sidebar-accent-foreground: var(--tech-text);
+  --sidebar-border: var(--tech-border);
+  --sidebar-ring: var(--tech-accent);
 }
 
 @layer base {
@@ -120,16 +146,89 @@
   
   /* Fundo com blur forte e transparência */
   .app-background {
-    background: rgba(128, 128, 128, 0.15);
+    background: var(--tech-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(128, 128, 128, 0.3);
+    border: 1px solid var(--tech-border);
   }
   
   .dark .app-background {
-    background: rgba(64, 64, 64, 0.25);
+    background: var(--tech-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(128, 128, 128, 0.2);
+    border: 1px solid var(--tech-border);
+  }
+  
+  /* Tech Button Styles */
+  .tech-button-primary {
+    background: linear-gradient(135deg, var(--tech-accent) 0%, var(--tech-accent-hover) 100%);
+    border: 1px solid var(--tech-accent);
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  }
+  
+  .tech-button-primary:hover {
+    background: linear-gradient(135deg, var(--tech-accent-hover) 0%, #1d4ed8 100%);
+    border-color: var(--tech-accent-hover);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+  }
+  
+  .tech-button-secondary {
+    background: var(--tech-card);
+    border: 1px solid var(--tech-border);
+    color: var(--tech-text);
+    transition: all 0.3s ease;
+  }
+  
+  .tech-button-secondary:hover {
+    background: var(--secondary);
+    border-color: var(--tech-border-hover);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  .tech-button-outline {
+    background: transparent;
+    border: 1px solid var(--tech-border);
+    color: var(--tech-text);
+    transition: all 0.3s ease;
+  }
+  
+  .tech-button-outline:hover {
+    background: var(--tech-accent);
+    border-color: var(--tech-accent);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .tech-button-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--tech-text);
+    transition: all 0.3s ease;
+  }
+  
+  .tech-button-ghost:hover {
+    background: var(--secondary);
+    border-color: var(--tech-border);
+    transform: translateY(-1px);
+  }
+  
+  .tech-button-destructive {
+    background: linear-gradient(135deg, var(--tech-danger) 0%, #dc2626 100%);
+    border: 1px solid var(--tech-danger);
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  }
+  
+  .tech-button-destructive:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-color: #dc2626;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+    transform: translateY(-1px);
   }
 }
