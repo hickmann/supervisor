@@ -70,7 +70,7 @@ const App = () => {
         isHidden ? "hidden pointer-events-none" : ""
       }`}
     >
-      <Card className="w-full flex flex-row items-center gap-2 p-2">
+      <Card className="w-full flex flex-row items-center gap-2 p-2 app-background">
         <SystemAudio {...systemAudio} />
         {systemAudio?.capturing ? (
           <div className="flex flex-row items-center gap-2 justify-between w-full">
@@ -96,7 +96,7 @@ const App = () => {
               : "w-full flex flex-row gap-2 items-center"
           }`}
         >
-          <Completion isHidden={isHidden} />
+          <Completion isHidden={isHidden} systemAudio={systemAudio} />
           <ChatHistory
             onSelectConversation={handleSelectConversation}
             onNewConversation={handleNewConversation}

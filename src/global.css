@@ -117,4 +117,19 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Fundo com blur forte e transparência */
+  .app-background {
+    background: rgba(128, 128, 128, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+  }
+  
+  .dark .app-background {
+    background: rgba(64, 64, 64, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+  }
 }

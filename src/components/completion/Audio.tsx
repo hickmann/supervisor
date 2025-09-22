@@ -9,7 +9,8 @@ export const Audio = ({
   setMicOpen,
   enableVAD,
   setEnableVAD,
-}: UseCompletionReturn) => {
+  systemAudio,
+}: UseCompletionReturn & { systemAudio?: any }) => {
   // Escutar quando o microfone é ativado para iniciar automaticamente a captura do sistema
   useEffect(() => {
     if (enableVAD) {
@@ -25,6 +26,7 @@ export const Audio = ({
         {enableVAD ? (
           <VadOnly
             setEnableVAD={setEnableVAD}
+            systemAudio={systemAudio}
           />
         ) : (
           <Button

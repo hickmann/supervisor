@@ -5,17 +5,17 @@ import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { fetchSTT } from "@/lib/functions/stt.function";
 import { floatArrayToWav } from "@/lib/utils";
-import { useSystemAudio } from "@/hooks/useSystemAudio";
 
 interface VadOnlyProps {
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
+  systemAudio?: any;
 }
 
 export const VadOnly = ({
   setEnableVAD,
+  systemAudio,
 }: VadOnlyProps) => {
   const [, setIsListening] = useState(false);
-  const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
