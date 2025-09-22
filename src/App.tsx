@@ -102,31 +102,6 @@ const App = () => {
             onNewConversation={handleNewConversation}
             currentConversationId={null}
           />
-          <Button
-            onClick={async () => {
-              console.log("🧪 VOSK: Testing VOSK from App...");
-              try {
-                const response = await invoke<{
-                  success: boolean;
-                  transcription?: string;
-                  error?: string;
-                }>("transcribe_audio_with_vosk", {
-                  audioBase64: btoa("test audio data"),
-                  modelName: "vosk-model-small-pt-0.3",
-                });
-                console.log("🧪 VOSK: Test result:", response);
-                alert(`VOSK Test: ${response.success ? "SUCCESS" : "FAILED"}\nResult: ${response.transcription || response.error}`);
-              } catch (error) {
-                console.error("🧪 VOSK: Test failed:", error);
-                alert(`VOSK Test failed: ${error}`);
-              }
-            }}
-            variant="outline"
-            size="sm"
-            title="Test VOSK"
-          >
-            Test VOSK
-          </Button>
           <Settings />
         </div>
 
