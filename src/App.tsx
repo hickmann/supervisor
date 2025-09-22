@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Settings, SystemAudio, Updater, Button } from "./components";
+import { Card, Settings, SystemAudio, Updater } from "./components";
 import { Completion } from "./components/completion";
 import { ChatHistory } from "./components/history";
 import { AudioVisualizer } from "./components/speech/audio-visualizer";
@@ -7,7 +7,6 @@ import { StatusIndicator } from "./components/speech/StatusIndicator";
 import { useTitles } from "./hooks";
 import { useSystemAudio } from "./hooks/useSystemAudio";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
 
 const App = () => {
   const systemAudio = useSystemAudio();
