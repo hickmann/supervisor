@@ -2,6 +2,7 @@ import { InfoIcon, MicIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger, Button } from "@/components";
 import { VadOnly } from "./VadOnly";
 import { UseCompletionReturn } from "@/types";
+import { useEffect } from "react";
 
 export const Audio = ({
   micOpen,
@@ -9,6 +10,15 @@ export const Audio = ({
   enableVAD,
   setEnableVAD,
 }: UseCompletionReturn) => {
+  // Escutar quando o microfone é ativado para iniciar automaticamente a captura do sistema
+  useEffect(() => {
+    if (enableVAD) {
+      console.log("🎤 Audio: Microphone activated, starting system audio capture");
+      // Disparar evento para iniciar captura do sistema
+      window.dispatchEvent(new CustomEvent("startSystemAudioCapture"));
+    }
+  }, [enableVAD]);
+
   return (
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>

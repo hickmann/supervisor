@@ -17,6 +17,7 @@ import { SetupInstructions } from "./SetupInstructions";
 import { OperationSection } from "./OperationSection";
 import { Context } from "./Context";
 import { useSystemAudioType } from "@/hooks";
+import { useEffect } from "react";
 
 export const SystemAudio = ({
   capturing,
@@ -50,6 +51,24 @@ export const SystemAudio = ({
   lastPacienteTranscription,
 }: useSystemAudioType) => {
   const platform = navigator.platform.toLowerCase();
+  
+  // Escutar evento para iniciar captura do sistema quando o microfone for ativado
+  useEffect(() => {
+    const handleStartSystemAudioCapture = async () => {
+      console.log("🎧 System Audio: Received startSystemAudioCapture event");
+      if (!capturing) {
+        console.log("🎧 System Audio: Auto-starting system audio capture from microphone activation");
+        await startCapture();
+      }
+    };
+
+    window.addEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
+    
+    return () => {
+      window.removeEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
+    };
+  }, [capturing, startCapture]);
+
   const handleToggleCapture = async () => {
     if (capturing) {
       await stopCapture();
