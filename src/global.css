@@ -165,13 +165,11 @@
     border: 1px solid var(--tech-accent);
     color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   }
   
   .tech-button-primary:hover {
     background: linear-gradient(135deg, var(--tech-accent-hover) 0%, #1d4ed8 100%);
     border-color: var(--tech-accent-hover);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
     transform: translateY(-1px);
   }
   
@@ -185,7 +183,6 @@
   .tech-button-secondary:hover {
     background: var(--secondary);
     border-color: var(--tech-border-hover);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
     transform: translateY(-1px);
   }
   
@@ -200,7 +197,6 @@
     background: var(--tech-accent);
     border-color: var(--tech-accent);
     color: white;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     transform: translateY(-1px);
   }
   
@@ -222,13 +218,11 @@
     border: 1px solid var(--tech-danger);
     color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
   }
   
   .tech-button-destructive:hover {
     background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     border-color: #dc2626;
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
     transform: translateY(-1px);
   }
 }
