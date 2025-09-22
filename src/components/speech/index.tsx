@@ -106,18 +106,21 @@ export const SystemAudio = ({
         setIsPopoverOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <Button
-          size="icon"
-          title={getButtonTitle()}
-          onClick={handleToggleCapture}
-          className={`${capturing ? "bg-green-50 hover:bg-green-100" : ""} ${
-            error ? "bg-red-100 hover:bg-red-200" : ""
-          }`}
-        >
-          {getButtonIcon()}
-        </Button>
-      </PopoverTrigger>
+      {/* Só mostrar o botão quando estiver capturando, com erro ou setup necessário */}
+      {(capturing || error || setupRequired) && (
+        <PopoverTrigger asChild>
+          <Button
+            size="icon"
+            title={getButtonTitle()}
+            onClick={handleToggleCapture}
+            className={`${capturing ? "bg-green-50 hover:bg-green-100" : ""} ${
+              error ? "bg-red-100 hover:bg-red-200" : ""
+            }`}
+          >
+            {getButtonIcon()}
+          </Button>
+        </PopoverTrigger>
+      )}
 
       {capturing || setupRequired || error ? (
         <PopoverContent
