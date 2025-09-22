@@ -58,6 +58,12 @@ export const SystemAudio = ({
       console.log("🎧 System Audio: Received startSystemAudioCapture event");
       if (!capturing) {
         console.log("🎧 System Audio: Auto-starting system audio capture from microphone activation");
+        // Abrir a janela imediatamente quando o microfone é ativado
+        setIsPopoverOpen(true);
+        // Redimensionar a janela para acomodar o conteúdo
+        setTimeout(() => {
+          resizeWindow(true);
+        }, 100);
         await startCapture();
       }
     };
@@ -68,6 +74,24 @@ export const SystemAudio = ({
       window.removeEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
     };
   }, [capturing, startCapture]);
+
+  // Escutar quando o VAD é desativado para fechar a janela de supervisão
+  useEffect(() => {
+    const handleStopSystemAudioCapture = () => {
+      console.log("🎧 System Audio: Received stopSystemAudioCapture event");
+      setIsPopoverOpen(false);
+      // Redimensionar a janela de volta ao tamanho original
+      setTimeout(() => {
+        resizeWindow(false);
+      }, 100);
+    };
+
+    window.addEventListener("stopSystemAudioCapture", handleStopSystemAudioCapture);
+    
+    return () => {
+      window.removeEventListener("stopSystemAudioCapture", handleStopSystemAudioCapture);
+    };
+  }, []);
 
   const handleToggleCapture = async () => {
     if (capturing) {
@@ -129,7 +153,7 @@ export const SystemAudio = ({
           className="select-none w-screen p-0 border overflow-hidden border-input/50"
           sideOffset={18}
         >
-          <ScrollArea className="h-[calc(100vh-4rem)]">
+          <ScrollArea className="h-[700px]">
             <div
               className={`p-6 ${
                 !lastTranscription && !lastAIResponse

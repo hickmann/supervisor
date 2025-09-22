@@ -619,7 +619,11 @@ export function useSystemAudio() {
       !!lastPacienteTranscription ||
       !!error;
     setIsPopoverOpen(shouldOpenPopover);
-    resizeWindow(shouldOpenPopover);
+    
+    // Usar setTimeout para garantir que o redimensionamento aconteça após o estado ser atualizado
+    setTimeout(() => {
+      resizeWindow(shouldOpenPopover);
+    }, 0);
     
     console.log("🎯 SystemAudio: Popover should open?", shouldOpenPopover, {
       capturing,

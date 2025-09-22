@@ -62,7 +62,20 @@ export const useCompletion = () => {
     conversationHistory: [],
   });
   const [micOpen, setMicOpen] = useState(false);
-  const [enableVAD, setEnableVAD] = useState(false);
+  const [enableVAD, setEnableVADState] = useState(false);
+  
+  // Wrapper para setEnableVAD que dispara eventos
+  const setEnableVAD = useCallback((value: boolean) => {
+    setEnableVADState(value);
+    if (value) {
+      // VAD ativado - evento já é disparado no Audio.tsx
+      console.log("🎤 Completion: VAD enabled");
+    } else {
+      // VAD desativado - disparar evento para fechar janela de supervisão
+      console.log("🎤 Completion: VAD disabled, notifying system audio");
+      window.dispatchEvent(new CustomEvent("stopSystemAudioCapture"));
+    }
+  }, []);
   const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
   const [isFilesPopoverOpen, setIsFilesPopoverOpen] = useState(false);
   const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
