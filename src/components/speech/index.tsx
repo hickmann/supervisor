@@ -1,8 +1,8 @@
 import {
   Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
+  AnimatedPopover,
+  AnimatedPopoverTrigger,
+  AnimatedPopoverContent,
   ScrollArea,
 } from "@/components/ui";
 import {
@@ -96,7 +96,7 @@ export const SystemAudio = ({
   };
 
   return (
-    <Popover
+    <AnimatedPopover
       open={isPopoverOpen}
       onOpenChange={(open) => {
         // Don't allow closing the popover when capturing is active
@@ -108,7 +108,7 @@ export const SystemAudio = ({
     >
       {/* Só mostrar o botão quando estiver capturando, com erro ou setup necessário */}
       {(capturing || error || setupRequired) && (
-        <PopoverTrigger asChild>
+        <AnimatedPopoverTrigger asChild>
           <Button
             size="icon"
             title={getButtonTitle()}
@@ -119,15 +119,15 @@ export const SystemAudio = ({
           >
             {getButtonIcon()}
           </Button>
-        </PopoverTrigger>
+        </AnimatedPopoverTrigger>
       )}
 
       {capturing || setupRequired || error ? (
-        <PopoverContent
+        <AnimatedPopoverContent
           align="end"
           side="bottom"
           className="select-none w-screen p-0 border overflow-hidden border-input/50"
-          sideOffset={8}
+          sideOffset={18}
         >
           <ScrollArea className="h-[calc(100vh-4rem)]">
             <div
@@ -210,8 +210,8 @@ export const SystemAudio = ({
               <Warning />
             </div>
           </ScrollArea>
-        </PopoverContent>
+        </AnimatedPopoverContent>
       ) : null}
-    </Popover>
+    </AnimatedPopover>
   );
 };
