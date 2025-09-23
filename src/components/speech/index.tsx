@@ -11,7 +11,6 @@ import {
   LoaderIcon,
   AudioLinesIcon,
 } from "lucide-react";
-import { Warning } from "./Warning";
 import { Header } from "./Header";
 import { SetupInstructions } from "./SetupInstructions";
 import { OperationSection } from "./OperationSection";
@@ -230,8 +229,6 @@ export const SystemAudio = ({
                   handleSetup={handleSetup}
                 />
               )}
-              {/* Experimental Warning */}
-              <Warning />
             </div>
           </ScrollArea>
         </AnimatedPopoverContent>
