@@ -41,7 +41,7 @@ fn set_window_height(window: tauri::WebviewWindow, height: u32) -> Result<(), St
     
     match window.set_size(Size::Logical(new_size)) {
         Ok(_) => {
-            if let Err(e) = window::position_window_top_center(&window, 54) {
+            if let Err(e) = window::position_window_top_center(&window, 10) {
                 eprintln!("Failed to reposition window: {}", e);
             }
             Ok(())

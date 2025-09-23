@@ -1,7 +1,7 @@
 use tauri::{Manager, App, WebviewWindow};
 
 // The offset from the top of the screen to the window
-const TOP_OFFSET: i32 = 54;
+const TOP_OFFSET: i32 = 10;
 
 /// Sets up the main window with custom positioning
 pub fn setup_main_window(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
