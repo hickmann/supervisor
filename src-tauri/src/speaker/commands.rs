@@ -13,7 +13,7 @@ use std::collections::VecDeque;
 const HOP_SIZE: usize = 1024;  // Analysis chunk size (~23ms at 44.1kHz, ~21ms at 48kHz)
 const VAD_SENSITIVITY_RMS: f32 = 0.002;  // Muito mais sensível para capturar início e fim das frases
 const SPEECH_PEAK_THRESHOLD: f32 = 0.006;  // Muito mais sensível para capturar início e fim das frases
-const SILENCE_CHUNKS: usize = 80;  // ~1.7s silence to end speech (ainda mais tempo para capturar palavras finais)
+const SILENCE_CHUNKS: usize = 45;  // ~1.7s silence to end speech (ainda mais tempo para capturar palavras finais)
 const MIN_SPEECH_CHUNKS: usize = 10;  // ~0.21s min speech duration (menor para capturar palavras rápidas)
 const PRE_SPEECH_CHUNKS: usize = 25;  // ~0.53s pre-speech buffer (maior para capturar início)
 
