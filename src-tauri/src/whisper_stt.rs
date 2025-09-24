@@ -107,10 +107,6 @@ impl WhisperState {
             model_path,
         };
         
-        println!("🔧 WHISPER: Whisper path: {}", whisper_state.whisper_path);
-        println!("🔧 WHISPER: Model path: {}", whisper_state.model_path);
-        println!("🔧 WHISPER: Current directory: {}", std::env::current_dir().unwrap().display());
-        println!("🔧 WHISPER: Project root: {}", std::env::current_dir().unwrap().parent().unwrap().display());
         
         whisper_state
     }
@@ -136,11 +132,8 @@ pub async fn transcribe_audio_with_whisper(
     state: State<'_, WhisperState>,
     audio_base64: String,
 ) -> Result<WhisperTranscriptionResult, String> {
-    println!("🎤🎤🎤 WHISPER FUNCTION CALLED! 🎤🎤🎤");
-    println!("🎤 WHISPER: Starting transcription");
-    println!("📊 WHISPER: Audio data length: {} characters", audio_base64.len());
-    println!("🔧 WHISPER: Whisper path: {}", state.whisper_path);
-    println!("🔧 WHISPER: Model path: {}", state.model_path);
+        info!("🎤 WHISPER: Starting transcription");
+        info!("📊 WHISPER: Audio data length: {} characters", audio_base64.len());
     
     // Verificar configuração
     state.verify_setup().map_err(|e| {
@@ -149,7 +142,6 @@ pub async fn transcribe_audio_with_whisper(
     })?;
     
     // Decodificar áudio base64
-    info!("🔓 WHISPER: Decoding base64 audio...");
     let audio_data = base64::engine::general_purpose::STANDARD
         .decode(&audio_base64)
         .map_err(|e| {
@@ -171,71 +163,38 @@ pub async fn transcribe_audio_with_whisper(
         format!("Failed to write audio to temp file: {}", e)
     })?;
     
-    info!("✅ WHISPER: Audio written to temp file: {:?}", temp_file.path());
     
-    // Verificar se o arquivo foi salvo corretamente
-    let file_size = std::fs::metadata(temp_file.path()).map(|m| m.len()).unwrap_or(0);
-    info!("📊 WHISPER: Temp file size: {} bytes", file_size);
     
-            // Verificar se é um arquivo WAV válido (deve começar com "RIFF")
-            let mut file_header = [0u8; 4];
-            if let Ok(_) = std::fs::read(temp_file.path()).map(|data| {
-                if data.len() >= 4 {
-                    file_header.copy_from_slice(&data[0..4]);
-                    println!("📊 WHISPER: File header: {:?}", String::from_utf8_lossy(&file_header));
-                    println!("📊 WHISPER: First 16 bytes: {:?}", &data[0..std::cmp::min(16, data.len())]);
-                }
-            }) {}
-            
-            // Verificar se o arquivo tem extensão .wav
-            let temp_path_str = temp_file.path().to_str().unwrap();
-            println!("📊 WHISPER: Temp file path: {}", temp_path_str);
-            
-            // Criar uma cópia com extensão .wav para garantir que o Whisper reconheça
-            let wav_path = format!("{}.wav", temp_path_str);
-            std::fs::copy(temp_file.path(), &wav_path).map_err(|e| {
-                error!("❌ WHISPER: Failed to copy to WAV file: {}", e);
-                format!("Failed to copy to WAV file: {}", e)
-            })?;
-            println!("✅ WHISPER: Created WAV file: {}", wav_path);
+    // Criar uma cópia com extensão .wav para garantir que o Whisper reconheça
+    let temp_path_str = temp_file.path().to_str().unwrap();
+    let wav_path = format!("{}.wav", temp_path_str);
+    std::fs::copy(temp_file.path(), &wav_path).map_err(|e| {
+        error!("❌ WHISPER: Failed to copy to WAV file: {}", e);
+        format!("Failed to copy to WAV file: {}", e)
+    })?;
     
-            // Executar Whisper.cpp
-            let output_file_base = temp_file.path().to_str().unwrap();
-            println!("🚀 WHISPER: Executing command: {} -f {} -m {} -l pt -nt --split-on-word -oj -of {}", 
-                      state.whisper_path, 
-                      &wav_path,
-                      state.model_path,
-                      output_file_base);
+    // Executar Whisper.cpp
+    let output_file_base = temp_file.path().to_str().unwrap();
             
-            let output = Command::new(&state.whisper_path)
-                .arg("-f")
-                .arg(&wav_path)
-                .arg("-m")
-                .arg(&state.model_path)
-                .arg("-l")
-                .arg("pt")
-                .arg("-nt")
-                .arg("--split-on-word")
-                .arg("-oj")
-                .arg("-of")
-                .arg(output_file_base)
-                .output();
+    let output = Command::new(&state.whisper_path)
+        .arg("-f")
+        .arg(&wav_path)
+        .arg("-m")
+        .arg(&state.model_path)
+        .arg("-l")
+        .arg("pt")
+        .arg("-nt")
+        .arg("--split-on-word")
+        .arg("-oj")
+        .arg("-of")
+        .arg(output_file_base)
+        .output();
     
     let output = output.map_err(|e| {
-        println!("❌ WHISPER: Failed to execute whisper: {}", e);
+        error!("❌ WHISPER: Failed to execute whisper: {}", e);
         format!("Failed to execute whisper: {}", e)
     })?;
     
-    println!("✅ WHISPER: Command executed successfully");
-    println!("📊 WHISPER: Exit status: {:?}", output.status);
-    println!("📝 WHISPER: Stdout length: {} bytes", output.stdout.len());
-    println!("📝 WHISPER: Stderr length: {} bytes", output.stderr.len());
-    
-    if !output.stderr.is_empty() {
-        println!("⚠️ WHISPER: Stderr content: {}", String::from_utf8_lossy(&output.stderr));
-    }
-    
-    info!("✅ WHISPER: Whisper execution completed");
     
     if !output.status.success() {
         let error_msg = String::from_utf8_lossy(&output.stderr);
@@ -248,32 +207,20 @@ pub async fn transcribe_audio_with_whisper(
         });
     }
     
-    // Processar saída do Whisper
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    info!("📝 WHISPER: Raw output: {}", stdout);
-    
-    // O Whisper.cpp real gera um arquivo JSON, vamos tentar ler o arquivo de saída
+    // O Whisper.cpp gera um arquivo JSON, vamos ler o arquivo de saída
     let output_file_path = format!("{}.json", output_file_base);
-    info!("🔍 WHISPER: Looking for JSON file at: {}", output_file_path);
-    
     let json_content = match std::fs::read_to_string(&output_file_path) {
-        Ok(content) => {
-            info!("✅ WHISPER: JSON file found and read successfully");
-            content
-        },
+        Ok(content) => content,
         Err(e) => {
             warn!("⚠️ WHISPER: Failed to read JSON file: {}", e);
-            info!("📝 WHISPER: Falling back to stdout: {}", stdout);
+            let stdout = String::from_utf8_lossy(&output.stdout);
             stdout.to_string()
         }
     };
     
-    info!("📝 WHISPER: JSON content: {}", json_content);
-    
-    // Tentar fazer parse da resposta JSON do Whisper
+    // Fazer parse da resposta JSON do Whisper
     let whisper_response: WhisperResponse = serde_json::from_str(&json_content).unwrap_or_else(|e| {
         error!("❌ WHISPER: Failed to parse JSON: {}", e);
-        error!("❌ WHISPER: JSON content that failed: {}", json_content);
         // Se não conseguir fazer parse, criar uma resposta vazia
         WhisperResponse {
             transcription: None,
@@ -283,8 +230,6 @@ pub async fn transcribe_audio_with_whisper(
             params: None,
         }
     });
-    
-    info!("📝 WHISPER: Parsed response: {:?}", whisper_response);
     
     // Processar transcrições uma única vez
     let (transcription, segments) = if let Some(transcriptions) = whisper_response.transcription {
@@ -322,9 +267,7 @@ pub async fn transcribe_audio_with_whisper(
     };
     
     if let Some(ref text) = transcription {
-        info!("🎯 WHISPER: Extracted text: '{}'", text);
-        info!("📝 WHISPER: FINAL TRANSCRIPTION RESULT: '{}'", text);
-        info!("📝 WHISPER: Transcription length: {} characters", text.chars().count());
+        info!("🎯 WHISPER: Transcription result: '{}'", text);
     } else {
         warn!("⚠️ WHISPER: No transcription text available");
     }
