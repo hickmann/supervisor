@@ -22,15 +22,15 @@ import { ChatMessage, ChatConversation } from "@/types/completion";
 
 export type useSystemAudioType = ReturnType<typeof useSystemAudio>;
 
-// Helper function to validate VOSK transcription
+// Helper function to validate Whisper transcription
 function isValidTranscription(transcription: string): boolean {
   if (!transcription || transcription.trim().length === 0) {
     return false;
   }
   
-  // Check for common VOSK error patterns
+  // Check for common Whisper error patterns
   const errorPatterns = [
-    /VOSK.*Error/i,
+    /WHISPER.*Error/i,
     /transcription failed/i,
     /^error:/i,
     /failed to process/i,
@@ -57,39 +57,58 @@ function isValidTranscription(transcription: string): boolean {
   return true;
 }
 
-// Helper function to transcribe audio with VOSK
-async function transcribeWithVosk(audioBase64: string): Promise<string> {
-  console.log("🎤 VOSK Frontend: Starting transcription...");
-  console.log("📊 VOSK Frontend: Audio data length:", audioBase64.length);
-  console.log("📊 VOSK Frontend: Audio data preview:", audioBase64.substring(0, 50) + "...");
+// Helper function to transcribe audio with Whisper
+async function transcribeWithWhisper(audioBase64: string): Promise<string> {
+  console.log("🎤 WHISPER Frontend: Starting transcription...");
+  console.log("📊 WHISPER Frontend: Audio data length:", audioBase64.length);
+  console.log("📊 WHISPER Frontend: Audio data preview:", audioBase64.substring(0, 50) + "...");
   
   try {
-    console.log("📡 VOSK Frontend: Calling Tauri command...");
+    console.log("📡 WHISPER Frontend: Calling Tauri command...");
     const response = await invoke<{
       success: boolean;
       transcription?: string;
       error?: string;
-    }>("transcribe_audio_with_vosk", {
+      segments?: Array<{
+        id: number;
+        seek: number;
+        start: number;
+        end: number;
+        text: string;
+        tokens: number[];
+        temperature: number;
+        avg_logprob: number;
+        compression_ratio: number;
+        no_speech_prob: number;
+      }>;
+    }>("transcribe_audio_with_whisper", {
       audioBase64,
-      modelName: "vosk-model-small-pt-0.3",
     });
 
-    console.log("📥 VOSK Frontend: Response received:", response);
+    console.log("📥 WHISPER Frontend: Response received:", response);
 
-            if (response.success && response.transcription) {
-              console.log("✅ VOSK Frontend: Transcription successful!");
-              console.log("📝 VOSK Frontend: TRANSCRIBED TEXT:", response.transcription);
-              console.log("📝 VOSK Frontend: Text length:", response.transcription.length, "characters");
-              console.log("📝 VOSK Frontend: Text preview:", response.transcription.substring(0, 100) + (response.transcription.length > 100 ? "..." : ""));
-              return response.transcription;
-            } else {
-              console.warn("⚠️ VOSK Frontend: Transcription failed:", response.error);
-              return response.error || "VOSK transcription failed";
-            }
+    if (response.success && response.transcription) {
+      console.log("✅ WHISPER Frontend: Transcription successful!");
+      console.log("📝 WHISPER Frontend: TRANSCRIBED TEXT:", response.transcription);
+      console.log("📝 WHISPER Frontend: Text length:", response.transcription.length, "characters");
+      console.log("📝 WHISPER Frontend: Text preview:", response.transcription.substring(0, 100) + (response.transcription.length > 100 ? "..." : ""));
+      
+      if (response.segments && response.segments.length > 0) {
+        console.log("📊 WHISPER Frontend: Segments received:", response.segments.length);
+        response.segments.forEach((segment, index) => {
+          console.log(`📊 WHISPER Frontend: Segment ${index}: ${segment.start}s-${segment.end}s: "${segment.text}"`);
+        });
+      }
+      
+      return response.transcription;
+    } else {
+      console.warn("⚠️ WHISPER Frontend: Transcription failed:", response.error);
+      return response.error || "WHISPER transcription failed";
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("❌ VOSK Frontend: Error:", errorMessage);
-    return `VOSK STT Error: ${errorMessage}`;
+    console.error("❌ WHISPER Frontend: Error:", errorMessage);
+    return `WHISPER STT Error: ${errorMessage}`;
   }
 }
 
@@ -284,9 +303,9 @@ export function useSystemAudio() {
 
             setIsProcessing(true);
             try {
-              // Use VOSK for transcription
-              console.log("🎤 System Audio: Calling transcribeWithVosk...");
-              const transcription = await transcribeWithVosk(base64Audio);
+              // Use Whisper for transcription
+              console.log("🎤 System Audio: Calling transcribeWithWhisper...");
+              const transcription = await transcribeWithWhisper(base64Audio);
 
               // Validate transcription before processing
               if (isValidTranscription(transcription)) {

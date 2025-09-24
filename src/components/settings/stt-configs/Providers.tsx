@@ -59,7 +59,7 @@ export const Providers = ({
                 isCustom: provider?.isCustom,
               };
             } catch (error) {
-              // Fallback for providers with invalid curl (like VOSK)
+              // Fallback for providers with invalid curl (like Whisper)
               return {
                 label: provider?.id || "Custom Provider",
                 value: provider?.id || "Custom Provider",

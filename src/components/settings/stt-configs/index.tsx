@@ -2,7 +2,6 @@ import { Header } from "@/components";
 import { UseSettingsReturn } from "@/types";
 import { Providers } from "./Providers";
 import { CustomProviders } from "./CustomProvider";
-import { VoskConfig } from "./VoskConfig";
 
 export const STTProviders = (settings: UseSettingsReturn) => {
   return (
@@ -17,8 +16,6 @@ export const STTProviders = (settings: UseSettingsReturn) => {
       <CustomProviders {...settings} />
       {/* Providers Selection */}
       <Providers {...settings} />
-      {/* VOSK Configuration */}
-      <VoskConfig {...settings} />
     </div>
   );
 };

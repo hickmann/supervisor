@@ -16,7 +16,7 @@ use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
 mod speaker;
-mod vosk_stt;
+mod whisper_stt;
 
 #[derive(Default)]
 pub struct AudioState {
@@ -73,7 +73,7 @@ pub fn run() {
     let builder = tauri::Builder::default()
         .manage(AudioState::default())
         .manage(shortcuts::WindowVisibility(Mutex::new(false)))
-        .manage(vosk_stt::VoskState::new())
+        .manage(whisper_stt::WhisperState::new())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_http::init())
@@ -103,8 +103,8 @@ pub fn run() {
             speaker::stop_system_audio_capture,
             speaker::check_system_audio_access,
             speaker::request_system_audio_access,
-            vosk_stt::transcribe_audio_with_vosk,
-            vosk_stt::get_available_vosk_models
+            whisper_stt::transcribe_audio_with_whisper,
+            whisper_stt::get_whisper_status,
         ])
         .setup(|app| {
             // Setup main window positioning

@@ -27,18 +27,18 @@ export const AutoSpeechVAD = ({
 
         let transcription: string;
         
-        // SEMPRE USAR VOSK - NÃO PRECISA VERIFICAR PROVIDERS
-        console.log("🎤 VAD: Using VOSK for all transcriptions");
+        // SEMPRE USAR WHISPER - NÃO PRECISA VERIFICAR PROVIDERS
+        console.log("🎤 VAD: Using WHISPER for all transcriptions");
 
         setIsTranscribing(true);
 
-        console.log("🎤 VAD: Starting transcription with VOSK...");
+        console.log("🎤 VAD: Starting transcription with WHISPER...");
         console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
-        // SEMPRE USAR VOSK - FORÇAR USO
+        // SEMPRE USAR WHISPER - FORÇAR USO
         transcription = await fetchSTT({
           provider: undefined,
-          selectedProvider: { provider: "vosk-stt", variables: {} },
+          selectedProvider: { provider: "whisper-stt", variables: {} },
           audio: audioBlob,
         });
 

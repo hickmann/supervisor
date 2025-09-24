@@ -130,7 +130,7 @@ fn process_chunk(mono_chunk: &[f32]) -> (f32, f32) {
     (rms, peak)
 }
 
-// Improved resampling with linear interpolation for better VOSK quality
+// Improved resampling with linear interpolation for better Whisper quality
 fn resample_to_16khz(input: &[f32], original_rate: u32) -> Vec<f32> {
     if original_rate == 16000 {
         return input.to_vec();
@@ -160,9 +160,9 @@ fn resample_to_16khz(input: &[f32], original_rate: u32) -> Vec<f32> {
     output
 }
 
-// Send samples to Pluely AI Speech
+// Send samples to Whisper.cpp
 fn samples_to_wav_b64(sample_rate: u32, mono_f32: &[f32]) -> Result<String, String> {
-    // Resample to 16000 Hz if needed for VOSK compatibility
+    // Resample to 16000 Hz if needed for Whisper compatibility
     let resampled_data = if sample_rate != 16000 {
         println!("🎤 System Audio: Resampling from {} Hz to 16000 Hz", sample_rate);
         resample_to_16khz(mono_f32, sample_rate)
@@ -173,7 +173,7 @@ fn samples_to_wav_b64(sample_rate: u32, mono_f32: &[f32]) -> Result<String, Stri
     let mut cursor = Cursor::new(Vec::new());
     let spec = WavSpec {
         channels: 1,
-        sample_rate: 16000, // Always use 16000 Hz for VOSK
+        sample_rate: 16000, // Always use 16000 Hz for Whisper
         bits_per_sample: 16,
         sample_format: hound::SampleFormat::Int,
     };

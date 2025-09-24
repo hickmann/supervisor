@@ -103,12 +103,10 @@ export const SPEECH_TO_TEXT_PROVIDERS = [
     streaming: false,
   },
   {
-    id: "vosk-stt",
-    name: "VOSK Speech-to-Text (Local)",
-    curl: `curl -X POST "http://localhost:8080/transcribe" \\
-      -H "Content-Type: application/json" \\
-      -d '{"audio": "{{AUDIO}}", "model": "{{MODEL}}"}'`,
-    responseContentPath: "transcription",
+    id: "whisper-stt",
+    name: "Whisper.cpp (Local)",
+    curl: `whisper/whisper.ps1 -f {{AUDIO}} -m whisper/models/ggml-base-q5_1.bin -l pt -no-timestamps 0 -split-on-word`,
+    responseContentPath: "text",
     streaming: false,
   },
 ];

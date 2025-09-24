@@ -31,10 +31,10 @@ export const VadOnly = ({
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
         console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
-        // Use VOSK for transcription
+        // Use Whisper for transcription
         const transcription = await fetchSTT({
           provider: undefined,
-          selectedProvider: { provider: "vosk-stt", variables: {} },
+          selectedProvider: { provider: "whisper-stt", variables: {} },
           audio: audioBlob,
         });
 
