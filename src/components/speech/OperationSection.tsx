@@ -48,6 +48,31 @@ export const OperationSection = ({
 }: Props) => {
   const [openConversation, setOpenConversation] = useState(false);
   
+  // Função para verificar se a resposta é genérica
+  const isGenericResponse = (response: string): boolean => {
+    if (!response) return false;
+    
+    const genericPatterns = [
+      /nenhuma recomendação específica/i,
+      /não foi identificada/i,
+      /não há recomendações/i,
+      /não foram identificadas/i,
+      /sem recomendações específicas/i,
+      /não foram encontradas/i,
+      /não há orientações específicas/i,
+      /não foram detectadas/i,
+      /sem orientações específicas/i,
+      /não foram observadas/i,
+      /sem sugestões específicas/i,
+      /não foram identificados pontos/i,
+      /não há pontos específicos/i,
+      /sem pontos específicos/i,
+      /não foram detectados pontos/i
+    ];
+    
+    return genericPatterns.some(pattern => pattern.test(response));
+  };
+  
   // Função para obter ícone e estilo baseado no role
   const getRoleInfo = (role: string) => {
     switch (role) {
@@ -87,50 +112,6 @@ export const OperationSection = ({
   };
   return (
     <div className="space-y-4">
-      {/* Últimas transcrições */}
-      {(lastTerapeutaTranscription || lastPacienteTranscription) && (
-        <div className="space-y-3">
-          <h3 className="font-semibold text-sm">Última Atividade</h3>
-          
-          {lastTerapeutaTranscription && (
-            <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center flex-shrink-0">
-                <GraduationCapIcon className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-medium text-blue-700">TERAPEUTA</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date().toLocaleTimeString()}
-                  </span>
-                </div>
-                <Card className="p-3 bg-blue-50 border-blue-200">
-                  <p className="text-sm text-blue-900">{lastTerapeutaTranscription}</p>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {lastPacienteTranscription && (
-            <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-full bg-green-50 border border-green-200 flex items-center justify-center flex-shrink-0">
-                <UserIcon className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-medium text-green-700">PACIENTE</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date().toLocaleTimeString()}
-                  </span>
-                </div>
-                <Card className="p-3 bg-green-50 border-green-200">
-                  <p className="text-sm text-green-900">{lastPacienteTranscription}</p>
-                </Card>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Quick Actions - sempre visível quando há atividade */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (
@@ -146,8 +127,8 @@ export const OperationSection = ({
         />
       )}
 
-      {/* Supervisão Psicológica */}
-      {(lastAIResponse || isAIProcessing) && (
+      {/* Supervisão Psicológica - só mostra se não for resposta genérica */}
+      {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
@@ -160,23 +141,25 @@ export const OperationSection = ({
               </p>
             </div>
           </div>
-          <Card className="p-4 bg-purple-50 border-purple-200">
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 shadow-sm">
             {isAIProcessing && !lastAIResponse ? (
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                <p className="text-sm italic text-purple-700">Analisando intervenção terapêutica...</p>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-purple-600 animate-pulse" />
+                <p className="text-sm font-medium text-purple-800">Analisando intervenção terapêutica...</p>
               </div>
             ) : (
-              <div className="text-sm leading-relaxed text-purple-900">
+              <div className="text-sm leading-relaxed text-purple-900 space-y-2">
                 {lastAIResponse ? (
-                  <Markdown>{lastAIResponse}</Markdown>
+                  <div className="prose prose-purple prose-sm max-w-none">
+                    <Markdown>{lastAIResponse}</Markdown>
+                  </div>
                 ) : null}
                 {isAIProcessing && (
                   <span className="inline-block w-2 h-4 bg-purple-600 animate-pulse ml-1" />
                 )}
               </div>
             )}
-          </Card>
+          </div>
         </div>
       )}
 

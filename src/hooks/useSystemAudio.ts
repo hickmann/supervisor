@@ -43,8 +43,8 @@ function isValidTranscription(transcription: string): boolean {
     }
   }
   
-  // Check minimum length (at least 3 characters)
-  if (transcription.trim().length < 3) {
+  // Check minimum length (at least 12 characters)
+  if (transcription.trim().length < 12) {
     return false;
   }
   
@@ -52,6 +52,32 @@ function isValidTranscription(transcription: string): boolean {
   const cleanText = transcription.trim().toLowerCase();
   if (/^(.)\1{2,}$/.test(cleanText)) { // repeated single character
     return false;
+  }
+  
+  // Filter out background noise and non-speech sounds in brackets
+  const backgroundNoisePatterns = [
+    /^\[.*\]$/, // Only brackets content like [MÚSICA DE FUNDO], [GRITOS DE GOL]
+    /^\[.*\]\s*$/, // Brackets content with trailing spaces
+    /\[música de fundo\]/i,
+    /\[gritos de gol\]/i,
+    /\[aplausos\]/i,
+    /\[ruído\]/i,
+    /\[barulho\]/i,
+    /\[som\]/i,
+    /\[música\]/i,
+    /\[canto\]/i,
+    /\[gritos\]/i,
+    /\[aplauso\]/i,
+    /\[background music\]/i,
+    /\[crowd noise\]/i,
+    /\[applause\]/i,
+    /\[cheering\]/i
+  ];
+  
+  for (const pattern of backgroundNoisePatterns) {
+    if (pattern.test(cleanText)) {
+      return false;
+    }
   }
   
   return true;

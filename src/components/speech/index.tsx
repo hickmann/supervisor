@@ -14,7 +14,6 @@ import {
 import { Header } from "./Header";
 import { SetupInstructions } from "./SetupInstructions";
 import { OperationSection } from "./OperationSection";
-import { Context } from "./Context";
 import { useSystemAudioType } from "@/hooks";
 import { useEffect } from "react";
 
@@ -30,10 +29,6 @@ export const SystemAudio = ({
   stopCapture,
   isPopoverOpen,
   setIsPopoverOpen,
-  useSystemPrompt,
-  setUseSystemPrompt,
-  contextContent,
-  setContextContent,
   startNewConversation,
   conversation,
   resizeWindow,
@@ -213,13 +208,6 @@ export const SystemAudio = ({
                     handleQuickActionClick={handleQuickActionClick}
                     lastTerapeutaTranscription={lastTerapeutaTranscription}
                     lastPacienteTranscription={lastPacienteTranscription}
-                  />
-                  {/* Context Settings */}
-                  <Context
-                    useSystemPrompt={useSystemPrompt}
-                    setUseSystemPrompt={setUseSystemPrompt}
-                    contextContent={contextContent}
-                    setContextContent={setContextContent}
                   />
                 </>
               )}

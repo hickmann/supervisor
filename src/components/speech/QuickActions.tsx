@@ -41,20 +41,9 @@ export const QuickActions = ({
     <div className="space-y-2">
       <div className="flex justify-between items-center h-5">
         <h4 className="text-xs font-semibold text-gray-500">
-          Quick Actions/Smart Conversation Helpers
+          Ajuda/Ações Rápidas
         </h4>
         <div className="flex items-center gap-2">
-          {show ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto px-2 py-1 text-xs"
-              onClick={() => setIsManaging(!isManaging)}
-            >
-              <Settings2Icon className="w-3.5 h-3.5 mr-1" />
-              {isManaging ? "Done" : "Manage"}
-            </Button>
-          ) : null}
           <Button
             variant="ghost"
             size="icon"
