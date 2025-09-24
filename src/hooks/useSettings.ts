@@ -69,10 +69,11 @@ export const useSettings = () => {
       );
       if (provider) {
         const variables = extractVariables(provider?.curl);
+        console.log("🔧 Settings: Extracted variables for provider", selectedAIProvider.provider, ":", variables);
         setVariables(variables);
       }
     }
-  }, [selectedAIProvider.provider]);
+  }, [selectedAIProvider.provider, allAiProviders]);
 
   useEffect(() => {
     if (selectedSttProvider.provider) {

@@ -3,7 +3,9 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   SPEECH_TO_TEXT_PROVIDERS,
   STORAGE_KEYS,
+  DEFAULT_SUPABASE_API_KEY,
 } from "@/config";
+import { forceSupabaseConfig, verifySupabaseConfig } from "@/lib/functions/force-supabase-config";
 import { safeLocalStorage } from "@/lib";
 import {
   getCustomizableState,
@@ -76,7 +78,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     provider: string;
     variables: Record<string, string>;
   }>({
-    provider: "",
+    provider: "supervision",
     variables: {},
   });
 
@@ -142,13 +144,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    // Load custom AI providers
-    const savedAi = safeLocalStorage.getItem(STORAGE_KEYS.CUSTOM_AI_PROVIDERS);
-    let aiList: TYPE_PROVIDER[] = [];
-    if (savedAi) {
-      aiList = validateAndProcessCurlProviders(savedAi, "AI");
-    }
-    setCustomAiProviders(aiList);
+    // Custom AI providers disabled - only supervision provider is available
+    setCustomAiProviders([]);
 
     // Load custom STT providers
     const savedStt = safeLocalStorage.getItem(
@@ -164,8 +161,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const savedSelectedAi = safeLocalStorage.getItem(
       STORAGE_KEYS.SELECTED_AI_PROVIDER
     );
+    
     if (savedSelectedAi) {
-      setSelectedAIProvider(JSON.parse(savedSelectedAi));
+      try {
+        const parsedConfig = JSON.parse(savedSelectedAi);
+        setSelectedAIProvider(parsedConfig);
+        
+        // Verificar se a configuração está correta
+        if (!verifySupabaseConfig()) {
+          console.log("⚠️ Configuração incorreta detectada, forçando reconfiguração...");
+          forceSupabaseConfig();
+          setSelectedAIProvider({
+            provider: "supervision",
+            variables: {
+              api_key: DEFAULT_SUPABASE_API_KEY,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("❌ Erro ao parsear configuração salva:", error);
+        forceSupabaseConfig();
+        setSelectedAIProvider({
+          provider: "supervision",
+          variables: {
+            api_key: DEFAULT_SUPABASE_API_KEY,
+          },
+        });
+      }
+    } else {
+      // Set supervision as default provider with default Supabase API key
+      forceSupabaseConfig();
+      setSelectedAIProvider({
+        provider: "supervision",
+        variables: {
+          api_key: DEFAULT_SUPABASE_API_KEY,
+        },
+      });
+      console.log("🔧 App Context: Set supervision as default provider with default API key");
     }
 
     // Load selected STT provider

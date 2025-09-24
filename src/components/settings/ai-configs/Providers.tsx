@@ -43,38 +43,23 @@ export const Providers = ({
     <div className="space-y-3">
       <div className="space-y-2">
         <Header
-          title="Select AI Provider"
-          description="Select your preferred AI service provider or custom providers to get started."
+          title="Análise de Supervisão"
+          description="Sistema de análise de supervisão psicológica configurado automaticamente."
         />
-        <Selection
-          selected={selectedAIProvider?.provider}
-          options={allAiProviders?.map((provider) => {
-            try {
-              const json = curl2Json(provider?.curl);
-              return {
-                label: provider?.isCustom
-                  ? json?.url || "Custom Provider"
-                  : provider?.id || "Custom Provider",
-                value: provider?.id || "Custom Provider",
-                isCustom: provider?.isCustom,
-              };
-            } catch (error) {
-              // Fallback for providers with invalid curl
-              return {
-                label: provider?.id || "Custom Provider",
-                value: provider?.id || "Custom Provider",
-                isCustom: provider?.isCustom,
-              };
-            }
-          })}
-          placeholder="Choose your AI provider"
-          onChange={(value) => {
-            onSetSelectedAIProvider({
-              provider: value,
-              variables: {},
-            });
-          }}
-        />
+        <div className="p-3 bg-card rounded-lg border">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-sm font-medium">Provider: Supervisão</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Endpoint: analyze-supervision
+          </p>
+          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/20 rounded border border-blue-200 dark:border-blue-800">
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              <strong>ℹ️ Informação:</strong> Este serviço usa Supabase. A chave de API padrão está configurada, mas você pode substituí-la pela sua própria chave se necessário.
+            </p>
+          </div>
+        </div>
       </div>
 
       {localSelectedProvider ? (
@@ -89,14 +74,8 @@ export const Providers = ({
       {findKeyAndValue("api_key") ? (
         <div className="space-y-2">
           <Header
-            title="API Key"
-            description={`Enter your ${
-              allAiProviders?.find(
-                (p) => p?.id === selectedAIProvider?.provider
-              )?.isCustom
-                ? "Custom Provider"
-                : selectedAIProvider?.provider
-            } API key to authenticate and access AI models. Your key is stored locally and never shared.`}
+            title="API Key (Supabase)"
+            description={`Enter your Supabase API key (anon key) to authenticate with the supervision service. The default key is already configured, but you can replace it with your own if needed. Your key is stored locally and never shared.`}
           />
 
           <div className="space-y-2">

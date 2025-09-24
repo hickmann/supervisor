@@ -11,6 +11,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import curl2Json from "@bany/curl-to-json";
 import { shouldUsePluelyAPI } from "./pluely.api";
+import { fetchSupervisionResponse } from "./supervision.function";
 
 // Pluely AI streaming function
 async function* fetchPluelyAIResponse(params: {
@@ -122,6 +123,19 @@ export async function* fetchAIResponse(params: {
         imagesBase64,
         history,
       });
+      return;
+    }
+
+    // Check if we should use Supervision API
+    if (provider?.id === "supervision") {
+      console.log("🔧 Supervision: Provider variables:", selectedProvider.variables);
+      const apiKey = selectedProvider.variables?.api_key || selectedProvider.variables?.API_KEY;
+      console.log("🔧 Supervision: API Key found:", apiKey ? "Yes" : "No");
+      if (!apiKey) {
+        yield "❌ **Erro**: Chave API não configurada para o serviço de supervisão";
+        return;
+      }
+      yield* fetchSupervisionResponse(userMessage, apiKey);
       return;
     }
     if (!provider) {
