@@ -73,29 +73,29 @@ const App = () => {
       <Card className="w-full flex flex-row items-center gap-2 p-2 app-background">
         <SystemAudio {...systemAudio} />
 {systemAudio?.capturing ? (
-          <div className="flex flex-row items-center gap-2 justify-between w-full">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-row items-center gap-4 justify-between w-full">
+            <div className="flex items-center gap-3">
               <AudioVisualizer isRecording={systemAudio?.capturing} />
               {/* Contador de tempo */}
-              <div className="text-xs font-mono text-white/80">
+              <div className="text-sm font-medium text-white/90">
                 {systemAudio.recordingTime || "00:00"}
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-3">
               {/* Botão Perguntar pra IA */}
               <button
                 onClick={systemAudio.handleSendToAI}
-                className="flex items-center gap-1.5 px-2 py-0.5 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1 hover:bg-white/10 transition-all duration-200 cursor-pointer"
               >
-                <span className="text-xs font-medium text-white">Perguntar pra IA</span>
-                <div className="flex items-center gap-0.5">
-                  <div className="w-5 h-3 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-[9px] text-white/80 font-mono leading-none">
+                <span className="text-sm font-medium text-white">Perguntar pra IA</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-6 h-4 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[10px] text-white/80 font-mono leading-none">
                       {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
                     </span>
                   </div>
-                  <div className="w-3 h-3 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-[9px] text-white/80 font-mono leading-none">↵</span>
+                  <div className="w-4 h-4 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[10px] text-white/80 font-mono leading-none">↵</span>
                   </div>
                 </div>
               </button>
@@ -103,17 +103,17 @@ const App = () => {
               {/* Botão Mostrar/Esconder */}
               <button
                 onClick={systemAudio.handleToggleVisibility}
-                className="flex items-center gap-1.5 px-2 py-0.5 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1 hover:bg-white/10 transition-all duration-200 cursor-pointer"
               >
-                <span className="text-xs font-medium text-white">Mostrar/Esconder</span>
-                <div className="flex items-center gap-0.5">
-                  <div className="w-5 h-3 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-[9px] text-white/80 font-mono leading-none">
+                <span className="text-sm font-medium text-white">Mostrar/Esconder</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-6 h-4 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[10px] text-white/80 font-mono leading-none">
                       {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
                     </span>
                   </div>
-                  <div className="w-3 h-3 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-[9px] text-white/80 font-mono leading-none">H</span>
+                  <div className="w-4 h-4 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[10px] text-white/80 font-mono leading-none">H</span>
                   </div>
                 </div>
               </button>

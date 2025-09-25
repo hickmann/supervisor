@@ -101,7 +101,7 @@ export const SystemAudio = ({
       return <AlertCircleIcon className="text-red-500" />;
     if (isProcessing) return <LoaderIcon className="animate-spin" />;
     if (capturing)
-      return <SquareIcon className="text-red-500" />;
+      return <SquareIcon className="text-white" />;
     return <HeadphonesIcon />;
   };
 
