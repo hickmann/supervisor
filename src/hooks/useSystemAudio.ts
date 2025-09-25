@@ -518,21 +518,8 @@ export function useSystemAudio() {
           setError(aiError.message || "Failed to get AI response");
         }
 
-        if (fullResponse && fullResponse !== "NO_CONTENT_204") {
-          // Apenas salvar a resposta do supervisor (assistant) se não for status 204
-          const supervisorMessage: ChatMessage = {
-            id: `msg_${Date.now()}_assistant`,
-            role: "assistant" as const,
-            content: fullResponse,
-            timestamp: Date.now(),
-          };
-
-          setConversation((prev) => ({
-            ...prev,
-            messages: [supervisorMessage, ...prev.messages],
-            updatedAt: Date.now(),
-          }));
-        }
+        // Não salvar respostas do Gemini no histórico da sessão
+        // Apenas paciente e terapeuta são salvos no histórico
       } catch (err) {
         setError("Failed to get AI response");
       } finally {

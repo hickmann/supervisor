@@ -30,7 +30,6 @@ export const SystemAudio = ({
   stopCapture,
   isPopoverOpen,
   setIsPopoverOpen,
-  startNewConversation,
   conversation,
   resizeWindow,
   handleSetup,
@@ -194,12 +193,11 @@ export const SystemAudio = ({
               ) : (
                 <>
                   {/* Operation Section com SupervisorScreen */}
-                  <SupervisorScreen>
+                  <SupervisorScreen conversation={conversation}>
                     <OperationSection
                       lastAIResponse={lastAIResponse}
                       isAIProcessing={isAIProcessing}
                       conversation={conversation}
-                      startNewConversation={startNewConversation}
                       quickActions={quickActions}
                       addQuickAction={addQuickAction}
                       removeQuickAction={removeQuickAction}

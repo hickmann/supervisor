@@ -13,6 +13,18 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Casos especiais que não são SupervisorItem normais
+    if (id === 'transcriptions') {
+      setSelectedItem({
+        id: 'transcriptions',
+        title: 'Transcrições da Sessão',
+        subtitle: 'Histórico completo da conversa',
+        description: 'Transcrições da sessão entre paciente e terapeuta',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
     const item = items.find(item => item.id === id);
     setSelectedItem(item || null);
   }, [items]);

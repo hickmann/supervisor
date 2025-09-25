@@ -1,23 +1,17 @@
 import { ChatConversation } from "@/types";
-import { Markdown } from "../Markdown";
-import { Button, Card } from "../ui";
+import { Button } from "../ui";
 import {
   BotIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  HeadphonesIcon,
-  UserIcon,
-  GraduationCapIcon,
+  CopyIcon,
 } from "lucide-react";
-import { useState } from "react";
 import { QuickActions } from "./QuickActions";
 import { SupervisorSummaryButtons } from "../supervisor/SupervisorSummaryButtons";
+import { useSupervisor } from "@/contexts";
 
 type Props = {
   lastAIResponse: string;
   isAIProcessing: boolean;
   conversation: ChatConversation;
-  startNewConversation: () => void;
   quickActions: string[];
   addQuickAction: (action: string) => void;
   removeQuickAction: (action: string) => void;
@@ -35,7 +29,6 @@ export const OperationSection = ({
   lastAIResponse,
   isAIProcessing,
   conversation,
-  startNewConversation,
   quickActions,
   addQuickAction,
   removeQuickAction,
@@ -47,7 +40,32 @@ export const OperationSection = ({
   lastTerapeutaTranscription,
   lastPacienteTranscription,
 }: Props) => {
-  const [openConversation, setOpenConversation] = useState(false);
+  const { selectItem } = useSupervisor();
+  
+  // Função para copiar toda a transcrição
+  const copyTranscription = async () => {
+    const allMessages = conversation.messages
+      .sort((a, b) => a.timestamp - b.timestamp) // Ordem cronológica
+      .map(msg => {
+        const role = msg.role === 'terapeuta' ? 'TERAPEUTA' : 
+                    msg.role === 'paciente' ? 'PACIENTE' : 'SISTEMA';
+        return `${role}: ${msg.content}`;
+      })
+      .join('\n\n');
+    
+    try {
+      await navigator.clipboard.writeText(allMessages);
+      // Aqui você pode adicionar um toast de sucesso se quiser
+    } catch (err) {
+      console.error('Erro ao copiar transcrição:', err);
+    }
+  };
+
+  // Função para mostrar transcrições (abre como os botões de supervisão)
+  const showTranscriptions = () => {
+    // Usar o sistema de seleção do supervisor para mostrar as transcrições
+    selectItem('transcriptions');
+  };
   
   // Função para verificar se a resposta é genérica
   const isGenericResponse = (response: string): boolean => {
@@ -74,47 +92,73 @@ export const OperationSection = ({
     return genericPatterns.some(pattern => pattern.test(response));
   };
   
-  // Função para obter ícone e estilo baseado no role
-  const getRoleInfo = (role: string) => {
-    switch (role) {
-      case "terapeuta":
-        return {
-          icon: <GraduationCapIcon className="h-4 w-4 text-blue-600" />,
-          bgColor: "bg-blue-50",
-          borderColor: "border-blue-200",
-          label: "TERAPEUTA",
-          labelColor: "text-blue-700"
-        };
-      case "paciente":
-        return {
-          icon: <UserIcon className="h-4 w-4 text-green-600" />,
-          bgColor: "bg-green-50",
-          borderColor: "border-green-200",
-          label: "PACIENTE",
-          labelColor: "text-green-700"
-        };
-      case "assistant":
-        return {
-          icon: <BotIcon className="h-4 w-4 text-purple-600" />,
-          bgColor: "bg-purple-50",
-          borderColor: "border-purple-200",
-          label: "SUPERVISOR",
-          labelColor: "text-purple-700"
-        };
-      default:
-        return {
-          icon: <HeadphonesIcon className="h-4 w-4 text-muted-foreground" />,
-          bgColor: "bg-muted",
-          borderColor: "border-input",
-          label: "SISTEMA",
-          labelColor: "text-muted-foreground"
-        };
-    }
-  };
+  // Verificar se há conteúdo para mostrar o header
+  const hasContent = (lastAIResponse && !isGenericResponse(lastAIResponse)) || isAIProcessing || conversation.messages.length > 0;
+
   return (
     <div className="space-y-4">
+      {/* Header com Percepções e botões - só aparece quando há conteúdo */}
+      {hasContent && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">✨ Percepções</h2>
+          <div className="flex items-center gap-2">
+            {conversation.messages.length > 0 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={showTranscriptions}
+                  className="flex items-center gap-2"
+                >
+                  Mostrar transcrição
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyTranscription}
+                  className="flex items-center gap-2"
+                  title="Copiar transcrição completa"
+                >
+                  <CopyIcon className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Quick Actions - sempre visível quando há atividade */}
+      {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
+      {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
+              <BotIcon className="h-4 w-4 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm text-purple-700">SUPERVISOR PSICOLÓGICO</h3>
+                {isAIProcessing && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                    <span className="text-xs text-purple-600">Analisando...</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Análise e orientações sobre a intervenção terapêutica
+              </p>
+            </div>
+          </div>
+
+          {/* Botões sempre visíveis */}
+          <SupervisorSummaryButtons 
+            lastAIResponse={lastAIResponse}
+            isAIProcessing={isAIProcessing}
+          />
+        </div>
+      )}
+
+      {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (
         <QuickActions
           actions={quickActions}
@@ -126,104 +170,6 @@ export const OperationSection = ({
           show={showQuickActions}
           setShow={setShowQuickActions}
         />
-      )}
-
-              {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
-              {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
-                      <BotIcon className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm text-purple-700">SUPERVISOR PSICOLÓGICO</h3>
-                        {isAIProcessing && (
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                            <span className="text-xs text-purple-600">Analisando...</span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Análise e orientações sobre a intervenção terapêutica
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Botões sempre visíveis */}
-                  <SupervisorSummaryButtons 
-                    lastAIResponse={lastAIResponse}
-                    isAIProcessing={isAIProcessing}
-                  />
-                </div>
-              )}
-
-      {conversation.messages.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3
-              className="font-semibold text-md w-full cursor-pointer"
-              onClick={() => setOpenConversation(!openConversation)}
-            >
-              Histórico da Sessão ({conversation.messages.length} mensagens)
-            </h3>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setOpenConversation(!openConversation)}
-              >
-                {openConversation ? (
-                  <ChevronUpIcon className="h-4 w-4" />
-                ) : (
-                  <ChevronDownIcon className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  startNewConversation();
-                  setOpenConversation(false);
-                }}
-              >
-                Nova Sessão
-              </Button>
-            </div>
-          </div>
-
-          {openConversation && (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {conversation.messages
-                .sort((a, b) => b.timestamp - a.timestamp)
-                .map((message, index) => {
-                  const roleInfo = getRoleInfo(message.role);
-                  return (
-                    <div key={`${message.id}-${index}`} className="flex items-start gap-3">
-                      <div className={`h-8 w-8 rounded-full ${roleInfo.bgColor} ${roleInfo.borderColor} border flex items-center justify-center flex-shrink-0`}>
-                        {roleInfo.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-medium ${roleInfo.labelColor}`}>
-                            {roleInfo.label}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <Card className={`p-3 ${roleInfo.bgColor} ${roleInfo.borderColor} border`}>
-                          <div className={`text-sm leading-relaxed ${message.role === 'assistant' ? 'text-purple-900' : message.role === 'terapeuta' ? 'text-blue-900' : 'text-green-900'}`}>
-                            <Markdown>{message.content}</Markdown>
-                          </div>
-                        </Card>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-        </div>
       )}
     </div>
   );
