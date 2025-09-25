@@ -19,7 +19,7 @@ export const Disclaimer = () => {
           {isVersionLoading ? (
             <span>Loading version...</span>
           ) : (
-            <span>Version: {version}</span>
+            <span>Versão: {version}</span>
           )}
         </div>
 

@@ -1,38 +1,34 @@
 {
-  "name": "pluely",
-  "private": false,
-  "version": "0.1.4",
+  "name": "CoterapIA",
+  "private": true,
+  "version": "0.1.1",
   "description": "The Open Source Alternative to Cluely - A lightning-fast, privacy-first AI assistant that works seamlessly during meetings, interviews, and conversations without anyone knowing.",
-  "author": {
-    "name": "Srikanth Nani",
-    "email": "srikanthnani1202@gmail.com",
-    "url": "https://www.srikanthnani.com"
-  },
-  "license": "MIT",
-  "homepage": "https://github.com/iamsrikanthnani/pluely#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iamsrikanthnani/pluely.git"
-  },
+   "license": "Copyright © 2025 CoterapIA",
+  "homepage": "https://www.coterapia.com.br",
   "bugs": {
-    "url": "https://github.com/iamsrikanthnani/pluely/issues"
+    "url": "https://www.coterapia.com.br/bugs"
   },
-  "keywords": [
-    "ai-assistant",
+"keywords": [
+    "assistente-de-terapia",
+    "copiloto-psicologo",
+    "supervisao-clinica",
+    "app-desktop",
     "tauri",
-    "desktop-app",
-    "privacy-first",
-    "open-source",
-    "meeting-assistant",
-    "speech-to-text",
-    "llm",
-    "chatgpt",
-    "claude",
-    "cluely-alternative",
+    "rust",
     "typescript",
     "react",
-    "rust"
-  ],
+    "stt-portugues",
+    "whisper",
+    "voz-para-texto",
+    "inteligencia-artificial",
+    "psicologia-baseada-em-evidencias",
+    "seguranca-de-dados",
+    "privacidade",
+    "ia-para-psicologos",
+    "terapia-online",
+    "anotacoes-automaticas",
+    "cluely-alternativa"
+],
   "type": "module",
   "scripts": {
     "dev": "vite",
