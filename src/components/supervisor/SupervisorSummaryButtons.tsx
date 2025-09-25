@@ -174,10 +174,10 @@ export const SupervisorSummaryButtons = ({
   }, [lastAIResponse, isAIProcessing, addItems]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
               {/* Lista de avaliações */}
               {items.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {items.slice(0, 5).map((item) => (
                     <Button
                       key={item.id}
@@ -205,7 +205,7 @@ export const SupervisorSummaryButtons = ({
       ) : (
         /* Mostrar resposta atual quando não há botões salvos */
         lastAIResponse && (
-          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-5 shadow-sm">
+          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-4 shadow-sm">
             <div className="text-sm leading-relaxed text-slate-700 space-y-3">
               <div className="prose prose-slate prose-sm max-w-none">
                 <Markdown>{lastAIResponse}</Markdown>

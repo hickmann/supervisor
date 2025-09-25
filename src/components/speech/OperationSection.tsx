@@ -116,7 +116,7 @@ export const OperationSection = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4">
       {/* Notificação de Erro */}
       {error && (
         <div className="bg-red-50/90 backdrop-blur-sm border border-red-200/50 rounded-lg p-4 shadow-sm">
@@ -170,9 +170,9 @@ export const OperationSection = ({
 
       {/* Seção do Assistente Clínico - abaixo de Percepções */}
       {assistentClinicoData && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Tópico Principal */}
-          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-5 shadow-sm">
+          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-4 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 tracking-tight">
               {assistentClinicoData.topico}
             </h3>
@@ -191,7 +191,7 @@ export const OperationSection = ({
           </div>
 
           {/* Botões de Ação */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Botão 1: Conceito/Definição */}
             {assistentClinicoData.conceito_definicao?.termo && (
               <Button
@@ -287,7 +287,7 @@ export const OperationSection = ({
 
       {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (
-        <div className="bg-white/60 backdrop-blur-sm border border-slate-200/30 rounded-xl p-4 shadow-sm">
+        <div className="bg-white/60 backdrop-blur-sm border border-slate-200/30 rounded-xl p-3 shadow-sm">
           <QuickActions
             actions={quickActions}
             onActionClick={handleQuickActionClick}

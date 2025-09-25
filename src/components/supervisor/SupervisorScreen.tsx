@@ -109,7 +109,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 className="h-full flex flex-col"
               >
                 {/* Header */}
-                <div className="p-6 border-b border-slate-200/30">
+                <div className="pt-2 pb-4 px-4 border-b border-slate-200/30">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Button
@@ -152,13 +152,13 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 </div>
 
                 {/* Conteúdo */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto pt-3 pb-4 px-4">
                   {selectedItem.id === 'transcriptions' ? (
                     /* Conteúdo das transcrições */
-                    <div className="space-y-4 max-h-full">
-                      <h3 className="text-lg font-semibold text-white mb-6 tracking-tight">Transcrições da Sessão</h3>
+                    <div className="space-y-3 max-h-full">
+                      <h3 className="text-lg font-semibold text-white mb-4 tracking-tight">Transcrições da Sessão</h3>
                       {conversation?.messages && conversation.messages.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {conversation.messages
                             .sort((a, b) => b.timestamp - a.timestamp) // Ordem reversa (mais recentes primeiro)
                             .map((message, index) => {
@@ -195,7 +195,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                     </div>
                   ) : (
                     /* Conteúdo da supervisão */
-                    <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-slate-200/30 shadow-sm max-h-full">
+                    <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-slate-200/30 shadow-sm max-h-full">
                       <div 
                         className="whitespace-pre-wrap leading-relaxed text-slate-700 overflow-y-auto max-h-full text-sm"
                         style={{ whiteSpace: 'pre-wrap' }}
