@@ -9,6 +9,5 @@ export * from "./animated-popover";
 export * from "./scroll-area";
 export * from "./select";
 export * from "./switch";
-export * from "./tabs";
 export * from "./textarea";
 export * from "./command";

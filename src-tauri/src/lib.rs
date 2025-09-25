@@ -23,10 +23,6 @@ pub struct AudioState {
     stream_task: Arc<Mutex<Option<JoinHandle<()>>>>,
 }
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 #[tauri::command]
 fn get_app_version() -> String {
@@ -96,7 +92,6 @@ pub fn run() {
         .plugin(tauri_plugin_keychain::init())
         .plugin(tauri_plugin_shell::init())  // Add shell plugin
         .invoke_handler(tauri::generate_handler![
-            greet, 
             get_app_version,
             set_window_height,
             capture_to_base64,
@@ -122,7 +117,6 @@ pub fn run() {
             speaker::check_system_audio_access,
             speaker::request_system_audio_access,
             whisper_stt::transcribe_audio_with_whisper,
-            whisper_stt::get_whisper_status,
         ])
         .setup(|app| {
             // Setup main window positioning

@@ -3,17 +3,12 @@ import { Card, Settings, SystemAudio, Updater } from "./components";
 import { Completion } from "./components/completion";
 import { ChatHistory } from "./components/history";
 import { AudioVisualizer } from "./components/speech/audio-visualizer";
-import { useTitles, useSupervisorDemo } from "./hooks";
 import { useSystemAudio } from "./hooks/useSystemAudio";
 import { listen } from "@tauri-apps/api/event";
 
 const App = () => {
   const systemAudio = useSystemAudio();
   const [isHidden, setIsHidden] = useState(false);
-  // Initialize title management
-  useTitles();
-  // Initialize supervisor demo data
-  useSupervisorDemo();
   const handleSelectConversation = (conversation: any) => {
     // Use localStorage to communicate the selected conversation to Completion component
     localStorage.setItem("selectedConversation", JSON.stringify(conversation));

@@ -280,12 +280,3 @@ pub async fn transcribe_audio_with_whisper(
     })
 }
 
-#[tauri::command]
-pub async fn get_whisper_status() -> Result<String, String> {
-    let state = WhisperState::new();
-    
-    match state.verify_setup() {
-        Ok(_) => Ok("Whisper.cpp is properly configured and ready to use".to_string()),
-        Err(e) => Err(e),
-    }
-}

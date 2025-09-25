@@ -8,15 +8,9 @@ import {
   ScrollArea,
 } from "@/components";
 import { Disclaimer } from "./Disclaimer";
-import { SystemPrompt } from "./SystemPrompt";
-import { ScreenshotConfigs } from "./ScreenshotConfigs";
 import { AppIconToggle } from "./AppIconToggle";
 import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
-import { TitleToggle } from "./TitleToggle";
-import { AIProviders } from "./ai-configs";
-import { STTProviders } from "./stt-configs";
 import { DeleteChats } from "./DeleteChats";
-import { PluelyApiSetup } from "./PluelyApiSetup";
 
 export const Settings = () => {
   const settings = useSettings();
