@@ -138,15 +138,16 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   // Função para enviar para o assistente clínico
   const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
-      console.log("🌐 AssistentClinico: Enviando conversas:", conversations);
+      console.log("🌐 AssistentClinico: Enviando apenas as 5 conversas coletadas:", conversations);
       
-      // Formatear as conversas para envio
+      // Formatear apenas as 5 conversas coletadas para envio
       const chatData = conversations
         .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
         .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
         .join('\n\n');
       
-      console.log("🌐 AssistentClinico: Dados formatados para envio:", chatData);
+      console.log("🌐 AssistentClinico: Dados formatados para envio (apenas 5 falas):", chatData);
+      console.log("🌐 AssistentClinico: Total de caracteres:", chatData.length);
       
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/assistente-clinico', {
         method: 'POST',
