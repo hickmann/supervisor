@@ -161,16 +161,16 @@ export const OperationSection = ({
             {assistentClinicoData.conceito_definicao?.termo && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-blue-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-blue-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('conceito_definicao')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
                     📖 {assistentClinicoData.conceito_definicao.termo}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-left line-clamp-2 leading-relaxed">
-                  {assistentClinicoData.conceito_definicao.definicao?.substring(0, 80)}...
+                <p className="text-xs text-slate-600 text-right line-clamp-1 leading-relaxed ml-2">
+                  {assistentClinicoData.conceito_definicao.definicao?.substring(0, 60)}...
                 </p>
               </Button>
             )}
@@ -179,16 +179,16 @@ export const OperationSection = ({
             {assistentClinicoData.pergunta_e_resposta?.pergunta && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-green-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-green-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('pergunta_resposta')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-green-700 transition-colors duration-200">
                     ❓ {assistentClinicoData.pergunta_e_resposta.pergunta.substring(0, 25)}...
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-left line-clamp-2 leading-relaxed">
-                  {assistentClinicoData.pergunta_e_resposta.resposta_sugerida?.substring(0, 80)}...
+                <p className="text-xs text-slate-600 text-right line-clamp-1 leading-relaxed ml-2">
+                  {assistentClinicoData.pergunta_e_resposta.resposta_sugerida?.substring(0, 60)}...
                 </p>
               </Button>
             )}
@@ -197,16 +197,16 @@ export const OperationSection = ({
             {assistentClinicoData.perguntas_exploratorias && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-orange-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-orange-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('perguntas_exploratorias')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-orange-700 transition-colors duration-200">
                     💬 Perguntas exploratórias
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-left leading-relaxed">
-                  {assistentClinicoData.perguntas_exploratorias.length} sugestões disponíveis
+                <p className="text-xs text-slate-600 text-right leading-relaxed ml-2">
+                  {assistentClinicoData.perguntas_exploratorias.length} sugestões
                 </p>
               </Button>
             )}
@@ -215,16 +215,16 @@ export const OperationSection = ({
             {assistentClinicoData.proximas_falas && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-purple-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-purple-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('proximas_falas')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-purple-700 transition-colors duration-200">
                     ✨ O que eu deveria falar depois?
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-left leading-relaxed">
-                  {assistentClinicoData.proximas_falas.length} sugestões de intervenção
+                <p className="text-xs text-slate-600 text-right leading-relaxed ml-2">
+                  {assistentClinicoData.proximas_falas.length} sugestões
                 </p>
               </Button>
             )}
@@ -233,16 +233,16 @@ export const OperationSection = ({
             {assistentClinicoData.checagem_fatos && assistentClinicoData.checagem_fatos.length > 0 && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-yellow-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-yellow-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('checagem_fatos')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-yellow-700 transition-colors duration-200">
                     ✔️ {assistentClinicoData.checagem_fatos[0].afirmacao.substring(0, 30)}...
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-left leading-relaxed">
-                  Verificação de fatos disponível
+                <p className="text-xs text-slate-600 text-right leading-relaxed ml-2">
+                  Verificação disponível
                 </p>
               </Button>
             )}
