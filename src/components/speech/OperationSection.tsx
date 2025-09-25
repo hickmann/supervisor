@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { QuickActions } from "./QuickActions";
 import { useSupervisor } from "@/contexts";
+import { useEffect } from "react";
 
 type Props = {
   lastAIResponse: string;
@@ -38,7 +39,18 @@ export const OperationSection = ({
   lastTerapeutaTranscription,
   lastPacienteTranscription,
 }: Props) => {
-  const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary } = useSupervisor();
+  const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary, error, setError } = useSupervisor();
+  
+  // Auto-dismiss do erro após 5 segundos
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error, setError]);
   
   // Função para copiar toda a transcrição
   const copyTranscription = async () => {
@@ -105,6 +117,29 @@ export const OperationSection = ({
 
   return (
     <div className="space-y-6 p-6">
+      {/* Notificação de Erro */}
+      {error && (
+        <div className="bg-red-50/90 backdrop-blur-sm border border-red-200/50 rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-red-500 text-lg">⚠️</div>
+              <div>
+                <h4 className="text-sm font-semibold text-red-800">Erro na API</h4>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+              className="text-red-500 hover:text-red-700 hover:bg-red-100/50 transition-colors duration-200"
+            >
+              ✕
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header com Percepções e botões */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white tracking-tight">✨ Percepções</h2>

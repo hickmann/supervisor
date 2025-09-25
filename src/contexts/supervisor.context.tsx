@@ -10,6 +10,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [conversationBuffer, setConversationBuffer] = useState<Array<{ role: string; content: string; timestamp: number }>>([]);
   const [sessionSummaryData, setSessionSummaryData] = useState<SessionSummaryResponse | null>(null);
   const [isGeneratingSessionSummary, setIsGeneratingSessionSummary] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const selectItem = useCallback((id: string | null) => {
     if (!id) {
@@ -177,6 +178,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
       setIsGeneratingSessionSummary(true);
+      setError(null); // Limpar erro anterior
       console.log("🌐 SessionSummary: Enviando histórico completo para session-summary:", conversationHistory);
       
       // Formatear todo o histórico da conversa para envio
@@ -240,6 +242,20 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         const errorText = await response.text();
         console.error("❌ SessionSummary: Erro na resposta:", response.status, response.statusText);
         console.error("❌ SessionSummary: Detalhes do erro:", errorText);
+        
+        // Tentar fazer parse do erro para extrair mensagem amigável
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.details) {
+            setError(`Erro: ${errorData.details}`);
+          } else if (errorData.error) {
+            setError(`Erro: ${errorData.error}`);
+          } else {
+            setError(`Erro na API: ${response.status} ${response.statusText}`);
+          }
+        } catch {
+          setError(`Erro na API: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (error) {
       console.error("❌ SessionSummary: Erro ao enviar:", error);
@@ -335,6 +351,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     sessionSummaryData,
     isGeneratingSessionSummary,
     generateSessionSummary,
+    error,
+    setError,
   };
 
   return (

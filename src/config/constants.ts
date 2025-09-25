@@ -24,5 +24,5 @@ export const DEFAULT_SYSTEM_PROMPT =
 
 export const DEFAULT_QUICK_ACTIONS = [
   "Recapitular Sessão Completa",
-  "Tarefas e Combinações",
+  "Tarefas e Combinados",
 ];
