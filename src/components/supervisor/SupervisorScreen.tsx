@@ -60,7 +60,7 @@ export const SupervisorScreen = ({ children }: SupervisorScreenProps) => {
                 className="h-full flex flex-col"
               >
                 {/* Header */}
-                <div className="flex items-center gap-3 p-4 border-b bg-background">
+                <div className="flex items-center gap-3 p-4 border-b">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -78,18 +78,12 @@ export const SupervisorScreen = ({ children }: SupervisorScreenProps) => {
 
                 {/* Conteúdo */}
                 <div className="flex-1 overflow-y-auto p-6">
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-semibold text-foreground">
-                      {selectedItem.title}
-                    </h2>
-                    
-                    <div className="bg-muted/50 rounded-lg p-6 border">
-                      <div 
-                        className="whitespace-pre-wrap leading-relaxed text-foreground"
-                        style={{ whiteSpace: 'pre-wrap' }}
-                      >
-                        {selectedItem.description}
-                      </div>
+                  <div className="bg-muted/50 rounded-lg p-6 border max-h-full">
+                    <div 
+                      className="whitespace-pre-wrap leading-relaxed text-foreground overflow-y-auto max-h-full"
+                      style={{ whiteSpace: 'pre-wrap' }}
+                    >
+                      {selectedItem.description}
                     </div>
                   </div>
                 </div>

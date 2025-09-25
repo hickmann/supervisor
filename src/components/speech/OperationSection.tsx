@@ -128,37 +128,36 @@ export const OperationSection = ({
         />
       )}
 
-      {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
-      {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
-              <BotIcon className="h-4 w-4 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-purple-700">SUPERVISOR PSICOLÓGICO</h3>
-              <p className="text-xs text-muted-foreground">
-                Análise e orientações sobre a intervenção terapêutica
-              </p>
-            </div>
-          </div>
+              {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
+              {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
+                      <BotIcon className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm text-purple-700">SUPERVISOR PSICOLÓGICO</h3>
+                        {isAIProcessing && (
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+                            <span className="text-xs text-purple-600">Analisando...</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Análise e orientações sobre a intervenção terapêutica
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Mostrar resposta atual OU botões de avaliações */}
-          {isAIProcessing && !lastAIResponse ? (
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-purple-600 animate-pulse" />
-                <p className="text-sm font-medium text-purple-800">Analisando intervenção terapêutica...</p>
-              </div>
-            </div>
-          ) : (
-            <SupervisorSummaryButtons 
-              lastAIResponse={lastAIResponse}
-              isAIProcessing={isAIProcessing}
-            />
-          )}
-        </div>
-      )}
+                  {/* Botões sempre visíveis */}
+                  <SupervisorSummaryButtons 
+                    lastAIResponse={lastAIResponse}
+                    isAIProcessing={isAIProcessing}
+                  />
+                </div>
+              )}
 
       {conversation.messages.length > 0 && (
         <div className="space-y-3">

@@ -148,7 +148,7 @@ export const SystemAudio = ({
           className="select-none w-screen p-0 border overflow-hidden border-input/50"
           sideOffset={18}
         >
-          <ScrollArea className="h-[700px]">
+                  <ScrollArea className="h-[600px] overflow-y-auto">
             <div
               className={`p-6 ${
                 !lastTranscription && !lastAIResponse

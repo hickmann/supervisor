@@ -28,10 +28,10 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       
       if (uniqueNewItems.length === 0) return prevItems;
       
-      // Combine and sort by createdAt descending, then limit to 6
-      const combined = [...uniqueNewItems, ...prevItems]
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 6);
+              // Combine and sort by createdAt descending, then limit to 5
+              const combined = [...uniqueNewItems, ...prevItems]
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, 5);
       
       return combined;
     });
