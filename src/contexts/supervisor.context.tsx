@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { SupervisorItem, SupervisorContextType } from "@/types/supervisor.type";
+import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse } from "@/types/supervisor.type";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
 
 export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<SupervisorItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<SupervisorItem | null>(null);
+  const [assistentClinicoData, setAssistentClinicoData] = useState<AssistentClinicoResponse | null>(null);
+  const [conversationBuffer, setConversationBuffer] = useState<Array<{ role: string; content: string; timestamp: number }>>([]);
 
   const selectItem = useCallback((id: string | null) => {
     if (!id) {
@@ -25,9 +27,62 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Casos especiais para assistente clínico
+    if (id === 'conceito_definicao' && assistentClinicoData?.conceito_definicao) {
+      setSelectedItem({
+        id: 'conceito_definicao',
+        title: assistentClinicoData.conceito_definicao.termo || 'Conceito',
+        subtitle: 'Conceito e Definição',
+        description: assistentClinicoData.conceito_definicao.definicao || 'Definição não disponível',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
+    if (id === 'pergunta_resposta' && assistentClinicoData?.pergunta_e_resposta) {
+      setSelectedItem({
+        id: 'pergunta_resposta',
+        title: assistentClinicoData.pergunta_e_resposta.pergunta || 'Pergunta',
+        subtitle: 'Pergunta e Resposta Sugerida',
+        description: assistentClinicoData.pergunta_e_resposta.resposta_sugerida || 'Resposta não disponível',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
+    if (id === 'perguntas_exploratorias' && assistentClinicoData?.perguntas_exploratorias) {
+      const perguntasList = assistentClinicoData.perguntas_exploratorias
+        .map((pergunta, index) => `${index + 1}. ${pergunta}`)
+        .join('\n\n');
+      
+      setSelectedItem({
+        id: 'perguntas_exploratorias',
+        title: 'Perguntas Exploratórias',
+        subtitle: 'Sugestões para aprofundar o tema',
+        description: perguntasList || 'Nenhuma pergunta disponível',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
+    if (id === 'proximas_falas' && assistentClinicoData?.proximas_falas) {
+      const falasList = assistentClinicoData.proximas_falas
+        .map((fala, index) => `${index + 1}. ${fala}`)
+        .join('\n\n');
+      
+      setSelectedItem({
+        id: 'proximas_falas',
+        title: 'O que eu deveria falar depois?',
+        subtitle: 'Sugestões para próximas intervenções',
+        description: falasList || 'Nenhuma sugestão disponível',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
     const item = items.find(item => item.id === id);
     setSelectedItem(item || null);
-  }, [items]);
+  }, [items, assistentClinicoData]);
 
   const addItems = useCallback((newItems: SupervisorItem[]) => {
     setItems(prevItems => {
@@ -48,12 +103,101 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return combined;
     });
   }, []);
+  
+  // Função para adicionar fala ao buffer da conversa
+  const addToConversationBuffer = useCallback((role: string, content: string) => {
+    const newMessage = {
+      role,
+      content: content.trim(),
+      timestamp: Date.now()
+    };
+    
+    setConversationBuffer(prev => {
+      const updated = [...prev, newMessage];
+      console.log("🔄 ConversationBuffer: Adicionada nova fala:", newMessage);
+      console.log("🔄 ConversationBuffer: Total de falas:", updated.length);
+      
+      // Se chegamos a 5 falas, verificar se o texto total tem pelo menos 80 caracteres
+      if (updated.length >= 5) {
+        const totalTextLength = updated.reduce((total, msg) => total + msg.content.length, 0);
+        console.log("🔄 ConversationBuffer: Texto total:", totalTextLength, "caracteres");
+        
+        if (totalTextLength >= 80) {
+          console.log("🚀 ConversationBuffer: 5 falas com texto suficiente, enviando para assistente clínico");
+          sendToAssistentClinico(updated);
+          return []; // Limpar buffer após enviar
+        } else {
+          console.log("🔄 ConversationBuffer: 5 falas mas texto insuficiente, aguardando mais falas...");
+        }
+      }
+      
+      return updated;
+    });
+  }, []);
+  
+  // Função para enviar para o assistente clínico
+  const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
+    try {
+      console.log("🌐 AssistentClinico: Enviando conversas:", conversations);
+      
+      // Formatear as conversas para envio
+      const chatData = conversations
+        .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
+        .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
+        .join('\n\n');
+      
+      console.log("🌐 AssistentClinico: Dados formatados para envio:", chatData);
+      
+      const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/assistente-clinico', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transcricao: chatData,
+          idioma: "pt-BR",
+          opcoes: {
+            max_bullets_resumo: 3,
+            max_perguntas_exploratorias: 4,
+            max_proximas_falas: 3
+          }
+        })
+      });
+      
+      console.log("🌐 AssistentClinico: Resposta recebida:", response.status, response.statusText);
+      
+      if (response.ok) {
+        const data: AssistentClinicoResponse = await response.json();
+        console.log("✅ AssistentClinico: Dados processados:", data);
+        console.log("✅ AssistentClinico: Estrutura dos dados:", {
+          hasTopico: !!data.topico,
+          hasResumo: !!data.resumo,
+          hasConceitoDefinicao: !!data.conceito_definicao,
+          hasPerguntaResposta: !!data.pergunta_e_resposta,
+          hasPerguntasExploratorias: !!data.perguntas_exploratorias,
+          hasProximasFalas: !!data.proximas_falas
+        });
+        setAssistentClinicoData(data);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ AssistentClinico: Erro na resposta:", response.status, response.statusText);
+        console.error("❌ AssistentClinico: Detalhes do erro:", errorText);
+      }
+    } catch (error) {
+      console.error("❌ AssistentClinico: Erro ao enviar:", error);
+    }
+  }, []);
 
   const value: SupervisorContextType = {
     items,
     selectedItem,
     selectItem,
     addItems,
+    assistentClinicoData,
+    conversationBuffer,
+    addToConversationBuffer,
   };
 
   return (

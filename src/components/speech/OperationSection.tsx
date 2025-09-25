@@ -1,11 +1,10 @@
 import { ChatConversation } from "@/types";
 import { Button } from "../ui";
 import {
-  BotIcon,
   CopyIcon,
 } from "lucide-react";
 import { QuickActions } from "./QuickActions";
-import { SupervisorSummaryButtons } from "../supervisor/SupervisorSummaryButtons";
+import { AssistentClinicoSection } from "./AssistentClinicoSection";
 import { useSupervisor } from "@/contexts";
 
 type Props = {
@@ -40,7 +39,7 @@ export const OperationSection = ({
   lastTerapeutaTranscription,
   lastPacienteTranscription,
 }: Props) => {
-  const { selectItem } = useSupervisor();
+  const { selectItem, assistentClinicoData, conversationBuffer } = useSupervisor();
   
   // Função para copiar toda a transcrição
   const copyTranscription = async () => {
@@ -92,8 +91,12 @@ export const OperationSection = ({
     return genericPatterns.some(pattern => pattern.test(response));
   };
   
-  // Verificar se há conteúdo para mostrar o header
-  const hasContent = (lastAIResponse && !isGenericResponse(lastAIResponse)) || isAIProcessing || conversation.messages.length > 0;
+  // Verificar se há conteúdo para mostrar - agora incluindo assistente clínico
+  const hasContent = (lastAIResponse && !isGenericResponse(lastAIResponse)) || 
+                     isAIProcessing || 
+                     conversation.messages.length > 0 || 
+                     assistentClinicoData || 
+                     conversationBuffer.length > 0;
 
   // Se não há conteúdo, não renderiza nada
   if (!hasContent) {
@@ -130,36 +133,8 @@ export const OperationSection = ({
         </div>
       </div>
 
-      {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
-      {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center">
-              <BotIcon className="h-4 w-4 text-purple-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm text-purple-700">SUPERVISOR PSICOLÓGICO</h3>
-                {isAIProcessing && (
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                    <span className="text-xs text-purple-600">Analisando...</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Análise e orientações sobre a intervenção terapêutica
-              </p>
-            </div>
-          </div>
-
-          {/* Botões sempre visíveis */}
-          <SupervisorSummaryButtons 
-            lastAIResponse={lastAIResponse}
-            isAIProcessing={isAIProcessing}
-          />
-        </div>
-      )}
+      {/* Assistente Clínico */}
+      <AssistentClinicoSection />
 
       {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (

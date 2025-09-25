@@ -3,6 +3,7 @@ import { useWindowResize, useGlobalShortcuts } from ".";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useApp } from "@/contexts";
+import { useSupervisor } from "@/contexts";
 import { fetchAIResponse } from "@/lib/functions";
 import {
   DEFAULT_QUICK_ACTIONS,
@@ -138,41 +139,12 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
   }
 }
 
-// Prompt específico para supervisão psicológica
-const PSYCHOLOGICAL_SUPERVISION_PROMPT = `Você é um supervisor experiente de psicólogos clínicos. Sua função é analisar as falas do terapeuta durante atendimentos e fornecer orientações construtivas.
-
-Analise cada fala do TERAPEUTA considerando:
-
-🔍 **AVALIAÇÃO TÉCNICA:**
-- Adequação teórica e técnica da intervenção
-- Uso apropriado de técnicas terapêuticas
-- Manejo do setting terapêutico
-
-🤝 **ASPECTOS RELACIONAIS:**
-- Nível de empatia demonstrado
-- Qualidade da escuta e acolhimento
-- Estabelecimento de rapport
-
-⚖️ **QUESTÕES ÉTICAS:**
-- Respeito aos princípios éticos da psicologia
-- Manutenção de limites profissionais apropriados
-- Proteção ao bem-estar do paciente
-
-📚 **SUGESTÕES PSICOEDUCACIONAIS:**
-- Conceitos relevantes para a situação
-- Técnicas que podem ser úteis
-- Material de apoio ou reflexões teóricas
-
-💡 **RECOMENDAÇÕES:**
-- Melhorias na abordagem
-- Técnicas alternativas
-- Pontos de atenção para próximas sessões
-
-Formate sua resposta de forma clara e construtiva, sempre mantendo um tom respeitoso e educativo. Seja específico em suas sugestões e explique o "porquê" por trás de cada recomendação.`;
+// Código removido: supervisão agora é feita pelo assistente clínico
 
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
+  const { addToConversationBuffer } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -245,9 +217,6 @@ export function useSystemAudio() {
     }
   }, []);
 
-  // Estado para controlar quando processar supervisão
-  const [pendingTerapeutaMessage, setPendingTerapeutaMessage] = useState<string>("");
-
   // Função para processar transcrição do microfone (TERAPEUTA)
   const processMicrophoneTranscription = useCallback(
     async (transcription: string) => {
@@ -262,8 +231,6 @@ export function useSystemAudio() {
       setError("");
       
       console.log("🎤 Microphone: Setting lastTerapeutaTranscription to:", transcription);
-
-      // Não forçar abertura do popover - apenas processar se já estiver ativo
 
       // Inicializar conversa se necessário
       setConversation((prev) => {
@@ -286,7 +253,7 @@ export function useSystemAudio() {
         return prev;
       });
 
-      // Salvar como mensagem do TERAPEUTA no chat
+      // Salvar como mensagem do TERAPEUTA no chat local
       const terapeutaMessage: ChatMessage = {
         id: `msg_${Date.now()}_terapeuta`,
         role: "terapeuta" as const,
@@ -306,10 +273,10 @@ export function useSystemAudio() {
         return newConversation;
       });
 
-      // Marcar para processar supervisão
-      setPendingTerapeutaMessage(transcription);
+      // Adicionar ao buffer do assistente clínico (novo fluxo)
+      addToConversationBuffer("terapeuta", transcription);
     },
-    []
+    [addToConversationBuffer]
   );
 
 
@@ -342,7 +309,7 @@ export function useSystemAudio() {
                 setLastTranscription(transcription);
                 setError("");
 
-                // Salvar como mensagem do PACIENTE no chat
+                // Salvar como mensagem do PACIENTE no chat local
                 const pacienteMessage: ChatMessage = {
                   id: `msg_${Date.now()}_paciente`,
                   role: "paciente" as const,
@@ -356,6 +323,9 @@ export function useSystemAudio() {
                   updatedAt: Date.now(),
                   title: prev.title || generateConversationTitle(`Sessão ${new Date().toLocaleDateString()}`),
                 }));
+
+                // Adicionar ao buffer do assistente clínico (novo fluxo)
+                addToConversationBuffer("paciente", transcription);
               } else {
                 console.warn("⚠️ System Audio: Invalid transcription, not processing:", transcription);
                 setError("Transcrição inválida do áudio do sistema");
@@ -384,6 +354,7 @@ export function useSystemAudio() {
   }, [
     capturing,
     conversation.messages.length,
+    addToConversationBuffer,
   ]);
 
   // Context management functions
@@ -529,26 +500,7 @@ export function useSystemAudio() {
     [selectedAIProvider, allAiProviders, conversation.messages]
   );
 
-  // UseEffect para processar supervisão quando nova mensagem do terapeuta for adicionada
-  useEffect(() => {
-    if (pendingTerapeutaMessage && conversation.messages.length > 0) {
-      const latestMessage = conversation.messages[0];
-      if (latestMessage.role === "terapeuta" && latestMessage.content === pendingTerapeutaMessage) {
-        // Processar supervisão
-        const previousMessages = conversation.messages.slice(1).map((msg) => {
-          return { role: msg.role, content: msg.content };
-        });
-
-        processWithAI(
-          pendingTerapeutaMessage,
-          PSYCHOLOGICAL_SUPERVISION_PROMPT,
-          previousMessages
-        );
-
-        setPendingTerapeutaMessage(""); // Limpar pending
-      }
-    }
-  }, [conversation.messages, pendingTerapeutaMessage, processWithAI]);
+  // Código removido: supervisão agora é feita pelo assistente clínico
 
   const startCapture = useCallback(async () => {
     try {
