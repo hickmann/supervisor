@@ -33,7 +33,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         id: 'conceito_definicao',
         title: assistentClinicoData.conceito_definicao.termo || 'Conceito',
         subtitle: 'Conceito e Definição',
-        description: assistentClinicoData.conceito_definicao.definicao || 'Definição não disponível',
+        description: `• ${assistentClinicoData.conceito_definicao.definicao || 'Definição não disponível'}`,
         createdAt: new Date().toISOString()
       });
       return;
@@ -44,7 +44,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         id: 'pergunta_resposta',
         title: assistentClinicoData.pergunta_e_resposta.pergunta || 'Pergunta',
         subtitle: 'Pergunta e Resposta Sugerida',
-        description: assistentClinicoData.pergunta_e_resposta.resposta_sugerida || 'Resposta não disponível',
+        description: `• ${assistentClinicoData.pergunta_e_resposta.resposta_sugerida || 'Resposta não disponível'}`,
         createdAt: new Date().toISOString()
       });
       return;
@@ -52,14 +52,14 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     
     if (id === 'perguntas_exploratorias' && assistentClinicoData?.perguntas_exploratorias) {
       const perguntasList = assistentClinicoData.perguntas_exploratorias
-        .map((pergunta, index) => `${index + 1}. ${pergunta}`)
+        .map((pergunta) => `• ${pergunta}`)
         .join('\n\n');
       
       setSelectedItem({
         id: 'perguntas_exploratorias',
         title: 'Perguntas Exploratórias',
         subtitle: 'Sugestões para aprofundar o tema',
-        description: perguntasList || 'Nenhuma pergunta disponível',
+        description: perguntasList || '• Nenhuma pergunta disponível',
         createdAt: new Date().toISOString()
       });
       return;
@@ -67,14 +67,14 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     
     if (id === 'proximas_falas' && assistentClinicoData?.proximas_falas) {
       const falasList = assistentClinicoData.proximas_falas
-        .map((fala, index) => `${index + 1}. ${fala}`)
+        .map((fala) => `• ${fala}`)
         .join('\n\n');
       
       setSelectedItem({
         id: 'proximas_falas',
         title: 'O que eu deveria falar depois?',
         subtitle: 'Sugestões para próximas intervenções',
-        description: falasList || 'Nenhuma sugestão disponível',
+        description: falasList || '• Nenhuma sugestão disponível',
         createdAt: new Date().toISOString()
       });
       return;

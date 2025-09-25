@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useSupervisor } from "@/contexts";
 import { Button } from "@/components";
-import { ArrowLeft, UserIcon, GraduationCapIcon } from "lucide-react";
+import { ArrowLeft, UserIcon, GraduationCapIcon, CopyIcon } from "lucide-react";
 import { useEffect } from "react";
 import { ChatConversation } from "@/types";
 
@@ -15,6 +15,18 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
 
   const handleBack = () => {
     selectItem(null);
+  };
+
+  // Função para copiar o conteúdo da resposta da IA
+  const handleCopyContent = async () => {
+    if (!selectedItem) return;
+    
+    try {
+      await navigator.clipboard.writeText(selectedItem.description);
+      // Aqui você pode adicionar um toast de sucesso se quiser
+    } catch (err) {
+      console.error('Erro ao copiar conteúdo:', err);
+    }
   };
 
   // Função para obter ícone e estilo baseado no role
@@ -97,20 +109,46 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 className="h-full flex flex-col"
               >
                 {/* Header */}
-                <div className="flex items-center gap-3 p-4 border-b">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBack}
-                    className="flex items-center gap-2"
-                    title="Voltar (ESC)"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Voltar
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Pressione ESC para voltar
-                  </span>
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleBack}
+                        className="flex items-center gap-2"
+                        title="Voltar (ESC)"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Voltar
+                      </Button>
+                      <span className="text-sm text-muted-foreground">
+                        Pressione ESC para voltar
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Novo header com título da IA e título do botão */}
+                  <div className="flex items-center justify-between mt-3">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Resposta da IA
+                    </h2>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        {selectedItem.title}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopyContent}
+                        className="flex items-center gap-1"
+                        title="Copiar resposta da IA"
+                      >
+                        <CopyIcon className="h-4 w-4" />
+                        Copiar
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Conteúdo */}
