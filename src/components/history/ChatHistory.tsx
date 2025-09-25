@@ -30,9 +30,10 @@ export const ChatHistory = ({
       <AnimatedPopover open={historyHook.isOpen} onOpenChange={historyHook.setIsOpen}>
         <AnimatedPopoverTrigger asChild>
           <Button
-            size="icon"
             aria-label="View All Chat History"
-            className="cursor-pointer"
+            variant="ghost"
+            size="icon"
+            className="!bg-transparent !border-none !text-white/70 hover:!text-white hover:!bg-white/10 !w-8 !h-8 !rounded-md !transition-all !duration-200 !cursor-pointer !p-0 !min-h-0 !h-8 !w-8 !shadow-none !gap-0 !whitespace-nowrap !text-sm !font-medium !disabled:pointer-events-none !disabled:opacity-50 !outline-none"
             title="View All Chat History"
           >
             <History className="h-4 w-4" />

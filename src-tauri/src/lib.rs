@@ -70,10 +70,16 @@ fn capture_to_base64() -> Result<String, String> {
 
 #[tauri::command]
 async fn open_url(app_handle: tauri::AppHandle, url: String) -> Result<(), String> {
-    use tauri_plugin_shell::ShellExt;
+    use tauri_plugin_opener::OpenerExt;
     
-    app_handle.shell().open(url, None).map_err(|e| format!("Failed to open URL: {}", e))?;
+    app_handle.opener().open_url(url, None::<String>).map_err(|e| format!("Failed to open URL: {}", e))?;
     
+    Ok(())
+}
+
+#[tauri::command]
+async fn exit_app(app_handle: tauri::AppHandle) -> Result<(), String> {
+    app_handle.exit(0);
     Ok(())
 }
 
@@ -95,6 +101,7 @@ pub fn run() {
             set_window_height,
             capture_to_base64,
             open_url,
+            exit_app,
             shortcuts::get_shortcuts,
             shortcuts::check_shortcuts_registered,
             shortcuts::set_app_icon_visibility,
