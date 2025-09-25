@@ -89,6 +89,7 @@ pub fn run() {
             shortcuts::check_shortcuts_registered,
             shortcuts::set_app_icon_visibility,
             shortcuts::set_always_on_top,
+            shortcuts::toggle_window_visibility,
             activate::activate_license_api,
             activate::mask_license_key_cmd,
             activate::get_checkout_url,

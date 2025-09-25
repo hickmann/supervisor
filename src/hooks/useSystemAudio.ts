@@ -453,6 +453,19 @@ export function useSystemAudio() {
     }
   }, [conversationBuffer, sendToAssistentClinico]);
 
+  // Função para toggle da visibilidade da janela
+  const handleToggleVisibility = useCallback(async () => {
+    console.log("🔄 ToggleVisibility: Alternando visibilidade da janela");
+    
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      await invoke("toggle_window_visibility");
+      console.log("✅ ToggleVisibility: Visibilidade da janela alterada com sucesso");
+    } catch (error) {
+      console.error("❌ ToggleVisibility: Erro ao alterar visibilidade:", error);
+    }
+  }, []);
+
   const handleQuickActionClick = async (action: string) => {
     setLastTranscription(action); // Show the action as if it were a transcription
     setError("");
@@ -728,7 +741,9 @@ export function useSystemAudio() {
     });
 
     globalShortcuts.registerSendToAICallback(handleSendToAI);
-  }, [startCapture, stopCapture, handleSendToAI]);
+    
+    globalShortcuts.registerToggleVisibilityCallback(handleToggleVisibility);
+  }, [startCapture, stopCapture, handleSendToAI, handleToggleVisibility]);
 
   useEffect(() => {
     return () => {
@@ -805,5 +820,8 @@ export function useSystemAudio() {
     processMicrophoneTranscription,
     shouldActivateVAD,
     setShouldActivateVAD,
+    // Callbacks para botões
+    handleSendToAI,
+    handleToggleVisibility,
   };
 }

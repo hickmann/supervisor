@@ -31,6 +31,11 @@ const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "cmd+enter";
 #[cfg(not(target_os = "macos"))]
 const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "ctrl+enter";
 
+#[cfg(target_os = "macos")]
+const DEFAULT_TOGGLE_VISIBILITY_SHORTCUT: &str = "cmd+h";
+#[cfg(not(target_os = "macos"))]
+const DEFAULT_TOGGLE_VISIBILITY_SHORTCUT: &str = "ctrl+h";
+
 /// Initialize global shortcuts for the application
 pub fn setup_global_shortcuts<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<dyn std::error::Error>> {
     let toggle_shortcut = DEFAULT_TOGGLE_SHORTCUT.parse::<Shortcut>()?;
@@ -38,6 +43,7 @@ pub fn setup_global_shortcuts<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<
     let screenshot_shortcut = DEFAULT_SCREENSHOT_SHORTCUT.parse::<Shortcut>()?;
     let system_audio_shortcut = DEFAULT_SYSTEM_AUDIO_SHORTCUT.parse::<Shortcut>()?;
     let send_to_ai_shortcut = DEFAULT_SEND_TO_AI_SHORTCUT.parse::<Shortcut>()?;
+    let toggle_visibility_shortcut = DEFAULT_TOGGLE_VISIBILITY_SHORTCUT.parse::<Shortcut>()?;
 
      
     // Register global shortcuts
@@ -75,6 +81,13 @@ pub fn setup_global_shortcuts<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<
         }
     }).map_err(|e| format!("Failed to register send to AI shortcut: {}", e))?;
 
+    let app_handle = app.clone();
+    app.global_shortcut().on_shortcut(toggle_visibility_shortcut, move |_app, _shortcut, event| {
+        if event.state() == ShortcutState::Pressed {
+            handle_toggle_visibility_shortcut(&app_handle);
+        }
+    }).map_err(|e| format!("Failed to register toggle visibility shortcut: {}", e))?;
+
     // Register all shortcuts
     app.global_shortcut().register(toggle_shortcut)
         .map_err(|e| format!("Failed to register toggle shortcut: {}", e))?;
@@ -86,6 +99,8 @@ pub fn setup_global_shortcuts<R: Runtime>(app: &AppHandle<R>) -> Result<(), Box<
         .map_err(|e| format!("Failed to register system audio shortcut: {}", e))?;
     app.global_shortcut().register(send_to_ai_shortcut)
         .map_err(|e| format!("Failed to register send to AI shortcut: {}", e))?;
+    app.global_shortcut().register(toggle_visibility_shortcut)
+        .map_err(|e| format!("Failed to register toggle visibility shortcut: {}", e))?;
     
     Ok(())
 }
@@ -214,6 +229,32 @@ fn handle_send_to_ai_shortcut<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
+/// Handle toggle visibility shortcut
+fn handle_toggle_visibility_shortcut<R: Runtime>(app: &AppHandle<R>) {
+    if let Some(window) = app.get_webview_window("main") {
+        match window.is_visible() {
+            Ok(true) => {
+                // Window is visible, hide it
+                if let Err(e) = window.hide() {
+                    eprintln!("Failed to hide window: {}", e);
+                }
+            }
+            Ok(false) => {
+                // Window is hidden, show it
+                if let Err(e) = window.show() {
+                    eprintln!("Failed to show window: {}", e);
+                }
+                if let Err(e) = window.set_focus() {
+                    eprintln!("Failed to focus window: {}", e);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to check window visibility: {}", e);
+            }
+        }
+    }
+}
+
 /// Tauri command to get current shortcuts
 #[tauri::command]
 pub fn get_shortcuts() -> serde_json::Value {
@@ -222,7 +263,8 @@ pub fn get_shortcuts() -> serde_json::Value {
         "audio": DEFAULT_AUDIO_SHORTCUT,
         "screenshot": DEFAULT_SCREENSHOT_SHORTCUT,
         "systemAudio": DEFAULT_SYSTEM_AUDIO_SHORTCUT,
-        "sendToAI": DEFAULT_SEND_TO_AI_SHORTCUT
+        "sendToAI": DEFAULT_SEND_TO_AI_SHORTCUT,
+        "toggleVisibility": DEFAULT_TOGGLE_VISIBILITY_SHORTCUT
     })
 }
 
@@ -235,6 +277,7 @@ pub fn check_shortcuts_registered<R: Runtime>(app: AppHandle<R>) -> Result<bool,
         DEFAULT_SCREENSHOT_SHORTCUT,
         DEFAULT_SYSTEM_AUDIO_SHORTCUT,
         DEFAULT_SEND_TO_AI_SHORTCUT,
+        DEFAULT_TOGGLE_VISIBILITY_SHORTCUT,
     ];
 
     for shortcut_str in shortcuts {
@@ -329,6 +372,49 @@ pub fn set_always_on_top<R: Runtime>(
             })?;
         
         println!("Successfully set always on top to: {}", enabled);
+    } else {
+        eprintln!("Main window not found");
+        return Err("Main window not found".to_string());
+    }
+    
+    Ok(())
+}
+
+/// Tauri command to toggle window visibility
+#[tauri::command]
+pub fn toggle_window_visibility<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    println!("Toggling window visibility");
+    
+    if let Some(window) = app.get_webview_window("main") {
+        match window.is_visible() {
+            Ok(true) => {
+                // Window is visible, hide it
+                window.hide()
+                    .map_err(|e| {
+                        eprintln!("Failed to hide window: {}", e);
+                        format!("Failed to hide window: {}", e)
+                    })?;
+                println!("Window hidden successfully");
+            }
+            Ok(false) => {
+                // Window is hidden, show it
+                window.show()
+                    .map_err(|e| {
+                        eprintln!("Failed to show window: {}", e);
+                        format!("Failed to show window: {}", e)
+                    })?;
+                window.set_focus()
+                    .map_err(|e| {
+                        eprintln!("Failed to focus window: {}", e);
+                        format!("Failed to focus window: {}", e)
+                    })?;
+                println!("Window shown and focused successfully");
+            }
+            Err(e) => {
+                eprintln!("Failed to check window visibility: {}", e);
+                return Err(format!("Failed to check window visibility: {}", e));
+            }
+        }
     } else {
         eprintln!("Main window not found");
         return Err("Main window not found".to_string());

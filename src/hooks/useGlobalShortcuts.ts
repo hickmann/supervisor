@@ -8,6 +8,7 @@ interface Shortcuts {
   screenshot: string;
   systemAudio: string;
   sendToAI: string;
+  toggleVisibility: string;
 }
 
 // Global singleton to prevent multiple event listeners in StrictMode
@@ -17,6 +18,7 @@ let globalEventListeners: {
   screenshot?: UnlistenFn;
   systemAudio?: UnlistenFn;
   sendToAI?: UnlistenFn;
+  toggleVisibility?: UnlistenFn;
 } = {};
 
 // Global debounce for screenshot events to prevent duplicates
@@ -28,6 +30,7 @@ export const useGlobalShortcuts = () => {
   const screenshotCallbackRef = useRef<(() => void) | null>(null);
   const systemAudioCallbackRef = useRef<(() => void) | null>(null);
   const sendToAICallbackRef = useRef<(() => void) | null>(null);
+  const toggleVisibilityCallbackRef = useRef<(() => void) | null>(null);
 
   const checkShortcutsRegistered = useCallback(async (): Promise<boolean> => {
     try {
@@ -74,6 +77,11 @@ export const useGlobalShortcuts = () => {
     sendToAICallbackRef.current = callback;
   }, []);
 
+  // Register toggle visibility callback
+  const registerToggleVisibilityCallback = useCallback((callback: () => void) => {
+    toggleVisibilityCallbackRef.current = callback;
+  }, []);
+
   // Setup event listeners using global singleton
   useEffect(() => {
     const setupEventListeners = async () => {
@@ -112,6 +120,13 @@ export const useGlobalShortcuts = () => {
             globalEventListeners.sendToAI();
           } catch (error) {
             console.warn("Error cleaning up send to AI listener:", error);
+          }
+        }
+        if (globalEventListeners.toggleVisibility) {
+          try {
+            globalEventListeners.toggleVisibility();
+          } catch (error) {
+            console.warn("Error cleaning up toggle visibility listener:", error);
           }
         }
 
@@ -167,6 +182,14 @@ export const useGlobalShortcuts = () => {
           }
         });
         globalEventListeners.sendToAI = unlistenSendToAI;
+
+        // Listen for toggle visibility event
+        const unlistenToggleVisibility = await listen("toggle-visibility", () => {
+          if (toggleVisibilityCallbackRef.current) {
+            toggleVisibilityCallbackRef.current();
+          }
+        });
+        globalEventListeners.toggleVisibility = unlistenToggleVisibility;
       } catch (error) {
         console.error("Failed to setup event listeners:", error);
       }
@@ -183,5 +206,6 @@ export const useGlobalShortcuts = () => {
     registerScreenshotCallback,
     registerSystemAudioCallback,
     registerSendToAICallback,
+    registerToggleVisibilityCallback,
   };
 };

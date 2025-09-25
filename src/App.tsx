@@ -85,6 +85,8 @@ const App = () => {
                 isProcessing={systemAudio.isProcessing}
                 isAIProcessing={systemAudio.isAIProcessing}
                 capturing={systemAudio.capturing}
+                onSendToAIClick={systemAudio.handleSendToAI}
+                onToggleVisibilityClick={systemAudio.handleToggleVisibility}
               />
             </div>
           </div>
