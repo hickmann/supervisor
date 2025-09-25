@@ -9,16 +9,23 @@ export type SupervisorItem = {
 export type AssistentClinicoResponse = {
   topico: string;
   resumo: string[];
-  conceito_definicao: {
+  conceito_definicao?: {
     termo: string;
     definicao: string;
   };
-  pergunta_e_resposta: {
+  pergunta_e_resposta?: {
     pergunta: string;
     resposta_sugerida: string;
   };
   perguntas_exploratorias: string[];
   proximas_falas: string[];
+  checagem_fatos?: Array<{
+    afirmacao: string;
+    avaliacao: string;
+    justificativa: string;
+    confianca: number;
+    fontes_sugeridas: string[];
+  }>;
 };
 
 export type SupervisorContextType = {

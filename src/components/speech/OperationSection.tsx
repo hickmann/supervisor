@@ -227,6 +227,24 @@ export const OperationSection = ({
                 </p>
               </Button>
             )}
+
+            {/* Botão 5: Checagem de Fatos */}
+            {assistentClinicoData.checagem_fatos && assistentClinicoData.checagem_fatos.length > 0 && (
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-yellow-50 border-yellow-200"
+                onClick={() => selectItem('checagem_fatos')}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm text-yellow-900">
+                    ✔️ {assistentClinicoData.checagem_fatos[0].afirmacao.substring(0, 30)}...
+                  </span>
+                </div>
+                <p className="text-xs text-yellow-700 text-left">
+                  Verificação de fatos disponível
+                </p>
+              </Button>
+            )}
           </div>
         </div>
       )}

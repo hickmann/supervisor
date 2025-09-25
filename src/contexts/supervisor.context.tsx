@@ -80,6 +80,26 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    if (id === 'checagem_fatos' && assistentClinicoData?.checagem_fatos && assistentClinicoData.checagem_fatos.length > 0) {
+      const checagemList = assistentClinicoData.checagem_fatos
+        .map((checagem) => {
+          const avaliacaoColor = checagem.avaliacao === 'preciso' ? '✅' : 
+                                 checagem.avaliacao === 'impreciso' ? '❌' : '⚠️';
+          
+          return `• ${checagem.afirmacao}\n\n${avaliacaoColor} Avaliação: ${checagem.avaliacao}\n\n📝 Justificativa: ${checagem.justificativa}\n\n📊 Confiança: ${(checagem.confianca * 100).toFixed(0)}%\n\n📚 Fontes sugeridas:\n${checagem.fontes_sugeridas.map(fonte => `  - ${fonte}`).join('\n')}`;
+        })
+        .join('\n\n' + '─'.repeat(50) + '\n\n');
+      
+      setSelectedItem({
+        id: 'checagem_fatos',
+        title: assistentClinicoData.checagem_fatos[0].afirmacao,
+        subtitle: 'Verificação de Fatos',
+        description: checagemList || '• Nenhuma verificação disponível',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
     const item = items.find(item => item.id === id);
     setSelectedItem(item || null);
   }, [items, assistentClinicoData]);
