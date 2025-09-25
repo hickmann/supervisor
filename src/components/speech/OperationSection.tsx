@@ -4,7 +4,6 @@ import {
   CopyIcon,
 } from "lucide-react";
 import { QuickActions } from "./QuickActions";
-import { AssistentClinicoSection } from "./AssistentClinicoSection";
 import { useSupervisor } from "@/contexts";
 
 type Props = {
@@ -156,7 +155,7 @@ export const OperationSection = ({
           </div>
 
           {/* Botões de Ação */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             {/* Botão 1: Conceito/Definição */}
             {assistentClinicoData.conceito_definicao?.termo && (
               <Button
@@ -232,31 +231,6 @@ export const OperationSection = ({
         </div>
       )}
 
-      {/* Indicador de Progresso do Assistente Clínico */}
-      {conversationBuffer.length > 0 && !assistentClinicoData && (
-        <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" style={{ animationDelay: '0.4s' }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-blue-800">
-                  Coletando conversas ({conversationBuffer.length}/5)
-                </p>
-                <p className="text-xs text-blue-600">
-                  Aguardando mais {5 - conversationBuffer.length} falas para análise...
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Assistente Clínico - seção original (agora só para casos especiais) */}
-      <AssistentClinicoSection />
 
       {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (
