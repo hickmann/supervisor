@@ -38,7 +38,7 @@ export const OperationSection = ({
   lastTerapeutaTranscription,
   lastPacienteTranscription,
 }: Props) => {
-  const { selectItem, assistentClinicoData, conversationBuffer } = useSupervisor();
+  const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary } = useSupervisor();
   
   // Função para copiar toda a transcrição
   const copyTranscription = async () => {
@@ -261,6 +261,7 @@ export const OperationSection = ({
           setIsManaging={setIsManagingQuickActions}
           show={showQuickActions}
           setShow={setShowQuickActions}
+          isGeneratingSessionSummary={isGeneratingSessionSummary}
         />
       )}
     </div>

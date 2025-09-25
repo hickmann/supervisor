@@ -17,6 +17,7 @@ interface QuickActionsProps {
   setIsManaging: (isManaging: boolean) => void;
   show: boolean;
   setShow: (show: boolean) => void;
+  isGeneratingSessionSummary?: boolean;
 }
 
 export const QuickActions = ({
@@ -28,6 +29,7 @@ export const QuickActions = ({
   setIsManaging,
   show,
   setShow,
+  isGeneratingSessionSummary = false,
 }: QuickActionsProps) => {
   const [newAction, setNewAction] = useState("");
 
@@ -62,34 +64,46 @@ export const QuickActions = ({
       </div>
       {show && (
         <div className="flex flex-wrap gap-2 items-center">
-          {actions.map((action) => (
-            <div key={action} className="relative group">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs h-7 pr-2"
-                onClick={() => {
-                  if (isManaging) {
-                    return;
-                  }
-                  onActionClick(action);
-                }}
-              >
-                {action}
-                {isManaging && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemoveAction(action);
-                    }}
-                    className="ml-2 cursor-pointer text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2Icon className="w-3 h-3" />
-                  </button>
-                )}
-              </Button>
-            </div>
-          ))}
+          {actions.map((action) => {
+            const isLoading = action === "Recapitular Sessão Completa" && isGeneratingSessionSummary;
+            
+            return (
+              <div key={action} className="relative group">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-7 pr-2"
+                  disabled={isLoading}
+                  onClick={() => {
+                    if (isManaging || isLoading) {
+                      return;
+                    }
+                    onActionClick(action);
+                  }}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin mr-1">⏳</span>
+                      Gerando...
+                    </>
+                  ) : (
+                    action
+                  )}
+                  {isManaging && !isLoading && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveAction(action);
+                      }}
+                      className="ml-2 cursor-pointer text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2Icon className="w-3 h-3" />
+                    </button>
+                  )}
+                </Button>
+              </div>
+            );
+          })}
           {isManaging && (
             <div className="flex gap-2">
               <Input

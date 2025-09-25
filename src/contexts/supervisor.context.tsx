@@ -9,6 +9,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [assistentClinicoData, setAssistentClinicoData] = useState<AssistentClinicoResponse | null>(null);
   const [conversationBuffer, setConversationBuffer] = useState<Array<{ role: string; content: string; timestamp: number }>>([]);
   const [sessionSummaryData, setSessionSummaryData] = useState<SessionSummaryResponse | null>(null);
+  const [isGeneratingSessionSummary, setIsGeneratingSessionSummary] = useState<boolean>(false);
 
   const selectItem = useCallback((id: string | null) => {
     if (!id) {
@@ -175,6 +176,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   // Função para gerar resumo da sessão completa
   const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
+      setIsGeneratingSessionSummary(true);
       console.log("🌐 SessionSummary: Enviando histórico completo para session-summary:", conversationHistory);
       
       // Formatear todo o histórico da conversa para envio
@@ -221,6 +223,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("❌ SessionSummary: Erro ao enviar:", error);
+    } finally {
+      setIsGeneratingSessionSummary(false);
     }
   }, []);
 
@@ -289,6 +293,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     conversationBuffer,
     addToConversationBuffer,
     sessionSummaryData,
+    isGeneratingSessionSummary,
     generateSessionSummary,
   };
 

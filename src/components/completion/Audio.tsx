@@ -1,4 +1,4 @@
-import { InfoIcon, MicIcon } from "lucide-react";
+import { InfoIcon, PlayIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger, Button } from "@/components";
 import { VadOnly } from "./VadOnly";
 import { UseCompletionReturn } from "@/types";
@@ -38,9 +38,9 @@ export const Audio = ({
               setMicOpen(true);
             }}
             className="cursor-pointer"
-            title="Ativar microfone (Sistema de Supervisão Integrado)"
+            title="Iniciar transcrição com a IA"
           >
-            <MicIcon className="h-4 w-4" />
+            <PlayIcon className="h-4 w-4" />
           </Button>
         )}
       </PopoverTrigger>
