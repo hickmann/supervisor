@@ -174,22 +174,28 @@ export const SupervisorSummaryButtons = ({
   }, [lastAIResponse, isAIProcessing, addItems]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
               {/* Lista de avaliações */}
               {items.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {items.slice(0, 5).map((item) => (
                     <Button
                       key={item.id}
                       variant={selectedItem?.id === item.id ? "default" : "secondary"}
-                      className="w-full h-auto justify-start text-left p-3"
+                      className={`w-full h-auto justify-start text-left p-4 transition-all duration-200 rounded-lg ${
+                        selectedItem?.id === item.id 
+                          ? "bg-slate-700 hover:bg-slate-800 text-white shadow-md" 
+                          : "bg-white/70 hover:bg-white/90 border-slate-200/50 hover:border-slate-300/50 text-slate-700 hover:text-slate-900"
+                      }`}
                       onClick={() => handleItemSelect(item.id)}
                     >
                       <div className="flex flex-col items-start w-full">
-                        <span className="text-sm font-medium truncate w-full">
+                        <span className="text-sm font-semibold truncate w-full">
                           {item.title}
                         </span>
-                        <span className="text-xs text-muted-foreground truncate w-full mt-1">
+                        <span className={`text-xs truncate w-full mt-1 ${
+                          selectedItem?.id === item.id ? "text-slate-200" : "text-slate-500"
+                        }`}>
                           {item.subtitle}
                         </span>
                       </div>
@@ -199,9 +205,9 @@ export const SupervisorSummaryButtons = ({
       ) : (
         /* Mostrar resposta atual quando não há botões salvos */
         lastAIResponse && (
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 shadow-sm">
-            <div className="text-sm leading-relaxed text-purple-900 space-y-2">
-              <div className="prose prose-purple prose-sm max-w-none">
+          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-5 shadow-sm">
+            <div className="text-sm leading-relaxed text-slate-700 space-y-3">
+              <div className="prose prose-slate prose-sm max-w-none">
                 <Markdown>{lastAIResponse}</Markdown>
               </div>
             </div>

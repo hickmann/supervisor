@@ -87,7 +87,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
           x: selectedItem ? "-50%" : "0%",
         }}
         transition={{
-          duration: 1.0,
+          duration: 0.8,
           ease: [0.25, 0.1, 0.25, 1], // easing suave
         }}
       >
@@ -109,39 +109,39 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 className="h-full flex flex-col"
               >
                 {/* Header */}
-                <div className="p-4 border-b bg-muted/30">
+                <div className="p-6 border-b border-slate-200/30 bg-white/80 backdrop-blur-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleBack}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 bg-white/60 hover:bg-white/80 border-slate-200/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
                         title="Voltar (ESC)"
                       >
                         <ArrowLeft className="h-4 w-4" />
                         Voltar
                       </Button>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-slate-300">
                         Pressione ESC para voltar
                       </span>
                     </div>
                   </div>
                   
                   {/* Novo header com título da IA e título do botão */}
-                  <div className="flex items-center justify-between mt-3">
-                    <h2 className="text-lg font-semibold text-foreground">
+                  <div className="flex items-center justify-between mt-4">
+                    <h2 className="text-xl font-semibold text-white tracking-tight">
                       Resposta da IA
                     </h2>
                     <div className="flex items-center gap-3">
-                      <h3 className="text-sm font-medium text-muted-foreground">
+                      <h3 className="text-sm font-medium text-slate-200">
                         {selectedItem.title}
                       </h3>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleCopyContent}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-2 bg-white/60 hover:bg-white/80 border-slate-200/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
                         title="Copiar resposta da IA"
                       >
                         <CopyIcon className="h-4 w-4" />
@@ -152,32 +152,32 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 </div>
 
                 {/* Conteúdo */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 bg-slate-50/20">
                   {selectedItem.id === 'transcriptions' ? (
                     /* Conteúdo das transcrições */
-                    <div className="space-y-3 max-h-full">
-                      <h3 className="text-lg font-semibold mb-4">Transcrições da Sessão</h3>
+                    <div className="space-y-4 max-h-full">
+                      <h3 className="text-lg font-semibold text-white mb-6 tracking-tight">Transcrições da Sessão</h3>
                       {conversation?.messages && conversation.messages.length > 0 ? (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {conversation.messages
                             .sort((a, b) => b.timestamp - a.timestamp) // Ordem reversa (mais recentes primeiro)
                             .map((message, index) => {
                               const roleInfo = getRoleInfo(message.role);
                               return (
-                                <div key={`${message.id}-${index}`} className="flex items-start gap-3">
-                                  <div className={`h-8 w-8 rounded-full ${roleInfo.bgColor} ${roleInfo.borderColor} border flex items-center justify-center flex-shrink-0`}>
+                                <div key={`${message.id}-${index}`} className="flex items-start gap-4">
+                                  <div className={`h-10 w-10 rounded-full ${roleInfo.bgColor} ${roleInfo.borderColor} border flex items-center justify-center flex-shrink-0 shadow-sm`}>
                                     {roleInfo.icon}
                                   </div>
                                   <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className={`text-xs font-medium ${roleInfo.labelColor}`}>
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className={`text-xs font-semibold ${roleInfo.labelColor}`}>
                                         {roleInfo.label}
                                       </span>
-                                      <span className="text-xs text-muted-foreground">
+                                      <span className="text-xs text-slate-500">
                                         {new Date(message.timestamp).toLocaleTimeString()}
                                       </span>
                                     </div>
-                                    <div className={`p-3 rounded-lg border ${roleInfo.bgColor} ${roleInfo.borderColor}`}>
+                                    <div className={`p-4 rounded-xl border ${roleInfo.bgColor} ${roleInfo.borderColor} shadow-sm`}>
                                       <div className={`text-sm leading-relaxed ${message.role === 'terapeuta' ? 'text-blue-900' : 'text-green-900'}`}>
                                         {message.content}
                                       </div>
@@ -188,16 +188,16 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                             })}
                         </div>
                       ) : (
-                        <div className="text-center text-muted-foreground py-8">
+                        <div className="text-center text-slate-300 py-12">
                           Nenhuma transcrição disponível
                         </div>
                       )}
                     </div>
                   ) : (
                     /* Conteúdo da supervisão */
-                    <div className="bg-muted/50 rounded-lg p-6 border max-h-full">
+                    <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 border border-slate-200/30 shadow-sm max-h-full">
                       <div 
-                        className="whitespace-pre-wrap leading-relaxed text-foreground overflow-y-auto max-h-full"
+                        className="whitespace-pre-wrap leading-relaxed text-slate-700 overflow-y-auto max-h-full text-sm"
                         style={{ whiteSpace: 'pre-wrap' }}
                       >
                         {selectedItem.description

@@ -213,9 +213,29 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 SessionSummary: Resposta recebida:", response.status, response.statusText);
       
       if (response.ok) {
-        const data: SessionSummaryResponse = await response.json();
-        console.log("✅ SessionSummary: Dados processados:", data);
-        setSessionSummaryData(data);
+        // Verificar se a resposta tem conteúdo antes de tentar fazer parse
+        if (response.status === 204) {
+          console.log("✅ SessionSummary: Resposta 204 - Nenhum conteúdo para processar");
+          return; // Não há dados para processar
+        }
+        
+        // Verificar se há conteúdo na resposta
+        const contentLength = response.headers.get('content-length');
+        if (contentLength === '0') {
+          console.log("✅ SessionSummary: Resposta vazia - Nenhum conteúdo para processar");
+          return;
+        }
+        
+        try {
+          const data: SessionSummaryResponse = await response.json();
+          console.log("✅ SessionSummary: Dados processados:", data);
+          setSessionSummaryData(data);
+        } catch (jsonError) {
+          console.warn("⚠️ SessionSummary: Erro ao fazer parse do JSON:", jsonError);
+          console.log("📄 SessionSummary: Tentando ler como texto...");
+          const textResponse = await response.text();
+          console.log("📄 SessionSummary: Resposta como texto:", textResponse);
+        }
       } else {
         const errorText = await response.text();
         console.error("❌ SessionSummary: Erro na resposta:", response.status, response.statusText);
@@ -263,17 +283,37 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 AssistentClinico: Resposta recebida:", response.status, response.statusText);
       
       if (response.ok) {
-        const data: AssistentClinicoResponse = await response.json();
-        console.log("✅ AssistentClinico: Dados processados:", data);
-        console.log("✅ AssistentClinico: Estrutura dos dados:", {
-          hasTopico: !!data.topico,
-          hasResumo: !!data.resumo,
-          hasConceitoDefinicao: !!data.conceito_definicao,
-          hasPerguntaResposta: !!data.pergunta_e_resposta,
-          hasPerguntasExploratorias: !!data.perguntas_exploratorias,
-          hasProximasFalas: !!data.proximas_falas
-        });
-        setAssistentClinicoData(data);
+        // Verificar se a resposta tem conteúdo antes de tentar fazer parse
+        if (response.status === 204) {
+          console.log("✅ AssistentClinico: Resposta 204 - Nenhum conteúdo para processar");
+          return; // Não há dados para processar
+        }
+        
+        // Verificar se há conteúdo na resposta
+        const contentLength = response.headers.get('content-length');
+        if (contentLength === '0') {
+          console.log("✅ AssistentClinico: Resposta vazia - Nenhum conteúdo para processar");
+          return;
+        }
+        
+        try {
+          const data: AssistentClinicoResponse = await response.json();
+          console.log("✅ AssistentClinico: Dados processados:", data);
+          console.log("✅ AssistentClinico: Estrutura dos dados:", {
+            hasTopico: !!data.topico,
+            hasResumo: !!data.resumo,
+            hasConceitoDefinicao: !!data.conceito_definicao,
+            hasPerguntaResposta: !!data.pergunta_e_resposta,
+            hasPerguntasExploratorias: !!data.perguntas_exploratorias,
+            hasProximasFalas: !!data.proximas_falas
+          });
+          setAssistentClinicoData(data);
+        } catch (jsonError) {
+          console.warn("⚠️ AssistentClinico: Erro ao fazer parse do JSON:", jsonError);
+          console.log("📄 AssistentClinico: Tentando ler como texto...");
+          const textResponse = await response.text();
+          console.log("📄 AssistentClinico: Resposta como texto:", textResponse);
+        }
       } else {
         const errorText = await response.text();
         console.error("❌ AssistentClinico: Erro na resposta:", response.status, response.statusText);

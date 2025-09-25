@@ -104,18 +104,18 @@ export const OperationSection = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-6">
       {/* Header com Percepções e botões */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">✨ Percepções</h2>
-        <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-white tracking-tight">✨ Percepções</h2>
+        <div className="flex items-center gap-3">
           {conversation.messages.length > 0 && (
             <>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={showTranscriptions}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white/60 hover:bg-white/80 border-slate-200/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
               >
                 Mostrar transcrição
               </Button>
@@ -123,7 +123,7 @@ export const OperationSection = ({
                 variant="outline"
                 size="sm"
                 onClick={copyTranscription}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white/60 hover:bg-white/80 border-slate-200/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
                 title="Copiar transcrição completa"
               >
                 <CopyIcon className="h-4 w-4" />
@@ -135,20 +135,20 @@ export const OperationSection = ({
 
       {/* Seção do Assistente Clínico - abaixo de Percepções */}
       {assistentClinicoData && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Tópico Principal */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
-            <h3 className="text-lg font-bold text-purple-900 mb-3">
+          <div className="bg-white/70 backdrop-blur-sm border border-purple-200/30 rounded-xl p-5 shadow-sm">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4 tracking-tight">
               {assistentClinicoData.topico}
             </h3>
             
             {/* Resumo em bullets */}
             {assistentClinicoData.resumo && assistentClinicoData.resumo.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {assistentClinicoData.resumo.map((item, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <span className="text-purple-600 text-sm font-bold mt-1">•</span>
-                    <p className="text-sm text-purple-800 leading-relaxed">{item}</p>
+                  <div key={index} className="flex items-start gap-3">
+                    <span className="text-purple-500 text-sm font-medium mt-1">•</span>
+                    <p className="text-sm text-slate-700 leading-relaxed font-normal">{item}</p>
                   </div>
                 ))}
               </div>
@@ -161,15 +161,15 @@ export const OperationSection = ({
             {assistentClinicoData.conceito_definicao?.termo && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-blue-50 border-blue-200"
+                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-blue-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('conceito_definicao')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-blue-900">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
                     📖 {assistentClinicoData.conceito_definicao.termo}
                   </span>
                 </div>
-                <p className="text-xs text-blue-700 text-left line-clamp-2">
+                <p className="text-xs text-slate-600 text-left line-clamp-2 leading-relaxed">
                   {assistentClinicoData.conceito_definicao.definicao?.substring(0, 80)}...
                 </p>
               </Button>
@@ -179,15 +179,15 @@ export const OperationSection = ({
             {assistentClinicoData.pergunta_e_resposta?.pergunta && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-green-50 border-green-200"
+                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-green-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('pergunta_resposta')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-green-900">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-green-700 transition-colors duration-200">
                     ❓ {assistentClinicoData.pergunta_e_resposta.pergunta.substring(0, 25)}...
                   </span>
                 </div>
-                <p className="text-xs text-green-700 text-left line-clamp-2">
+                <p className="text-xs text-slate-600 text-left line-clamp-2 leading-relaxed">
                   {assistentClinicoData.pergunta_e_resposta.resposta_sugerida?.substring(0, 80)}...
                 </p>
               </Button>
@@ -197,15 +197,15 @@ export const OperationSection = ({
             {assistentClinicoData.perguntas_exploratorias && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-orange-50 border-orange-200"
+                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-orange-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('perguntas_exploratorias')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-orange-900">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-orange-700 transition-colors duration-200">
                     💬 Perguntas exploratórias
                   </span>
                 </div>
-                <p className="text-xs text-orange-700 text-left">
+                <p className="text-xs text-slate-600 text-left leading-relaxed">
                   {assistentClinicoData.perguntas_exploratorias.length} sugestões disponíveis
                 </p>
               </Button>
@@ -215,15 +215,15 @@ export const OperationSection = ({
             {assistentClinicoData.proximas_falas && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-purple-50 border-purple-200"
+                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-purple-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('proximas_falas')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-purple-900">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-purple-700 transition-colors duration-200">
                     ✨ O que eu deveria falar depois?
                   </span>
                 </div>
-                <p className="text-xs text-purple-700 text-left">
+                <p className="text-xs text-slate-600 text-left leading-relaxed">
                   {assistentClinicoData.proximas_falas.length} sugestões de intervenção
                 </p>
               </Button>
@@ -233,15 +233,15 @@ export const OperationSection = ({
             {assistentClinicoData.checagem_fatos && assistentClinicoData.checagem_fatos.length > 0 && (
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-yellow-50 border-yellow-200"
+                className="h-auto p-4 flex flex-col items-start gap-3 bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-yellow-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('checagem_fatos')}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-yellow-900">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-yellow-700 transition-colors duration-200">
                     ✔️ {assistentClinicoData.checagem_fatos[0].afirmacao.substring(0, 30)}...
                   </span>
                 </div>
-                <p className="text-xs text-yellow-700 text-left">
+                <p className="text-xs text-slate-600 text-left leading-relaxed">
                   Verificação de fatos disponível
                 </p>
               </Button>
@@ -252,17 +252,19 @@ export const OperationSection = ({
 
       {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (
-        <QuickActions
-          actions={quickActions}
-          onActionClick={handleQuickActionClick}
-          onAddAction={addQuickAction}
-          onRemoveAction={removeQuickAction}
-          isManaging={isManagingQuickActions}
-          setIsManaging={setIsManagingQuickActions}
-          show={showQuickActions}
-          setShow={setShowQuickActions}
-          isGeneratingSessionSummary={isGeneratingSessionSummary}
-        />
+        <div className="bg-white/60 backdrop-blur-sm border border-slate-200/30 rounded-xl p-4 shadow-sm">
+          <QuickActions
+            actions={quickActions}
+            onActionClick={handleQuickActionClick}
+            onAddAction={addQuickAction}
+            onRemoveAction={removeQuickAction}
+            isManaging={isManagingQuickActions}
+            setIsManaging={setIsManagingQuickActions}
+            show={showQuickActions}
+            setShow={setShowQuickActions}
+            isGeneratingSessionSummary={isGeneratingSessionSummary}
+          />
+        </div>
       )}
     </div>
   );

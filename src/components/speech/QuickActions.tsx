@@ -39,31 +39,31 @@ export const QuickActions = ({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center h-5">
-        <h4 className="text-xs font-semibold text-gray-500">
+    <div className="space-y-3">
+      <div className="flex justify-between items-center">
+        <h4 className="text-sm font-semibold text-white tracking-tight">
           Ajuda/Ações Rápidas
         </h4>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="h-5 w-5"
+            className="h-6 w-6 hover:bg-slate-100/50 transition-colors duration-200"
             onClick={() => {
               setShow(!show);
               setIsManaging(false);
             }}
           >
             {show ? (
-              <EyeOffIcon className="w-3.5 h-3.5" />
+              <EyeOffIcon className="w-4 h-4 text-slate-500" />
             ) : (
-              <EyeIcon className="w-3.5 h-3.5" />
+              <EyeIcon className="w-4 h-4 text-slate-500" />
             )}
           </Button>
         </div>
       </div>
       {show && (
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-3 items-center">
           {actions.map((action) => {
             const isLoading = action === "Recapitular Sessão Completa" && isGeneratingSessionSummary;
             
@@ -72,7 +72,7 @@ export const QuickActions = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs h-7 pr-2"
+                  className="text-xs h-8 px-3 bg-white/70 hover:bg-white/90 border-slate-200/50 hover:border-slate-300/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
                   disabled={isLoading}
                   onClick={() => {
                     if (isManaging || isLoading) {
@@ -83,7 +83,7 @@ export const QuickActions = ({
                 >
                   {isLoading ? (
                     <>
-                      <span className="animate-spin mr-1">⏳</span>
+                      <span className="animate-spin mr-2">⏳</span>
                       Gerando...
                     </>
                   ) : (
@@ -95,7 +95,7 @@ export const QuickActions = ({
                         e.stopPropagation();
                         onRemoveAction(action);
                       }}
-                      className="ml-2 cursor-pointer text-gray-400 hover:text-red-500"
+                      className="ml-2 cursor-pointer text-slate-400 hover:text-red-500 transition-colors duration-200"
                     >
                       <Trash2Icon className="w-3 h-3" />
                     </button>
@@ -105,13 +105,13 @@ export const QuickActions = ({
             );
           })}
           {isManaging && (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Input
                 type="text"
                 value={newAction}
                 onChange={(e) => setNewAction(e.target.value)}
-                placeholder="Add new..."
-                className="h-7 text-xs w-32"
+                placeholder="Adicionar nova ação..."
+                className="h-8 text-xs w-40 bg-white/70 border-slate-200/50 focus:border-slate-300/50 rounded-lg"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -121,7 +121,7 @@ export const QuickActions = ({
               />
               <Button
                 size="sm"
-                className="h-7 text-xs"
+                className="h-8 text-xs bg-slate-700 hover:bg-slate-800 text-white transition-colors duration-200 rounded-lg"
                 onClick={handleAdd}
                 disabled={!newAction.trim()}
               >
