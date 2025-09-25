@@ -160,7 +160,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                       {conversation?.messages && conversation.messages.length > 0 ? (
                         <div className="space-y-3">
                           {conversation.messages
-                            .sort((a, b) => a.timestamp - b.timestamp) // Ordem cronológica
+                            .sort((a, b) => b.timestamp - a.timestamp) // Ordem reversa (mais recentes primeiro)
                             .map((message, index) => {
                               const roleInfo = getRoleInfo(message.role);
                               return (
