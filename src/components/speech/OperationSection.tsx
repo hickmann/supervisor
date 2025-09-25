@@ -95,37 +95,40 @@ export const OperationSection = ({
   // Verificar se há conteúdo para mostrar o header
   const hasContent = (lastAIResponse && !isGenericResponse(lastAIResponse)) || isAIProcessing || conversation.messages.length > 0;
 
+  // Se não há conteúdo, não renderiza nada
+  if (!hasContent) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
-      {/* Header com Percepções e botões - só aparece quando há conteúdo */}
-      {hasContent && (
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">✨ Percepções</h2>
-          <div className="flex items-center gap-2">
-            {conversation.messages.length > 0 && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={showTranscriptions}
-                  className="flex items-center gap-2"
-                >
-                  Mostrar transcrição
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyTranscription}
-                  className="flex items-center gap-2"
-                  title="Copiar transcrição completa"
-                >
-                  <CopyIcon className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-          </div>
+      {/* Header com Percepções e botões */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">✨ Percepções</h2>
+        <div className="flex items-center gap-2">
+          {conversation.messages.length > 0 && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={showTranscriptions}
+                className="flex items-center gap-2"
+              >
+                Mostrar transcrição
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyTranscription}
+                className="flex items-center gap-2"
+                title="Copiar transcrição completa"
+              >
+                <CopyIcon className="h-4 w-4" />
+              </Button>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
       {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (

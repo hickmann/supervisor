@@ -61,6 +61,11 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
     }
   }, [selectedItem]);
 
+  // Se não há children (OperationSection retornou null), não renderiza nada
+  if (!children) {
+    return null;
+  }
+
   return (
     <div className="w-full h-full relative overflow-hidden">
       {/* Container principal com animação de deslizamento */}

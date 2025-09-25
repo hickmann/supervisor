@@ -113,6 +113,14 @@ export const SystemAudio = ({
     return "Start system audio capture";
   };
 
+  // Verificar se há conteúdo real para mostrar no popover
+  const hasRealContent = 
+    (lastAIResponse && lastAIResponse !== "NO_CONTENT_204") || // Resposta válida do Gemini
+    conversation.messages.length > 0 || // Há transcrições na conversa
+    isAIProcessing; // Está processando
+
+  const shouldShowPopoverContent = setupRequired || error || hasRealContent;
+
   return (
     <AnimatedPopover
       open={isPopoverOpen}
@@ -140,14 +148,14 @@ export const SystemAudio = ({
         </AnimatedPopoverTrigger>
       )}
 
-      {capturing || setupRequired || error ? (
+      {shouldShowPopoverContent && (
         <AnimatedPopoverContent
           align="end"
           side="bottom"
           className="select-none w-screen p-0 border overflow-hidden border-input/50"
           sideOffset={18}
         >
-                  <ScrollArea className="h-[600px] overflow-y-auto">
+          <ScrollArea className="h-[600px] overflow-y-auto">
             <div
               className={`p-6 ${
                 !lastTranscription && !lastAIResponse
@@ -155,8 +163,8 @@ export const SystemAudio = ({
                   : "space-y-4"
               }`}
             >
-              {/* Header - Hide when there are messages to save space */}
-              {!lastTranscription && !lastAIResponse && (
+              {/* Header - Hide when there are messages to save space or when capturing */}
+              {!lastTranscription && !lastAIResponse && !capturing && (
                 <Header
                   setupRequired={setupRequired}
                   setIsPopoverOpen={setIsPopoverOpen}
@@ -192,7 +200,7 @@ export const SystemAudio = ({
                 />
               ) : (
                 <>
-                  {/* Operation Section com SupervisorScreen */}
+                  {/* Operation Section com SupervisorScreen - só renderiza quando há conteúdo */}
                   <SupervisorScreen conversation={conversation}>
                     <OperationSection
                       lastAIResponse={lastAIResponse}
@@ -221,7 +229,7 @@ export const SystemAudio = ({
             </div>
           </ScrollArea>
         </AnimatedPopoverContent>
-      ) : null}
+      )}
     </AnimatedPopover>
   );
 };

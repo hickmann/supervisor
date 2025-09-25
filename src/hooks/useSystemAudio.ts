@@ -642,13 +642,16 @@ export function useSystemAudio() {
   }, [startCapture]);
 
   useEffect(() => {
+    // Só abrir o popover quando há conteúdo real para mostrar
+    const hasRealContent = 
+      (lastAIResponse && lastAIResponse !== "NO_CONTENT_204") || // Resposta válida do Gemini
+      conversation.messages.length > 0 || // Há transcrições na conversa
+      isAIProcessing; // Está processando
+    
     const shouldOpenPopover =
       capturing ||
       setupRequired ||
-      isAIProcessing ||
-      !!lastAIResponse ||
-      !!lastTerapeutaTranscription ||
-      !!lastPacienteTranscription ||
+      hasRealContent ||
       !!error;
     setIsPopoverOpen(shouldOpenPopover);
     
