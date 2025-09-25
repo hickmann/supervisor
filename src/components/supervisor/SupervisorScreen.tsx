@@ -109,7 +109,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 className="h-full flex flex-col"
               >
                 {/* Header */}
-                <div className="p-6 border-b border-slate-200/30 bg-white/80 backdrop-blur-sm">
+                <div className="p-6 border-b border-slate-200/30">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Button
@@ -152,7 +152,7 @@ export const SupervisorScreen = ({ children, conversation }: SupervisorScreenPro
                 </div>
 
                 {/* Conteúdo */}
-                <div className="flex-1 overflow-y-auto p-6 bg-slate-50/20">
+                <div className="flex-1 overflow-y-auto p-6">
                   {selectedItem.id === 'transcriptions' ? (
                     /* Conteúdo das transcrições */
                     <div className="space-y-4 max-h-full">
