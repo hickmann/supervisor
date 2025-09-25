@@ -42,7 +42,8 @@ export type SupervisorContextType = {
   addToConversationBuffer: (role: string, content: string) => void;
   sessionSummaryData: SessionSummaryResponse | null;
   isGeneratingSessionSummary: boolean;
-  generateSessionSummary: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<void>;
+  generateSessionSummary: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<boolean>;
+  sendToAssistentClinico: (conversations: Array<{ role: string; content: string; timestamp: number }>) => Promise<void>;
   error: string | null;
   setError: (error: string | null) => void;
 };

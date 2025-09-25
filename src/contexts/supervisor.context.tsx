@@ -175,7 +175,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   
   // Função para gerar resumo da sessão completa
-  const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => {
+  const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>): Promise<boolean> => {
     try {
       setIsGeneratingSessionSummary(true);
       setError(null); // Limpar erro anterior
@@ -218,25 +218,27 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         // Verificar se a resposta tem conteúdo antes de tentar fazer parse
         if (response.status === 204) {
           console.log("✅ SessionSummary: Resposta 204 - Nenhum conteúdo para processar");
-          return; // Não há dados para processar
+          return false; // Não há dados para processar
         }
         
         // Verificar se há conteúdo na resposta
         const contentLength = response.headers.get('content-length');
         if (contentLength === '0') {
           console.log("✅ SessionSummary: Resposta vazia - Nenhum conteúdo para processar");
-          return;
+          return false; // Resposta vazia
         }
         
         try {
           const data: SessionSummaryResponse = await response.json();
           console.log("✅ SessionSummary: Dados processados:", data);
           setSessionSummaryData(data);
+          return true; // Sucesso - dados processados
         } catch (jsonError) {
           console.warn("⚠️ SessionSummary: Erro ao fazer parse do JSON:", jsonError);
           console.log("📄 SessionSummary: Tentando ler como texto...");
           const textResponse = await response.text();
           console.log("📄 SessionSummary: Resposta como texto:", textResponse);
+          return false; // Falha no parse
         }
       } else {
         const errorText = await response.text();
@@ -256,9 +258,11 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         } catch {
           setError(`Erro na API: ${response.status} ${response.statusText}`);
         }
+        return false; // Erro na API
       }
     } catch (error) {
       console.error("❌ SessionSummary: Erro ao enviar:", error);
+      return false; // Erro de rede/conexão
     } finally {
       setIsGeneratingSessionSummary(false);
     }
@@ -351,6 +355,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     sessionSummaryData,
     isGeneratingSessionSummary,
     generateSessionSummary,
+    sendToAssistentClinico,
     error,
     setError,
   };

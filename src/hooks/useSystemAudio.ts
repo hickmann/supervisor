@@ -144,7 +144,7 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
-  const { addToConversationBuffer, generateSessionSummary, selectItem } = useSupervisor();
+  const { addToConversationBuffer, generateSessionSummary, selectItem, sendToAssistentClinico, conversationBuffer } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -424,15 +424,51 @@ export function useSystemAudio() {
     [quickActions, saveQuickActions]
   );
 
+  // Função para enviar falas armazenadas para a IA via atalho
+  const handleSendToAI = useCallback(async () => {
+    console.log("🚀 SendToAI: Atalho CTRL+G/CMD+G pressionado");
+    
+    if (conversationBuffer.length === 0) {
+      console.warn("⚠️ SendToAI: Nenhuma fala armazenada para enviar");
+      setError("Nenhuma fala armazenada para enviar. Grave algumas falas primeiro.");
+      return;
+    }
+
+    console.log("📊 SendToAI: Enviando", conversationBuffer.length, "falas para a IA");
+    console.log("📊 SendToAI: Falas:", conversationBuffer);
+    
+    try {
+      setIsAIProcessing(true);
+      setError("");
+      
+      // Enviar as falas armazenadas para o assistente clínico
+      await sendToAssistentClinico(conversationBuffer);
+      
+      console.log("✅ SendToAI: Falas enviadas com sucesso para a IA");
+    } catch (error) {
+      console.error("❌ SendToAI: Erro ao enviar falas:", error);
+      setError("Erro ao enviar falas para a IA");
+    } finally {
+      setIsAIProcessing(false);
+    }
+  }, [conversationBuffer, sendToAssistentClinico]);
+
   const handleQuickActionClick = async (action: string) => {
     setLastTranscription(action); // Show the action as if it were a transcription
     setError("");
 
     // Verificar se é a ação especial "Recapitular Sessão Completa"
     if (action === "Recapitular Sessão Completa") {
+      console.log("🔄 SessionSummary: Verificando mensagens disponíveis...");
+      console.log("📊 SessionSummary: conversation.messages.length:", conversation.messages.length);
+      console.log("📊 SessionSummary: conversation.messages:", conversation.messages);
+      
+      // Aguardar um pequeno delay para garantir que o estado seja atualizado
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       if (conversation.messages.length === 0) {
         console.warn("⚠️ SessionSummary: Nenhuma mensagem na conversa para resumir");
-        setError("Nenhuma mensagem na conversa para resumir");
+        setError("Nenhuma mensagem na conversa para resumir. Certifique-se de que há transcrições disponíveis.");
         return;
       }
 
@@ -443,13 +479,37 @@ export function useSystemAudio() {
         timestamp: msg.timestamp
       }));
 
-      console.log("🔄 SessionSummary: Iniciando geração de resumo da sessão via quick action...");
-      await generateSessionSummary(conversationHistory);
+      // Verificar se há conteúdo suficiente (pelo menos 50 caracteres)
+      const totalContent = conversationHistory
+        .map(msg => msg.content)
+        .join(' ')
+        .trim();
       
-      // Aguardar um pouco para garantir que os dados foram processados e abrir a janela
-      setTimeout(() => {
-        selectItem('session_summary');
-      }, 1000);
+      console.log("📊 SessionSummary: Total content length:", totalContent.length);
+      console.log("📊 SessionSummary: Total content preview:", totalContent.substring(0, 100) + "...");
+      
+      if (totalContent.length < 50) {
+        console.warn("⚠️ SessionSummary: Conteúdo insuficiente para resumir (menos de 50 caracteres)");
+        setError(`Conteúdo insuficiente para resumir. Necessário pelo menos 50 caracteres, mas encontrado apenas ${totalContent.length}.`);
+        return;
+      }
+
+      console.log("🔄 SessionSummary: Iniciando geração de resumo da sessão via quick action...");
+      console.log("📊 SessionSummary: conversationHistory:", conversationHistory);
+      
+      // Aguardar a geração do resumo e verificar se foi bem-sucedida
+      const success = await generateSessionSummary(conversationHistory);
+      
+      if (success) {
+        console.log("✅ SessionSummary: Resumo gerado com sucesso, abrindo janela...");
+        // Aguardar um pouco para garantir que o estado foi atualizado
+        setTimeout(() => {
+          selectItem('session_summary');
+        }, 500);
+      } else {
+        console.log("❌ SessionSummary: Falha ao gerar resumo, não abrindo janela");
+        // O erro já foi definido na função generateSessionSummary
+      }
       
       return;
     }
@@ -666,7 +726,9 @@ export function useSystemAudio() {
         await startCapture();
       }
     });
-  }, [startCapture, stopCapture]);
+
+    globalShortcuts.registerSendToAICallback(handleSendToAI);
+  }, [startCapture, stopCapture, handleSendToAI]);
 
   useEffect(() => {
     return () => {

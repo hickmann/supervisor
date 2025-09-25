@@ -7,6 +7,7 @@ interface Shortcuts {
   audio: string;
   screenshot: string;
   systemAudio: string;
+  sendToAI: string;
 }
 
 // Global singleton to prevent multiple event listeners in StrictMode
@@ -15,6 +16,7 @@ let globalEventListeners: {
   audio?: UnlistenFn;
   screenshot?: UnlistenFn;
   systemAudio?: UnlistenFn;
+  sendToAI?: UnlistenFn;
 } = {};
 
 // Global debounce for screenshot events to prevent duplicates
@@ -25,6 +27,7 @@ export const useGlobalShortcuts = () => {
   const audioCallbackRef = useRef<(() => void) | null>(null);
   const screenshotCallbackRef = useRef<(() => void) | null>(null);
   const systemAudioCallbackRef = useRef<(() => void) | null>(null);
+  const sendToAICallbackRef = useRef<(() => void) | null>(null);
 
   const checkShortcutsRegistered = useCallback(async (): Promise<boolean> => {
     try {
@@ -66,6 +69,11 @@ export const useGlobalShortcuts = () => {
     systemAudioCallbackRef.current = callback;
   }, []);
 
+  // Register send to AI callback
+  const registerSendToAICallback = useCallback((callback: () => void) => {
+    sendToAICallbackRef.current = callback;
+  }, []);
+
   // Setup event listeners using global singleton
   useEffect(() => {
     const setupEventListeners = async () => {
@@ -97,6 +105,13 @@ export const useGlobalShortcuts = () => {
             globalEventListeners.systemAudio();
           } catch (error) {
             console.warn("Error cleaning up system audio listener:", error);
+          }
+        }
+        if (globalEventListeners.sendToAI) {
+          try {
+            globalEventListeners.sendToAI();
+          } catch (error) {
+            console.warn("Error cleaning up send to AI listener:", error);
           }
         }
 
@@ -144,6 +159,14 @@ export const useGlobalShortcuts = () => {
           }
         });
         globalEventListeners.systemAudio = unlistenSystemAudio;
+
+        // Listen for send to AI event
+        const unlistenSendToAI = await listen("send-to-ai", () => {
+          if (sendToAICallbackRef.current) {
+            sendToAICallbackRef.current();
+          }
+        });
+        globalEventListeners.sendToAI = unlistenSendToAI;
       } catch (error) {
         console.error("Failed to setup event listeners:", error);
       }
@@ -159,5 +182,6 @@ export const useGlobalShortcuts = () => {
     registerAudioCallback,
     registerScreenshotCallback,
     registerSystemAudioCallback,
+    registerSendToAICallback,
   };
 };
