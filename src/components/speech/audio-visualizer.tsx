@@ -198,8 +198,8 @@ export function AudioVisualizer({ isRecording }: AudioVisualizerProps) {
   };
 
   return (
-    <div ref={containerRef} className="!h-[32px] !w-full">
-      <canvas ref={canvasRef} className="h-full !w-full pl-8" />
+    <div ref={containerRef} className="!h-[30px] !w-[40px]">
+      <canvas ref={canvasRef} className="h-full !w-full" />
     </div>
   );
 }

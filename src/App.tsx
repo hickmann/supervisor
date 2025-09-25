@@ -3,7 +3,6 @@ import { Card, Settings, SystemAudio, Updater } from "./components";
 import { Completion } from "./components/completion";
 import { ChatHistory } from "./components/history";
 import { AudioVisualizer } from "./components/speech/audio-visualizer";
-import { StatusIndicator } from "./components/speech/StatusIndicator";
 import { useTitles, useSupervisorDemo } from "./hooks";
 import { useSystemAudio } from "./hooks/useSystemAudio";
 import { listen } from "@tauri-apps/api/event";
@@ -75,19 +74,49 @@ const App = () => {
         <SystemAudio {...systemAudio} />
 {systemAudio?.capturing ? (
           <div className="flex flex-row items-center gap-2 justify-between w-full">
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex items-center gap-2">
               <AudioVisualizer isRecording={systemAudio?.capturing} />
+              {/* Contador de tempo */}
+              <div className="text-xs font-mono text-white/80">
+                {systemAudio.recordingTime || "00:00"}
+              </div>
             </div>
-            <div className="flex !w-fit items-center gap-2">
-              <StatusIndicator
-                setupRequired={systemAudio.setupRequired}
-                error={systemAudio.error}
-                isProcessing={systemAudio.isProcessing}
-                isAIProcessing={systemAudio.isAIProcessing}
-                capturing={systemAudio.capturing}
-                onSendToAIClick={systemAudio.handleSendToAI}
-                onToggleVisibilityClick={systemAudio.handleToggleVisibility}
-              />
+            <div className="flex items-center gap-1.5">
+              {/* Botão Perguntar pra IA */}
+              <button
+                onClick={systemAudio.handleSendToAI}
+                className="flex items-center gap-1.5 px-2 py-0.5 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+              >
+                <span className="text-xs font-medium text-white">Perguntar pra IA</span>
+                <div className="flex items-center gap-0.5">
+                  <div className="w-5 h-3 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[9px] text-white/80 font-mono leading-none">
+                      {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
+                    </span>
+                  </div>
+                  <div className="w-3 h-3 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[9px] text-white/80 font-mono leading-none">↵</span>
+                  </div>
+                </div>
+              </button>
+
+              {/* Botão Mostrar/Esconder */}
+              <button
+                onClick={systemAudio.handleToggleVisibility}
+                className="flex items-center gap-1.5 px-2 py-0.5 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+              >
+                <span className="text-xs font-medium text-white">Mostrar/Esconder</span>
+                <div className="flex items-center gap-0.5">
+                  <div className="w-5 h-3 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[9px] text-white/80 font-mono leading-none">
+                      {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
+                    </span>
+                  </div>
+                  <div className="w-3 h-3 border border-white/40 rounded flex items-center justify-center">
+                    <span className="text-[9px] text-white/80 font-mono leading-none">H</span>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         ) : null}

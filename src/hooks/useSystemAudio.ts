@@ -147,7 +147,9 @@ export function useSystemAudio() {
   const { addToConversationBuffer, generateSessionSummary, selectItem, sendToAssistentClinico, conversationBuffer } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
+  const [recordingTime, setRecordingTime] = useState("00:00");
   const [isProcessing, setIsProcessing] = useState(false);
+  const recordingStartTimeRef = useRef<number | null>(null);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [lastTranscription, setLastTranscription] = useState<string>("");
   const [lastAIResponse, setLastAIResponse] = useState<string>("");
@@ -758,6 +760,32 @@ export function useSystemAudio() {
     saveConversation(conversation);
   }, [conversation.messages.length, conversation.title, conversation.id]);
 
+  // Timer para contador de gravação
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (capturing) {
+      recordingStartTimeRef.current = Date.now();
+      intervalId = setInterval(() => {
+        if (recordingStartTimeRef.current) {
+          const elapsed = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
+          const minutes = Math.floor(elapsed / 60);
+          const seconds = elapsed % 60;
+          setRecordingTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        }
+      }, 1000);
+    } else {
+      setRecordingTime("00:00");
+      recordingStartTimeRef.current = null;
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [capturing]);
+
   const startNewConversation = useCallback(() => {
     setConversation({
       id: `sysaudio_conv_${Date.now()}_${Math.random()
@@ -780,6 +808,7 @@ export function useSystemAudio() {
 
   return {
     capturing,
+    recordingTime,
     isProcessing,
     isAIProcessing,
     lastTranscription,

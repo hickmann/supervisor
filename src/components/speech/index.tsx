@@ -9,7 +9,7 @@ import {
   HeadphonesIcon,
   AlertCircleIcon,
   LoaderIcon,
-  AudioLinesIcon,
+  SquareIcon,
 } from "lucide-react";
 import { Header } from "./Header";
 import { SetupInstructions } from "./SetupInstructions";
@@ -101,7 +101,7 @@ export const SystemAudio = ({
       return <AlertCircleIcon className="text-red-500" />;
     if (isProcessing) return <LoaderIcon className="animate-spin" />;
     if (capturing)
-      return <AudioLinesIcon className="text-green-500 animate-pulse" />;
+      return <SquareIcon className="text-red-500" />;
     return <HeadphonesIcon />;
   };
 
