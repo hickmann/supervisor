@@ -5,7 +5,6 @@ import {
   PlusIcon,
   EyeIcon,
   EyeOffIcon,
-  Settings2Icon,
 } from "lucide-react";
 import { useState } from "react";
 

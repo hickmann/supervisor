@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { QuickActions } from "./QuickActions";
+import { SupervisorSummaryButtons } from "../supervisor/SupervisorSummaryButtons";
 
 type Props = {
   lastAIResponse: string;
@@ -127,7 +128,7 @@ export const OperationSection = ({
         />
       )}
 
-      {/* Supervisão Psicológica - só mostra se não for resposta genérica */}
+      {/* Supervisão Psicológica - substitui a seção roxa pelos botões */}
       {(lastAIResponse && !isGenericResponse(lastAIResponse) || isAIProcessing) && (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -141,25 +142,21 @@ export const OperationSection = ({
               </p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 shadow-sm">
-            {isAIProcessing && !lastAIResponse ? (
+
+          {/* Mostrar resposta atual OU botões de avaliações */}
+          {isAIProcessing && !lastAIResponse ? (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-purple-600 animate-pulse" />
                 <p className="text-sm font-medium text-purple-800">Analisando intervenção terapêutica...</p>
               </div>
-            ) : (
-              <div className="text-sm leading-relaxed text-purple-900 space-y-2">
-                {lastAIResponse ? (
-                  <div className="prose prose-purple prose-sm max-w-none">
-                    <Markdown>{lastAIResponse}</Markdown>
-                  </div>
-                ) : null}
-                {isAIProcessing && (
-                  <span className="inline-block w-2 h-4 bg-purple-600 animate-pulse ml-1" />
-                )}
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <SupervisorSummaryButtons 
+              lastAIResponse={lastAIResponse}
+              isAIProcessing={isAIProcessing}
+            />
+          )}
         </div>
       )}
 

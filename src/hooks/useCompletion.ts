@@ -65,9 +65,10 @@ export const useCompletion = () => {
   const [enableVAD, setEnableVADState] = useState(false);
   
   // Wrapper para setEnableVAD que dispara eventos
-  const setEnableVAD = useCallback((value: boolean) => {
-    setEnableVADState(value);
-    if (value) {
+  const setEnableVAD = useCallback((value: boolean | ((prevState: boolean) => boolean)) => {
+    const newValue = typeof value === 'function' ? value(enableVAD) : value;
+    setEnableVADState(newValue);
+    if (newValue) {
       // VAD ativado - evento já é disparado no Audio.tsx
       console.log("🎤 Completion: VAD enabled");
     } else {
@@ -75,7 +76,7 @@ export const useCompletion = () => {
       console.log("🎤 Completion: VAD disabled, notifying system audio");
       window.dispatchEvent(new CustomEvent("stopSystemAudioCapture"));
     }
-  }, []);
+  }, [enableVAD]);
   const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
   const [isFilesPopoverOpen, setIsFilesPopoverOpen] = useState(false);
   const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);

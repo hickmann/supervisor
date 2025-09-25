@@ -1,4 +1,4 @@
-import { Button, Header, Input, Selection, TextInput } from "@/components";
+import { Button, Header, Input, TextInput } from "@/components";
 import { UseSettingsReturn } from "@/types";
 import curl2Json, { ResultJSON } from "@bany/curl-to-json";
 import { KeyIcon, TrashIcon } from "lucide-react";

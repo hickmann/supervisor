@@ -4,7 +4,7 @@ import { Completion } from "./components/completion";
 import { ChatHistory } from "./components/history";
 import { AudioVisualizer } from "./components/speech/audio-visualizer";
 import { StatusIndicator } from "./components/speech/StatusIndicator";
-import { useTitles } from "./hooks";
+import { useTitles, useSupervisorDemo } from "./hooks";
 import { useSystemAudio } from "./hooks/useSystemAudio";
 import { listen } from "@tauri-apps/api/event";
 
@@ -13,6 +13,8 @@ const App = () => {
   const [isHidden, setIsHidden] = useState(false);
   // Initialize title management
   useTitles();
+  // Initialize supervisor demo data
+  useSupervisorDemo();
   const handleSelectConversation = (conversation: any) => {
     // Use localStorage to communicate the selected conversation to Completion component
     localStorage.setItem("selectedConversation", JSON.stringify(conversation));
@@ -71,7 +73,7 @@ const App = () => {
     >
       <Card className="w-full flex flex-row items-center gap-2 p-2 app-background">
         <SystemAudio {...systemAudio} />
-        {systemAudio?.capturing ? (
+{systemAudio?.capturing ? (
           <div className="flex flex-row items-center gap-2 justify-between w-full">
             <div className="flex flex-1 items-center gap-2">
               <AudioVisualizer isRecording={systemAudio?.capturing} />
@@ -92,16 +94,18 @@ const App = () => {
           className={`${
             systemAudio?.capturing
               ? "hidden w-full fade-out transition-all duration-300"
-              : "w-full flex flex-row gap-2 items-center"
+              : "w-full"
           }`}
         >
-          <Completion isHidden={isHidden} systemAudio={systemAudio} />
-          <ChatHistory
-            onSelectConversation={handleSelectConversation}
-            onNewConversation={handleNewConversation}
-            currentConversationId={null}
-          />
-          <Settings />
+          <div className="w-full flex flex-row gap-2 items-center">
+            <Completion isHidden={isHidden} systemAudio={systemAudio} />
+            <ChatHistory
+              onSelectConversation={handleSelectConversation}
+              onNewConversation={handleNewConversation}
+              currentConversationId={null}
+            />
+            <Settings />
+          </div>
         </div>
 
         <Updater />

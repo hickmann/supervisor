@@ -14,6 +14,7 @@ import {
 import { Header } from "./Header";
 import { SetupInstructions } from "./SetupInstructions";
 import { OperationSection } from "./OperationSection";
+import { SupervisorScreen } from "../supervisor";
 import { useSystemAudioType } from "@/hooks";
 import { useEffect } from "react";
 
@@ -192,23 +193,25 @@ export const SystemAudio = ({
                 />
               ) : (
                 <>
-                  {/* Operation Section */}
-                  <OperationSection
-                    lastAIResponse={lastAIResponse}
-                    isAIProcessing={isAIProcessing}
-                    conversation={conversation}
-                    startNewConversation={startNewConversation}
-                    quickActions={quickActions}
-                    addQuickAction={addQuickAction}
-                    removeQuickAction={removeQuickAction}
-                    isManagingQuickActions={isManagingQuickActions}
-                    setIsManagingQuickActions={setIsManagingQuickActions}
-                    showQuickActions={showQuickActions}
-                    setShowQuickActions={setShowQuickActions}
-                    handleQuickActionClick={handleQuickActionClick}
-                    lastTerapeutaTranscription={lastTerapeutaTranscription}
-                    lastPacienteTranscription={lastPacienteTranscription}
-                  />
+                  {/* Operation Section com SupervisorScreen */}
+                  <SupervisorScreen>
+                    <OperationSection
+                      lastAIResponse={lastAIResponse}
+                      isAIProcessing={isAIProcessing}
+                      conversation={conversation}
+                      startNewConversation={startNewConversation}
+                      quickActions={quickActions}
+                      addQuickAction={addQuickAction}
+                      removeQuickAction={removeQuickAction}
+                      isManagingQuickActions={isManagingQuickActions}
+                      setIsManagingQuickActions={setIsManagingQuickActions}
+                      showQuickActions={showQuickActions}
+                      setShowQuickActions={setShowQuickActions}
+                      handleQuickActionClick={handleQuickActionClick}
+                      lastTerapeutaTranscription={lastTerapeutaTranscription}
+                      lastPacienteTranscription={lastPacienteTranscription}
+                    />
+                  </SupervisorScreen>
                 </>
               )}
               {!setupRequired && platform.includes("mac") && (
