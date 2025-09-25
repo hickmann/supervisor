@@ -64,6 +64,7 @@ export const OperationSection = ({
     // Usar o sistema de seleção do supervisor para mostrar as transcrições
     selectItem('transcriptions');
   };
+
   
   // Função para verificar se a resposta é genérica
   const isGenericResponse = (response: string): boolean => {
@@ -248,7 +249,6 @@ export const OperationSection = ({
           </div>
         </div>
       )}
-
 
       {/* Quick Actions - movido para o final */}
       {(lastTerapeutaTranscription || lastPacienteTranscription || lastAIResponse || isAIProcessing) && (

@@ -144,7 +144,7 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
-  const { addToConversationBuffer } = useSupervisor();
+  const { addToConversationBuffer, generateSessionSummary, selectItem } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -427,6 +427,32 @@ export function useSystemAudio() {
   const handleQuickActionClick = async (action: string) => {
     setLastTranscription(action); // Show the action as if it were a transcription
     setError("");
+
+    // Verificar se é a ação especial "Recapitular Sessão Completa"
+    if (action === "Recapitular Sessão Completa") {
+      if (conversation.messages.length === 0) {
+        console.warn("⚠️ SessionSummary: Nenhuma mensagem na conversa para resumir");
+        setError("Nenhuma mensagem na conversa para resumir");
+        return;
+      }
+
+      // Converter mensagens da conversa para o formato esperado
+      const conversationHistory = conversation.messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp
+      }));
+
+      console.log("🔄 SessionSummary: Iniciando geração de resumo da sessão via quick action...");
+      await generateSessionSummary(conversationHistory);
+      
+      // Aguardar um pouco para garantir que os dados foram processados e abrir a janela
+      setTimeout(() => {
+        selectItem('session_summary');
+      }, 1000);
+      
+      return;
+    }
 
     const effectiveSystemPrompt = useSystemPrompt
       ? systemPrompt || DEFAULT_SYSTEM_PROMPT

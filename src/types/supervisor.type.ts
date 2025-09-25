@@ -28,6 +28,10 @@ export type AssistentClinicoResponse = {
   }>;
 };
 
+export type SessionSummaryResponse = {
+  temas: string[];
+};
+
 export type SupervisorContextType = {
   items: SupervisorItem[];
   selectedItem: SupervisorItem | null;
@@ -36,4 +40,6 @@ export type SupervisorContextType = {
   assistentClinicoData: AssistentClinicoResponse | null;
   conversationBuffer: Array<{ role: string; content: string; timestamp: number }>;
   addToConversationBuffer: (role: string, content: string) => void;
+  sessionSummaryData: SessionSummaryResponse | null;
+  generateSessionSummary: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<void>;
 };

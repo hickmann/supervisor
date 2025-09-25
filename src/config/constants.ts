@@ -23,8 +23,6 @@ export const DEFAULT_SYSTEM_PROMPT =
   "You are a helpful AI assistant. Be concise, accurate, and friendly in your responses";
 
 export const DEFAULT_QUICK_ACTIONS = [
-  "O que responder?",
-  "Fazer perguntas",
   "Recapitular Sessão Completa",
   "Tarefas e Combinações",
 ];

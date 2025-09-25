@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse } from "@/types/supervisor.type";
+import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse } from "@/types/supervisor.type";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
 
@@ -8,6 +8,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [selectedItem, setSelectedItem] = useState<SupervisorItem | null>(null);
   const [assistentClinicoData, setAssistentClinicoData] = useState<AssistentClinicoResponse | null>(null);
   const [conversationBuffer, setConversationBuffer] = useState<Array<{ role: string; content: string; timestamp: number }>>([]);
+  const [sessionSummaryData, setSessionSummaryData] = useState<SessionSummaryResponse | null>(null);
 
   const selectItem = useCallback((id: string | null) => {
     if (!id) {
@@ -100,9 +101,25 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Caso especial para session-summary
+    if (id === 'session_summary' && sessionSummaryData?.temas) {
+      const temasList = sessionSummaryData.temas
+        .map((tema) => `• ${tema}`)
+        .join('\n\n');
+      
+      setSelectedItem({
+        id: 'session_summary',
+        title: 'Recapitulação da Sessão Completa',
+        subtitle: 'Temas identificados na sessão',
+        description: temasList || '• Nenhum tema identificado',
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
     const item = items.find(item => item.id === id);
     setSelectedItem(item || null);
-  }, [items, assistentClinicoData]);
+  }, [items, assistentClinicoData, sessionSummaryData]);
 
   const addItems = useCallback((newItems: SupervisorItem[]) => {
     setItems(prevItems => {
@@ -155,6 +172,58 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
   
+  // Função para gerar resumo da sessão completa
+  const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => {
+    try {
+      console.log("🌐 SessionSummary: Enviando histórico completo para session-summary:", conversationHistory);
+      
+      // Formatear todo o histórico da conversa para envio
+      const chatData = conversationHistory
+        .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
+        .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
+        .join('\n\n');
+      
+      console.log("🌐 SessionSummary: Dados formatados para envio:", chatData);
+      console.log("🌐 SessionSummary: Total de caracteres:", chatData.length);
+      
+      const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/session-summary', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          idioma: "pt-BR",
+          opcoes: {
+            incluir_temas: true,
+            incluir_intervencoes: true,
+            incluir_tarefas: true,
+            incluir_sinais_alerta: true
+          },
+          metadados: {
+            timestamp_iso: new Date().toISOString()
+          },
+          transcricao: chatData
+        })
+      });
+      
+      console.log("🌐 SessionSummary: Resposta recebida:", response.status, response.statusText);
+      
+      if (response.ok) {
+        const data: SessionSummaryResponse = await response.json();
+        console.log("✅ SessionSummary: Dados processados:", data);
+        setSessionSummaryData(data);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ SessionSummary: Erro na resposta:", response.status, response.statusText);
+        console.error("❌ SessionSummary: Detalhes do erro:", errorText);
+      }
+    } catch (error) {
+      console.error("❌ SessionSummary: Erro ao enviar:", error);
+    }
+  }, []);
+
   // Função para enviar para o assistente clínico
   const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
@@ -219,6 +288,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     assistentClinicoData,
     conversationBuffer,
     addToConversationBuffer,
+    sessionSummaryData,
+    generateSessionSummary,
   };
 
   return (
