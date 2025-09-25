@@ -148,6 +148,24 @@ const App = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Link CoterapIA.com.br no centro */}
+            <button
+              onClick={async () => {
+                try {
+                  const { invoke } = await import("@tauri-apps/api/core");
+                  await invoke("open_url", { url: "https://www.CoterapIA.com.br" });
+                } catch (error) {
+                  console.error("Erro ao abrir URL:", error);
+                  // Fallback para window.open se o Tauri não funcionar
+                  window.open('https://www.CoterapIA.com.br', '_blank');
+                }
+              }}
+              className="text-sm font-medium text-white hover:text-white/80 transition-colors duration-200 cursor-pointer"
+            >
+              CoterapIA
+            </button>
+            
             <div className="flex items-center gap-2">
               <ChatHistory
                 onSelectConversation={handleSelectConversation}
