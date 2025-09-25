@@ -62,7 +62,9 @@ export async function* fetchSupervisionResponse(
     });
 
     if (response.status === 204) {
-      yield "✅ **Análise de Supervisão**\n\nNenhuma recomendação específica foi identificada para esta transcrição.";
+      // Status 204 = No Content - não há recomendações específicas
+      // Retornamos uma string especial que será ignorada pelo sistema de botões
+      yield "NO_CONTENT_204";
       return;
     }
 

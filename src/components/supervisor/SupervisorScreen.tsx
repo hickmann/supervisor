@@ -83,7 +83,15 @@ export const SupervisorScreen = ({ children }: SupervisorScreenProps) => {
                       className="whitespace-pre-wrap leading-relaxed text-foreground overflow-y-auto max-h-full"
                       style={{ whiteSpace: 'pre-wrap' }}
                     >
-                      {selectedItem.description}
+                      {selectedItem.description
+                        .replace(/\*\*/g, '') // Remove **
+                        .replace(/\*/g, '') // Remove *
+                        .replace(/#{1,6}\s*/g, '') // Remove headers markdown
+                        .replace(/`/g, '') // Remove backticks
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links markdown, mantém texto
+                        .replace(/^\s*[-*+]\s*/gm, '• ') // Converte listas markdown para bullet points
+                        .replace(/^\s*\d+\.\s*/gm, '') // Remove numeração de listas
+                        .trim()}
                     </div>
                   </div>
                 </div>

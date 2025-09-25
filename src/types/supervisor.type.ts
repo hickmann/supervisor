@@ -1,6 +1,7 @@
 export type SupervisorItem = {
   id: string;
   title: string;
+  subtitle: string;
   description: string; // texto clínico
   createdAt: string; // ISO
 };

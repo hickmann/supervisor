@@ -26,4 +26,5 @@ export const DEFAULT_QUICK_ACTIONS = [
   "O que responder?",
   "Fazer perguntas",
   "Recapitular",
+  "Tarefas e Combinações",
 ];
