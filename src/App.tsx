@@ -128,14 +128,34 @@ const App = () => {
               : "w-full"
           }`}
         >
-          <div className="w-full flex flex-row gap-2 items-center">
-            <Completion isHidden={isHidden} systemAudio={systemAudio} />
-            <ChatHistory
-              onSelectConversation={handleSelectConversation}
-              onNewConversation={handleNewConversation}
-              currentConversationId={null}
-            />
-            <Settings />
+          <div className="w-full flex flex-row gap-2 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Completion isHidden={isHidden} systemAudio={systemAudio} />
+              {/* Componente de escuta e contador zerado */}
+              <div className="flex items-center gap-3">
+                {/* Simulação da onda de áudio quando não está gravando */}
+                <div className="w-[40px] h-[30px] flex items-center justify-center">
+                  <div className="flex items-center gap-1">
+                    <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                    <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                    <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                    <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                    <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                  </div>
+                </div>
+                <div className="text-sm font-medium text-white/90">
+                  00:00
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChatHistory
+                onSelectConversation={handleSelectConversation}
+                onNewConversation={handleNewConversation}
+                currentConversationId={null}
+              />
+              <Settings />
+            </div>
           </div>
         </div>
 

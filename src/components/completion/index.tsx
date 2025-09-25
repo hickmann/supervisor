@@ -9,7 +9,7 @@ export const Completion = ({ isHidden, systemAudio }: { isHidden: boolean; syste
   return (
     <>
       <Audio {...completion} systemAudio={systemAudio} />
-      <Input {...completion} isHidden={isHidden} />
+      {systemAudio?.capturing && <Input {...completion} isHidden={isHidden} />}
       {completion?.screenshotConfiguration?.enabled && (
         <Screenshot {...completion} />
       )}
