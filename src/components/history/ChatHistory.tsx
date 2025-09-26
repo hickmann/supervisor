@@ -51,13 +51,11 @@ export const ChatHistory = ({
               {...historyHook}
               viewingConversation={historyHook.viewingConversation}
               onBackToConversations={handleBackToConversations}
-              onSelectConversation={onSelectConversation}
             />
           ) : (
             <ConversationListView
               {...historyHook}
               currentConversationId={currentConversationId}
-              onNewConversation={onNewConversation}
               onClosePopover={() => historyHook.setIsOpen(false)}
               onSelectConversation={onSelectConversation}
             />

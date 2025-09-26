@@ -11,15 +11,12 @@ import { UseHistoryType } from "@/hooks/useHistory";
 interface MessageHistoryViewProps extends UseHistoryType {
   viewingConversation: ChatConversation;
   onBackToConversations: () => void;
-  onSelectConversation: (conversation: ChatConversation) => void;
 }
 
 export const MessageHistoryView = ({
   viewingConversation,
   onBackToConversations,
-  onSelectConversation,
   handleDeleteConfirm,
-  setIsOpen,
 }: MessageHistoryViewProps) => {
   const handleSupervisorEvaluation = () => {
     // TODO: Implement supervisor evaluation functionality
@@ -34,7 +31,7 @@ export const MessageHistoryView = ({
         .map(message => {
           const roleLabel = message.role === "user" || message.role === "paciente" ? "PACIENTE" : 
                            message.role === "assistant" || message.role === "terapeuta" ? "TERAPEUTA" : 
-                           message.role === "system" ? "SISTEMA" : message.role.toUpperCase();
+                           message.role === "system" ? "SISTEMA" : String(message.role).toUpperCase();
           const time = new Date(message.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -139,7 +136,7 @@ export const MessageHistoryView = ({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     {message.role === "user" || message.role === "paciente" ? "PACIENTE" : 
                      message.role === "assistant" || message.role === "terapeuta" ? "TERAPEUTA" : 
-                     message.role === "system" ? "SISTEMA" : message.role.toUpperCase()}
+                     message.role === "system" ? "SISTEMA" : String(message.role).toUpperCase()}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {new Date(message.timestamp).toLocaleTimeString([], {

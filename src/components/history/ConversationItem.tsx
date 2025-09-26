@@ -1,11 +1,11 @@
 import {
   MessageSquare,
-  Download,
+  Copy,
   Trash2,
   Check,
   Loader2,
   Calendar,
-  MessageCircleReplyIcon,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components";
 import { ChatConversation } from "@/types/completion";
@@ -21,14 +21,55 @@ export const ConversationItem = ({
   conversation,
   currentConversationId,
   selectedConversationId,
-  downloadedConversations,
   handleViewConversation,
   onSelectConversation,
-  handleDownloadConversation,
   handleDeleteConfirm,
   formatDate,
   setIsOpen,
 }: ConversationItemProps) => {
+  // Função para calcular a duração da conversa
+  const getConversationDuration = () => {
+    if (conversation.messages.length === 0) return "0 min";
+    const sortedMessages = [...conversation.messages].sort((a, b) => a.timestamp - b.timestamp);
+    const startTime = sortedMessages[0].timestamp;
+    const endTime = sortedMessages[sortedMessages.length - 1].timestamp;
+    const durationMs = endTime - startTime;
+    const durationMinutes = Math.round(durationMs / (1000 * 60));
+    return durationMinutes > 0 ? `${durationMinutes} min` : "< 1 min";
+  };
+
+  // Função para formatar o título completo
+  const getFullTitle = () => {
+    const duration = getConversationDuration();
+    return `${conversation.title} • ${duration}`;
+  };
+
+  // Função para copiar a conversa completa
+  const handleCopyConversation = async () => {
+    try {
+      // Formatar a conversa completa para cópia
+      const conversationText = conversation.messages
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map(message => {
+          const roleLabel = message.role === "user" || message.role === "paciente" ? "PACIENTE" : 
+                           message.role === "assistant" || message.role === "terapeuta" ? "TERAPEUTA" : 
+                           message.role === "system" ? "SISTEMA" : String(message.role).toUpperCase();
+          const time = new Date(message.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `${roleLabel} (${time}): ${message.content}`;
+        })
+        .join('\n\n');
+      
+      const fullText = `${conversation.title}\n\n${conversationText}`;
+      
+      await navigator.clipboard.writeText(fullText);
+      console.log("Conversation copied to clipboard");
+    } catch (error) {
+      console.error("Failed to copy conversation:", error);
+    }
+  };
   const handleViewClick = () => {
     handleViewConversation(conversation);
   };
@@ -39,9 +80,6 @@ export const ConversationItem = ({
     setIsOpen(false);
   };
 
-  const handleDownloadClick = (e: React.MouseEvent) => {
-    handleDownloadConversation(conversation, e);
-  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,9 +100,7 @@ export const ConversationItem = ({
       <div className="flex w-full flex-row items-start gap-2">
         <div className="flex-1 min-w-0 flex flex-col">
           <h3 className="text-sm font-medium truncate leading-5 line-clamp-1">
-            {conversation?.title?.length > 70
-              ? conversation?.title?.slice(0, 70) + "..."
-              : conversation?.title}
+            {getFullTitle()}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -89,32 +125,25 @@ export const ConversationItem = ({
             variant="ghost"
             className="cursor-pointer h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
             onClick={handleSelectClick}
-            title="Reuse this conversation"
+            title="Avaliar com Supervisor"
           >
-            <MessageCircleReplyIcon className="h-3 w-3" />
+            <Upload className="h-3 w-3" />
           </Button>
           <Button
             size="icon"
-            variant={
-              downloadedConversations.has(conversation.id) ? "outline" : "ghost"
-            }
+            variant="ghost"
             className="cursor-pointer h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-            onClick={handleDownloadClick}
-            title="Download conversation as markdown"
-            disabled={downloadedConversations.has(conversation.id)}
+            onClick={handleCopyConversation}
+            title="Copie toda a conversa"
           >
-            {downloadedConversations.has(conversation.id) ? (
-              <Check className="h-3 w-3 text-green-600" />
-            ) : (
-              <Download className="h-3 w-3" />
-            )}
+            <Copy className="h-3 w-3" />
           </Button>
           <Button
             size="icon"
             variant="ghost"
             className="cursor-pointer h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
             onClick={handleDeleteClick}
-            title="Delete conversation"
+            title="Delete esse atendimento"
           >
             <Trash2 className="h-3 w-3" />
           </Button>

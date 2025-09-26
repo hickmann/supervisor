@@ -1,12 +1,11 @@
 import { MessageSquare } from "lucide-react";
-import { Button, ScrollArea } from "@/components";
+import { ScrollArea } from "@/components";
 import { UseHistoryType } from "@/hooks/useHistory";
 import { ConversationItem } from "./ConversationItem";
 import { ChatConversation } from "@/types/completion";
 
 interface ConversationListViewProps extends UseHistoryType {
   currentConversationId: string | null;
-  onNewConversation: () => void;
   onClosePopover: () => void;
   onSelectConversation: (conversation: ChatConversation) => void;
 }
@@ -21,34 +20,18 @@ export const ConversationListView = ({
   handleDownloadConversation,
   handleDeleteConfirm,
   formatDate,
-  onNewConversation,
   onClosePopover,
   setIsOpen,
 }: ConversationListViewProps) => {
-  const handleNewChat = () => {
-    onNewConversation();
-    onClosePopover();
-  };
 
   return (
     <>
       <div className="border-b border-input/50 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            All Conversations
+            Histórico de Atendimentos
           </h2>
-          <Button
-            size="sm"
-            onClick={handleNewChat}
-            className="text-xs"
-            title="Start new chat"
-          >
-            New Chat
-          </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Your conversation history
-        </p>
       </div>
 
       <ScrollArea className="h-[calc(100vh-8.75rem)]">
@@ -73,10 +56,8 @@ export const ConversationListView = ({
                   {...{
                     conversations,
                     selectedConversationId,
-                    downloadedConversations,
                     handleViewConversation,
                     onSelectConversation,
-                    handleDownloadConversation,
                     handleDeleteConfirm,
                     formatDate,
                     isOpen: false,
