@@ -64,8 +64,7 @@
       "timestampUrl": null,
       "tsp": false,
       "wix": {
-        "language": ["en-US"],
-        "template": "modern"
+        "language": ["en-US"]
       }
     },
     "linux": {
