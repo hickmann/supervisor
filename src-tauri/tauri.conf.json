@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "CoterapIA",
-  "version": "0.1.4",
-  "identifier": "com.srikanthnani.coterapia",
+  "version": "0.1.1",
+  "identifier": "com.coterapia.copiloto",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -18,7 +18,7 @@
         "height": 54,
         "decorations": false,
         "transparent": true,
-        "alwaysOnTop": false,
+        "alwaysOnTop": true,
         "resizable": false,
         "visibleOnAllWorkspaces": true,
         "skipTaskbar": true,
@@ -43,12 +43,70 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["info.plist", "coterapia.desktop"],
-    "macOS": { "minimumSystemVersion": "10.13" }
+    "resources": [
+      "info.plist", 
+      "coterapia.desktop",
+      "../whisper/**/*",
+      "models/**/*",
+      "vosk-libs/**/*"
+    ],
+    "externalBin": [
+      "../whisper/whisper-cli.exe",
+      "../whisper/whisper-server.exe",
+      "../whisper/whisper-stream.exe",
+      "../whisper/whisper-command.exe",
+      "../whisper/whisper-bench.exe",
+      "../whisper/whisper-talk-llama.exe",
+      "../whisper/stream.exe",
+      "../whisper/command.exe",
+      "../whisper/bench.exe",
+      "../whisper/lsp.exe",
+      "../whisper/main.exe",
+      "../whisper/quantize.exe",
+      "../whisper/vad-speech-segments.exe",
+      "../whisper/test-vad.exe",
+      "../whisper/test-vad-full.exe",
+      "../whisper/wchess.exe"
+    ],
+    "macOS": { 
+      "minimumSystemVersion": "10.13",
+      "frameworks": [],
+      "exceptionDomain": "localhost"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "allowDowngrades": false,
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": null,
+      "tsp": false,
+      "wix": {
+        "language": ["en-US"],
+        "template": "modern"
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libgtk-3-0",
+          "libwebkit2gtk-4.0-37",
+          "libayatana-appindicator3-1",
+          "librsvg2-common",
+          "libasound2",
+          "libpulse0",
+          "ffmpeg"
+        ]
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
   },
   "plugins": {
     "updater": {
-      "endpoints": ["https://coterapia.com/api/update"],
+      "endpoints": ["https://coterapia.com.br/api/update"],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RDJBNUFFM0ZCREEyQjEKUldTeG9yMC9ycVhTWmlBRkovV2N5L3RudDhTTHFzM3QxSkF0R0doRGtvSUJKWktpdGp4cWRhcmcK",
       "windows": {
         "installMode": "passive"

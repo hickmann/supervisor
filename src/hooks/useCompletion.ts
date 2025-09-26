@@ -390,7 +390,7 @@ export const useCompletion = () => {
       const newMessages = [...state.conversationHistory, userMsg, assistantMsg];
       const title =
         state.conversationHistory.length === 0
-          ? generateConversationTitle(userMessage, timestamp)
+          ? generateConversationTitle(userMessage)
           : undefined;
 
       const conversation: ChatConversation = {
@@ -399,8 +399,8 @@ export const useCompletion = () => {
           title ||
           (state.currentConversationId
             ? getConversation(state.currentConversationId)?.title ||
-              generateConversationTitle(userMessage, timestamp)
-            : generateConversationTitle(userMessage, timestamp)),
+              generateConversationTitle(userMessage)
+            : generateConversationTitle(userMessage)),
         messages: newMessages,
         createdAt: state.currentConversationId
           ? getConversation(state.currentConversationId)?.createdAt || timestamp

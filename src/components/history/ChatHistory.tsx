@@ -16,7 +16,6 @@ interface ChatHistoryProps {
 
 export const ChatHistory = ({
   onSelectConversation,
-  onNewConversation,
   currentConversationId,
 }: ChatHistoryProps) => {
   const historyHook = useHistory();

@@ -1,4 +1,4 @@
-import { InfoIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "../ui";
 
 type Props = {

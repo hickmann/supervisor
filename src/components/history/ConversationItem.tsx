@@ -2,7 +2,6 @@ import {
   MessageSquare,
   Copy,
   Trash2,
-  Check,
   Loader2,
   Calendar,
   Upload,

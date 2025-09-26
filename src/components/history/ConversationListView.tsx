@@ -14,13 +14,10 @@ export const ConversationListView = ({
   conversations,
   currentConversationId,
   selectedConversationId,
-  downloadedConversations,
   handleViewConversation,
   onSelectConversation,
-  handleDownloadConversation,
   handleDeleteConfirm,
   formatDate,
-  onClosePopover,
   setIsOpen,
 }: ConversationListViewProps) => {
 
@@ -50,24 +47,23 @@ export const ConversationListView = ({
             <div className="space-y-1 pr-2">
               {conversations.map((conversation) => (
                 <ConversationItem
-                  {...conversation}
                   conversation={conversation}
                   currentConversationId={currentConversationId}
-                  {...{
-                    conversations,
-                    selectedConversationId,
-                    handleViewConversation,
-                    onSelectConversation,
-                    handleDeleteConfirm,
-                    formatDate,
-                    isOpen: false,
-                    viewingConversation: null,
-                    deleteConfirm: null,
-                    setIsOpen,
-                    confirmDelete: () => {},
-                    cancelDelete: () => {},
-                    refreshConversations: () => {},
-                  }}
+                  onSelectConversation={onSelectConversation}
+                  conversations={conversations}
+                  isOpen={false}
+                  selectedConversationId={selectedConversationId}
+                  viewingConversation={null}
+                  downloadedConversations={new Set()}
+                  deleteConfirm={null}
+                  setIsOpen={setIsOpen}
+                  handleViewConversation={handleViewConversation}
+                  handleDownloadConversation={() => {}}
+                  handleDeleteConfirm={handleDeleteConfirm}
+                  confirmDelete={() => {}}
+                  cancelDelete={() => {}}
+                  formatDate={formatDate}
+                  refreshConversations={() => {}}
                 />
               ))}
             </div>
