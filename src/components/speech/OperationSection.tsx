@@ -214,17 +214,14 @@ export const OperationSection = ({
             {assistentClinicoData.pergunta_e_resposta?.pergunta && (
               <Button
                 variant="outline"
-                className="w-full h-auto p-3 flex flex-row items-center justify-between bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-green-300/50 transition-all duration-200 rounded-lg group"
+                className="w-full h-auto p-3 flex flex-row items-center justify-start bg-white/60 hover:bg-white/80 border-slate-200/50 hover:border-green-300/50 transition-all duration-200 rounded-lg group"
                 onClick={() => selectItem('pergunta_resposta')}
               >
                 <div className="flex items-center gap-2 flex-1">
                   <span className="font-semibold text-sm text-slate-800 group-hover:text-green-700 transition-colors duration-200">
-                    ❓ {assistentClinicoData.pergunta_e_resposta.pergunta.substring(0, 25)}...
+                    ❓ {assistentClinicoData.pergunta_e_resposta.pergunta}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 text-right line-clamp-1 leading-relaxed ml-2">
-                  {assistentClinicoData.pergunta_e_resposta.resposta_sugerida?.substring(0, 60)}...
-                </p>
               </Button>
             )}
 

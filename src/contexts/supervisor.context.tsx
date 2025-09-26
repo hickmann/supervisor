@@ -106,7 +106,13 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Caso especial para session-summary
-    if (id === 'session_summary' && sessionSummaryData?.temas) {
+    if (id === 'session_summary') {
+      if (!sessionSummaryData?.temas) {
+        // Se não há dados, não abrir a janela
+        console.warn("⚠️ SessionSummary: Tentativa de abrir janela sem dados disponíveis");
+        return;
+      }
+      
       const temasList = sessionSummaryData.temas
         .map((tema) => `• ${tema}`)
         .join('\n\n');
@@ -122,7 +128,13 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Caso especial para tasks-agreements
-    if (id === 'tasks_agreements' && tasksAgreementsData) {
+    if (id === 'tasks_agreements') {
+      if (!tasksAgreementsData) {
+        // Se não há dados, não abrir a janela
+        console.warn("⚠️ TasksAgreements: Tentativa de abrir janela sem dados disponíveis");
+        return;
+      }
+      
       let description = '';
       
       if (tasksAgreementsData.tarefas && tasksAgreementsData.tarefas.length > 0) {
@@ -224,6 +236,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsGeneratingSessionSummary(true);
       setError(null); // Limpar erro anterior
+      setSessionSummaryData(null); // Limpar dados anteriores
       console.log("🌐 SessionSummary: Enviando histórico completo para session-summary:", conversationHistory);
       
       // Formatear todo o histórico da conversa para envio
@@ -318,6 +331,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsGeneratingTasksAgreements(true);
       setError(null); // Limpar erro anterior
+      setTasksAgreementsData(null); // Limpar dados anteriores
       console.log("🌐 TasksAgreements: Enviando histórico completo para extract-tasks-agreements:", conversationHistory);
       
       // Formatear todo o histórico da conversa para envio

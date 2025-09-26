@@ -144,7 +144,7 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
-  const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, conversationBuffer } = useSupervisor();
+  const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, conversationBuffer, sessionSummaryData, tasksAgreementsData } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [recordingTime, setRecordingTime] = useState("00:00");
@@ -165,6 +165,10 @@ export function useSystemAudio() {
   const [lastPacienteTranscription, setLastPacienteTranscription] = useState<string>("");
   const [isMicrophoneListening, setIsMicrophoneListening] = useState<boolean>(false);
   const [shouldActivateVAD, setShouldActivateVAD] = useState<boolean>(false);
+  
+  // Estados para controlar quando devemos abrir a janela após os dados chegarem
+  const [pendingSessionSummaryOpen, setPendingSessionSummaryOpen] = useState<boolean>(false);
+  const [pendingTasksAgreementsOpen, setPendingTasksAgreementsOpen] = useState<boolean>(false);
 
   const [conversation, setConversation] = useState<ChatConversation>({
     id: "",
@@ -218,6 +222,24 @@ export function useSystemAudio() {
       setQuickActions(DEFAULT_QUICK_ACTIONS);
     }
   }, []);
+
+  // useEffect para abrir janela do resumo da sessão quando dados chegarem
+  useEffect(() => {
+    if (pendingSessionSummaryOpen && sessionSummaryData?.temas) {
+      console.log("✅ SessionSummary: Dados chegaram, abrindo janela automaticamente");
+      selectItem('session_summary');
+      setPendingSessionSummaryOpen(false);
+    }
+  }, [sessionSummaryData, pendingSessionSummaryOpen, selectItem]);
+
+  // useEffect para abrir janela de tarefas e acordos quando dados chegarem
+  useEffect(() => {
+    if (pendingTasksAgreementsOpen && tasksAgreementsData) {
+      console.log("✅ TasksAgreements: Dados chegaram, abrindo janela automaticamente");
+      selectItem('tasks_agreements');
+      setPendingTasksAgreementsOpen(false);
+    }
+  }, [tasksAgreementsData, pendingTasksAgreementsOpen, selectItem]);
 
   // Função para processar transcrição do microfone (TERAPEUTA)
   const processMicrophoneTranscription = useCallback(
@@ -512,17 +534,18 @@ export function useSystemAudio() {
       console.log("🔄 SessionSummary: Iniciando geração de resumo da sessão via quick action...");
       console.log("📊 SessionSummary: conversationHistory:", conversationHistory);
       
+      // Marcar que queremos abrir a janela quando os dados chegarem
+      setPendingSessionSummaryOpen(true);
+      
       // Aguardar a geração do resumo e verificar se foi bem-sucedida
       const success = await generateSessionSummary(conversationHistory);
       
       if (success) {
-        console.log("✅ SessionSummary: Resumo gerado com sucesso, abrindo janela...");
-        // Aguardar um pouco para garantir que o estado foi atualizado
-        setTimeout(() => {
-          selectItem('session_summary');
-        }, 500);
+        console.log("✅ SessionSummary: Resumo gerado com sucesso, aguardando dados para abrir janela...");
+        // A janela será aberta automaticamente pelo useEffect quando os dados chegarem
       } else {
         console.log("❌ SessionSummary: Falha ao gerar resumo, não abrindo janela");
+        setPendingSessionSummaryOpen(false); // Cancelar abertura da janela
         // O erro já foi definido na função generateSessionSummary
       }
       
@@ -569,17 +592,18 @@ export function useSystemAudio() {
       console.log("🔄 TasksAgreements: Iniciando extração de tarefas e acordos via quick action...");
       console.log("📊 TasksAgreements: conversationHistory:", conversationHistory);
       
+      // Marcar que queremos abrir a janela quando os dados chegarem
+      setPendingTasksAgreementsOpen(true);
+      
       // Aguardar a extração de tarefas e acordos e verificar se foi bem-sucedida
       const success = await generateTasksAgreements(conversationHistory);
       
       if (success) {
-        console.log("✅ TasksAgreements: Tarefas e acordos extraídos com sucesso, abrindo janela...");
-        // Aguardar um pouco para garantir que o estado foi atualizado
-        setTimeout(() => {
-          selectItem('tasks_agreements');
-        }, 500);
+        console.log("✅ TasksAgreements: Tarefas e acordos extraídos com sucesso, aguardando dados para abrir janela...");
+        // A janela será aberta automaticamente pelo useEffect quando os dados chegarem
       } else {
         console.log("❌ TasksAgreements: Falha ao extrair tarefas, não abrindo janela");
+        setPendingTasksAgreementsOpen(false); // Cancelar abertura da janela
         // O erro já foi definido na função generateTasksAgreements
       }
       
