@@ -12,12 +12,12 @@ export const Disclaimer = () => {
         rel="noopener noreferrer"
         className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
       >
-        Report a bug
+        Reportar um bug
       </a>
       <div className="flex items-center gap-4">
         <div className="text-sm text-muted-foreground/70 leading-relaxed">
           {isVersionLoading ? (
-            <span>Loading version...</span>
+            <span>Carregando versão...</span>
           ) : (
             <span>Versão: {version}</span>
           )}

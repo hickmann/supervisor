@@ -15,8 +15,8 @@ export const AlwaysOnTopToggle = ({ className }: AlwaysOnTopToggleProps) => {
   return (
     <div className={`space-y-2 ${className}`}>
       <Header
-        title="Always On Top Mode"
-        description="Control whether the window stays above all other applications"
+        title="Modo Sempre no Topo"
+        description="Controla se a janela permanece acima de todas as outras aplicações"
         isMainTitle
       />
       <div className="flex items-center justify-between">
@@ -24,25 +24,25 @@ export const AlwaysOnTopToggle = ({ className }: AlwaysOnTopToggleProps) => {
           <div>
             <Label className="text-sm font-medium">
               {customizable.alwaysOnTop.isEnabled
-                ? "Disable Always On Top"
-                : "Enable Always On Top"}
+                ? "Desabilitar Sempre no Topo"
+                : "Habilitar Sempre no Topo"}
             </Label>
             <p className="text-xs text-muted-foreground mt-1">
               {customizable.alwaysOnTop.isEnabled
-                ? "Window stays above all other applications (default)"
-                : "Window behaves like normal applications"}
+                ? "Janela permanece acima de todas as outras aplicações (padrão)"
+                : "Janela se comporta como aplicações normais"}
             </p>
           </div>
         </div>
         <Switch
           checked={customizable.alwaysOnTop.isEnabled}
           onCheckedChange={handleSwitchChange}
-          title={`Toggle to ${
-            !customizable.alwaysOnTop.isEnabled ? "Enabled" : "Disabled"
-          } always on top`}
-          aria-label={`Toggle to ${
-            customizable.alwaysOnTop.isEnabled ? "Enabled" : "Disabled"
-          } always on top`}
+          title={`Alternar para ${
+            !customizable.alwaysOnTop.isEnabled ? "Habilitado" : "Desabilitado"
+          } sempre no topo`}
+          aria-label={`Alternar para ${
+            customizable.alwaysOnTop.isEnabled ? "Habilitado" : "Desabilitado"
+          } sempre no topo`}
         />
       </div>
     </div>

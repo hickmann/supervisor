@@ -21,8 +21,8 @@ export const DeleteChats = ({
   return (
     <div className="space-y-3">
       <Header
-        title="Delete Chat History"
-        description="Permanently delete all your chat conversations and history. This action cannot be undone and will remove all stored conversations from your local storage."
+        title="Excluir Histórico de Conversas"
+        description="Exclui permanentemente todas as suas conversas e histórico de chat. Esta ação não pode ser desfeita e removerá todas as conversas armazenadas do seu armazenamento local."
         isMainTitle
       />
 
@@ -30,7 +30,7 @@ export const DeleteChats = ({
         {isDeleting && (
           <div className="p-3 bg-green-50 border border-green-200 rounded-md">
             <p className="text-xs text-green-700 font-medium">
-              ✅ All chat history has been successfully deleted.
+              ✅ Todo o histórico de conversas foi excluído com sucesso.
             </p>
           </div>
         )}
@@ -40,17 +40,17 @@ export const DeleteChats = ({
           disabled={isDeleting}
           variant="destructive"
           className="w-full h-11"
-          title="Delete all chat history"
+          title="Excluir todo o histórico de conversas"
         >
           {isDeleting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Deleting...
+              Excluindo...
             </>
           ) : (
             <>
               <TrashIcon className="h-4 w-4 mr-2" />
-              Delete All Chats
+              Excluir Todas as Conversas
             </>
           )}
         </Button>
@@ -61,22 +61,22 @@ export const DeleteChats = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background border rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-2">
-              Delete All Chat History
+              Excluir Todo o Histórico de Conversas
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Are you sure you want to delete all chat history? This action
-              cannot be undone and will permanently remove all stored
-              conversations.
+              Tem certeza de que deseja excluir todo o histórico de conversas? Esta ação
+              não pode ser desfeita e removerá permanentemente todas as conversas
+              armazenadas.
             </p>
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteConfirmDialog(false)}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button variant="destructive" onClick={deleteAllChats}>
-                Delete All
+                Excluir Tudo
               </Button>
             </div>
           </div>
