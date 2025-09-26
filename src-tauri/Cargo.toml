@@ -1,18 +1,31 @@
 [package]
 name = "coterapia"
-version = "0.1.4"
-description = "The Open Source Alternative to Cluely - A lightning-fast, privacy-first AI assistant that works seamlessly during meetings, interviews, and conversations without anyone knowing."
-authors = ["Srikanth Nani <srikanthnani1202@gmail.com>"]
-license = "MIT"
-repository = "https://github.com/iamsrikanthnani/coterapia"
-homepage = "https://github.com/iamsrikanthnani/coterapia"
-documentation = "https://github.com/iamsrikanthnani/coterapia/wiki"
+version = "0.1.1"
+description = "Um copiloto de supervisão para psicólogos: analisa sessões em tempo real, sugere insights clínicos, organiza tarefas e apoia decisões com base em evidências, de forma ética e segura."
+authors = ["CoterapIA <suporte@coterapia.com.br>"]
+license = "Copyright CoterapIA 2025"
+homepage = "https://www.coterapia.com.br"
 readme = "../README.md"
-keywords = ["ai-assistant", "tauri", "desktop-app", "privacy-first", "meeting-assistant"]
-categories = ["gui", "multimedia", "accessibility", "science", "development-tools"]
+keywords = [
+  "copiloto-psicologo",
+  "supervisao-clinica",
+  "ai-assistant",
+  "psicologia-evidencias",
+  "assistente-terapeutico",
+  "analise-sessoes",
+  "terapia-online",
+  "desktop-app",
+  "privacy-first",
+  "apoio-clinico"
+]
+categories = [
+  "psychology",
+  "ai-tools",
+  "desktop-app",
+  "privacy-security",
+  "productivity"
+]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary
