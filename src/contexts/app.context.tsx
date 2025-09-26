@@ -108,9 +108,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     titles: { isEnabled: true },
   });
 
-  // Pluely API State
-  const [pluelyApiEnabled, setPluelyApiEnabledState] = useState<boolean>(
-    safeLocalStorage.getItem(STORAGE_KEYS.PLUELY_API_ENABLED) === "true"
+  // CoterapIA API State
+  const [coterapiaApiEnabled, setCoterapiaApiEnabledState] = useState<boolean>(
+    safeLocalStorage.getItem(STORAGE_KEYS.COTERAPIA_API_ENABLED) === "true"
   );
 
   // Function to load AI, STT, system prompt and screenshot config data from storage
@@ -212,12 +212,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const customizableState = getCustomizableState();
     setCustomizable(customizableState);
 
-    // Load Pluely API enabled state
-    const savedPluelyApiEnabled = safeLocalStorage.getItem(
-      STORAGE_KEYS.PLUELY_API_ENABLED
+    // Load CoterapIA API enabled state
+    const savedCoterapiaApiEnabled = safeLocalStorage.getItem(
+      STORAGE_KEYS.COTERAPIA_API_ENABLED
     );
-    if (savedPluelyApiEnabled !== null) {
-      setPluelyApiEnabledState(savedPluelyApiEnabled === "true");
+    if (savedCoterapiaApiEnabled !== null) {
+      setCoterapiaApiEnabledState(savedCoterapiaApiEnabled === "true");
     }
   };
 
@@ -390,9 +390,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     loadData();
   };
 
-  const setPluelyApiEnabled = (enabled: boolean) => {
-    setPluelyApiEnabledState(enabled);
-    safeLocalStorage.setItem(STORAGE_KEYS.PLUELY_API_ENABLED, String(enabled));
+  const setCoterapiaApiEnabled = (enabled: boolean) => {
+    setCoterapiaApiEnabledState(enabled);
+    safeLocalStorage.setItem(STORAGE_KEYS.COTERAPIA_API_ENABLED, String(enabled));
     loadData();
   };
 
@@ -415,8 +415,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     toggleAlwaysOnTop,
     toggleTitlesVisibility,
     loadData,
-    pluelyApiEnabled,
-    setPluelyApiEnabled,
+    coterapiaApiEnabled,
+    setCoterapiaApiEnabled,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

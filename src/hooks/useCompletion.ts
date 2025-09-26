@@ -6,7 +6,7 @@ import { useApp } from "@/contexts";
 import { fetchAIResponse, safeLocalStorage } from "@/lib";
 import { STORAGE_KEYS } from "@/config";
 import { invoke } from "@tauri-apps/api/core";
-import { shouldUsePluelyAPI } from "@/lib/functions/pluely.api";
+import { shouldUseCoterapiaAPI } from "@/lib/functions/coterapia.api";
 
 // Types for completion
 interface AttachedFile {
@@ -173,9 +173,9 @@ export const useCompletion = () => {
 
         let fullResponse = "";
 
-        const usePluelyAPI = await shouldUsePluelyAPI();
+        const useCoterapiaAPI = await shouldUseCoterapiaAPI();
         // Check if AI provider is configured
-        if (!selectedAIProvider.provider && !usePluelyAPI) {
+        if (!selectedAIProvider.provider && !useCoterapiaAPI) {
           setState((prev) => ({
             ...prev,
             error: "Please select an AI provider in settings",
@@ -186,7 +186,7 @@ export const useCompletion = () => {
         const provider = allAiProviders.find(
           (p) => p.id === selectedAIProvider.provider
         );
-        if (!provider && !usePluelyAPI) {
+        if (!provider && !useCoterapiaAPI) {
           setState((prev) => ({
             ...prev,
             error: "Invalid provider selected",
@@ -203,7 +203,7 @@ export const useCompletion = () => {
         try {
           // Use the fetchAIResponse function
           for await (const chunk of fetchAIResponse({
-            provider: usePluelyAPI ? undefined : provider,
+            provider: useCoterapiaAPI ? undefined : provider,
             selectedProvider: selectedAIProvider,
             systemPrompt: systemPrompt || undefined,
             history: messageHistory,
@@ -514,9 +514,9 @@ export const useCompletion = () => {
 
           let fullResponse = "";
 
-          const usePluelyAPI = await shouldUsePluelyAPI();
+          const useCoterapiaAPI = await shouldUseCoterapiaAPI();
           // Check if AI provider is configured
-          if (!selectedAIProvider.provider && !usePluelyAPI) {
+          if (!selectedAIProvider.provider && !useCoterapiaAPI) {
             setState((prev) => ({
               ...prev,
               error: "Please select an AI provider in settings",
@@ -527,7 +527,7 @@ export const useCompletion = () => {
           const provider = allAiProviders.find(
             (p) => p.id === selectedAIProvider.provider
           );
-          if (!provider && !usePluelyAPI) {
+          if (!provider && !useCoterapiaAPI) {
             setState((prev) => ({
               ...prev,
               error: "Invalid provider selected",
@@ -545,7 +545,7 @@ export const useCompletion = () => {
 
           // Use the fetchAIResponse function with image
           for await (const chunk of fetchAIResponse({
-            provider: usePluelyAPI ? undefined : provider,
+            provider: useCoterapiaAPI ? undefined : provider,
             selectedProvider: selectedAIProvider,
             systemPrompt: systemPrompt || undefined,
             history: messageHistory,

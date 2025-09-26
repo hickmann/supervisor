@@ -1,4 +1,4 @@
-// Pluely macos speaker input and stream
+// CoterapIA macos speaker input and stream
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::task::{Poll, Waker};

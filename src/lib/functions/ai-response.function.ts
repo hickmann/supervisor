@@ -10,11 +10,11 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import curl2Json from "@bany/curl-to-json";
-import { shouldUsePluelyAPI } from "./pluely.api";
+import { shouldUseCoterapiaAPI } from "./coterapia.api";
 import { fetchSupervisionResponse } from "./supervision.function";
 
-// Pluely AI streaming function
-async function* fetchPluelyAIResponse(params: {
+// CoterapIA AI streaming function
+async function* fetchCoterapiaAIResponse(params: {
   systemPrompt?: string;
   userMessage: string;
   imagesBase64?: string[];
@@ -89,7 +89,7 @@ async function* fetchPluelyAIResponse(params: {
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    yield `Pluely API Error: ${errorMessage}`;
+    yield `CoterapIA API Error: ${errorMessage}`;
   }
 }
 
@@ -114,10 +114,10 @@ export async function* fetchAIResponse(params: {
       imagesBase64 = [],
     } = params;
 
-    // Check if we should use Pluely API instead
-    const usePluelyAPI = await shouldUsePluelyAPI();
-    if (usePluelyAPI) {
-      yield* fetchPluelyAIResponse({
+    // Check if we should use CoterapIA API instead
+    const useCoterapiaAPI = await shouldUseCoterapiaAPI();
+    if (useCoterapiaAPI) {
+      yield* fetchCoterapiaAIResponse({
         systemPrompt,
         userMessage,
         imagesBase64,

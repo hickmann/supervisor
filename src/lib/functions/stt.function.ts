@@ -5,8 +5,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 import { TYPE_PROVIDER } from "@/types";
 
-// Pluely STT function
-export async function fetchPluelySTT(audio: File | Blob): Promise<string> {
+// CoterapIA STT function
+export async function fetchCoterapiaSTT(audio: File | Blob): Promise<string> {
   try {
     // Convert audio to base64
     const audioBase64 = await blobToBase64(audio);
@@ -27,7 +27,7 @@ export async function fetchPluelySTT(audio: File | Blob): Promise<string> {
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    return `Pluely STT Error: ${errorMessage}`;
+    return `CoterapIA STT Error: ${errorMessage}`;
   }
 }
 

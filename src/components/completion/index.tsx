@@ -1,5 +1,4 @@
 import { useCompletion } from "@/hooks";
-import { Screenshot } from "./Screenshot";
 import { Audio } from "./Audio";
 import { Input } from "./Input";
 
@@ -10,9 +9,6 @@ export const Completion = ({ isHidden, systemAudio }: { isHidden: boolean; syste
     <>
       <Audio {...completion} systemAudio={systemAudio} />
       {systemAudio?.capturing && <Input {...completion} isHidden={isHidden} />}
-      {completion?.screenshotConfiguration?.enabled && (
-        <Screenshot {...completion} />
-      )}
     </>
   );
 };

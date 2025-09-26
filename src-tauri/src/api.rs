@@ -42,7 +42,7 @@ fn get_secure_storage_path(app: &AppHandle) -> Result<PathBuf, String> {
 struct SecureStorage {
     license_key: Option<String>,
     instance_id: Option<String>,
-    selected_pluely_model: Option<String>,
+    selected_coterapia_model: Option<String>,
 }
 
 async fn get_stored_credentials(app: &AppHandle) -> Result<(String, String, Option<Model>), String> {
@@ -61,7 +61,7 @@ async fn get_stored_credentials(app: &AppHandle) -> Result<(String, String, Opti
     let license_key = storage.license_key.ok_or("License key not found".to_string())?;
     let instance_id = storage.instance_id.ok_or("Instance ID not found".to_string())?;
 
-    let selected_model: Option<Model> = storage.selected_pluely_model
+    let selected_model: Option<Model> = storage.selected_coterapia_model
         .and_then(|json_str| serde_json::from_str(&json_str).ok());
     
     Ok((license_key, instance_id, selected_model))

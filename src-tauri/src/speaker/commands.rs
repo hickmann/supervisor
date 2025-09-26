@@ -1,4 +1,4 @@
-// Pluely AI Speech Detection, and capture system audio (speaker output) as a stream of f32 samples.
+// CoterapIA AI Speech Detection, and capture system audio (speaker output) as a stream of f32 samples.
 use tauri::{AppHandle, Emitter, Manager};
 use futures_util::StreamExt;
 use tauri_plugin_shell::ShellExt;
@@ -9,7 +9,7 @@ use std::io::Cursor;
 use base64::{Engine as _, engine::general_purpose::STANDARD as B64};
 use std::collections::VecDeque;
 
-// Pluely AI Speech Detection - Configurações otimizadas para não cortar início/fim
+// CoterapIA AI Speech Detection - Configurações otimizadas para não cortar início/fim
 const HOP_SIZE: usize = 1024;  // Analysis chunk size (~23ms at 44.1kHz, ~21ms at 48kHz)
 const VAD_SENSITIVITY_RMS: f32 = 0.002;  // Muito mais sensível para capturar início e fim das frases
 const SPEECH_PEAK_THRESHOLD: f32 = 0.006;  // Muito mais sensível para capturar início e fim das frases
@@ -117,7 +117,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-// Process a chunk for Pluely AI Speech Detection (RMS and peak calculation)
+// Process a chunk for CoterapIA AI Speech Detection (RMS and peak calculation)
 fn process_chunk(mono_chunk: &[f32]) -> (f32, f32) {
     let mut sumsq = 0.0f32;
     let mut peak = 0.0f32;

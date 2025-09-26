@@ -15,7 +15,7 @@ import {
   safeLocalStorage,
   saveConversation,
 } from "@/lib";
-import { shouldUsePluelyAPI } from "@/lib/functions/pluely.api";
+import { shouldUseCoterapiaAPI } from "@/lib/functions/coterapia.api";
 import { Message } from "@/types/completion";
 
 // Importar tipos do arquivo de tipos
@@ -560,8 +560,8 @@ export function useSystemAudio() {
 
         let fullResponse = "";
 
-        const usePluelyAPI = await shouldUsePluelyAPI();
-        if (!selectedAIProvider.provider && !usePluelyAPI) {
+        const useCoterapiaAPI = await shouldUseCoterapiaAPI();
+        if (!selectedAIProvider.provider && !useCoterapiaAPI) {
           setError("No AI provider selected.");
           return;
         }
@@ -569,14 +569,14 @@ export function useSystemAudio() {
         const provider = allAiProviders.find(
           (p) => p.id === selectedAIProvider.provider
         );
-        if (!provider && !usePluelyAPI) {
+        if (!provider && !useCoterapiaAPI) {
           setError("AI provider config not found.");
           return;
         }
 
         try {
           for await (const chunk of fetchAIResponse({
-            provider: usePluelyAPI ? undefined : provider,
+            provider: useCoterapiaAPI ? undefined : provider,
             selectedProvider: selectedAIProvider,
             systemPrompt: prompt,
             history: previousMessages,

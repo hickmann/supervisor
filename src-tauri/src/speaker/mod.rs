@@ -20,7 +20,7 @@ use linux::{SpeakerInput as PlatformSpeakerInput, SpeakerStream as PlatformSpeak
 mod commands;
 pub use commands::*;
 
-// Pluely speaker input and stream
+// CoterapIA speaker input and stream
 pub struct SpeakerInput {
     #[cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))]
     inner: PlatformSpeakerInput,

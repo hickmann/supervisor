@@ -7,7 +7,7 @@ const TOP_OFFSET: i32 = 10;
 pub fn setup_main_window(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     // Try different possible window labels
     let window = app.get_webview_window("main")
-        .or_else(|| app.get_webview_window("pluely"))
+        .or_else(|| app.get_webview_window("coterapia"))
         .or_else(|| {
             // Get the first window if specific labels don't work
             app.webview_windows().values().next().cloned()
