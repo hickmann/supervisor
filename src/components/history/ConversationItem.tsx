@@ -45,7 +45,8 @@ export const ConversationItem = ({
   };
 
   // Função para copiar a conversa completa
-  const handleCopyConversation = async () => {
+  const handleCopyConversation = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Previne que o clique abra a conversa
     try {
       // Formatar a conversa completa para cópia
       const conversationText = conversation.messages
