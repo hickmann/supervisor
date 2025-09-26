@@ -175,9 +175,9 @@ pub async fn transcribe_audio_with_whisper(
     
     // Executar Whisper.cpp
     let output_file_base = temp_file.path().to_str().unwrap();
-            
-    let output = Command::new(&state.whisper_path)
-        .arg("-f")
+    
+    let mut cmd = Command::new(&state.whisper_path);
+    cmd.arg("-f")
         .arg(&wav_path)
         .arg("-m")
         .arg(&state.model_path)
@@ -187,8 +187,16 @@ pub async fn transcribe_audio_with_whisper(
         .arg("--split-on-word")
         .arg("-oj")
         .arg("-of")
-        .arg(output_file_base)
-        .output();
+        .arg(output_file_base);
+    
+    // No Windows, ocultar a janela do console
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW flag
+    }
+    
+    let output = cmd.output();
     
     let output = output.map_err(|e| {
         error!("❌ WHISPER: Failed to execute whisper: {}", e);
