@@ -18,11 +18,11 @@ export const Header = ({
     <div className="flex flex-col gap-3">
       <div className="border-b border-input/50 pb-3 flex justify-between items-start">
         <div>
-          <h2 className="font-semibold text-sm">Supervisão Psicológica em Tempo Real</h2>
+          <h2 className="font-semibold text-sm">Um copiloto clínico que pensa junto com você em tempo real.</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {setupRequired
               ? "Setup necessário para capturar áudio do sistema"
-              : "Sistema de supervisão para psicólogos: Microfone = TERAPEUTA | Sistema = PACIENTE. O supervisor analisará as falas do terapeuta e fornecerá orientações em tempo real."}
+              : "Sistema de Copiloto para psicólogos ativado"}
           </p>
         </div>
         {!capturing ? (
@@ -41,16 +41,6 @@ export const Header = ({
         ) : null}
       </div>
 
-      <div className="flex flex-col items-start gap-2">
-        <div className="flex flex-row items-center gap-2">
-          <InfoIcon className="w-4 h-4" />
-          <p className="text-sm text-muted-foreground">
-            Sistema de supervisão psicológica em desenvolvimento ativo. 
-            Use o microfone para suas falas como terapeuta e o sistema capturará 
-            automaticamente as falas do paciente para análise supervisiva.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
