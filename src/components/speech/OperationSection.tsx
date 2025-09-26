@@ -39,7 +39,7 @@ export const OperationSection = ({
   lastTerapeutaTranscription,
   lastPacienteTranscription,
 }: Props) => {
-  const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary, error, setError } = useSupervisor();
+  const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary, isGeneratingTasksAgreements, error, setError } = useSupervisor();
   
   // Auto-dismiss do erro após 5 segundos
   useEffect(() => {
@@ -298,6 +298,7 @@ export const OperationSection = ({
             show={showQuickActions}
             setShow={setShowQuickActions}
             isGeneratingSessionSummary={isGeneratingSessionSummary}
+            isGeneratingTasksAgreements={isGeneratingTasksAgreements}
           />
         </div>
       )}

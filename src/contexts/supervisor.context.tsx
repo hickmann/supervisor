@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse } from "@/types/supervisor.type";
+import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse, TasksAgreementsResponse } from "@/types/supervisor.type";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
 
@@ -10,6 +10,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [conversationBuffer, setConversationBuffer] = useState<Array<{ role: string; content: string; timestamp: number }>>([]);
   const [sessionSummaryData, setSessionSummaryData] = useState<SessionSummaryResponse | null>(null);
   const [isGeneratingSessionSummary, setIsGeneratingSessionSummary] = useState<boolean>(false);
+  const [tasksAgreementsData, setTasksAgreementsData] = useState<TasksAgreementsResponse | null>(null);
+  const [isGeneratingTasksAgreements, setIsGeneratingTasksAgreements] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectItem = useCallback((id: string | null) => {
@@ -119,9 +121,52 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
+    // Caso especial para tasks-agreements
+    if (id === 'tasks_agreements' && tasksAgreementsData) {
+      let description = '';
+      
+      if (tasksAgreementsData.tarefas && tasksAgreementsData.tarefas.length > 0) {
+        description += '📋 TAREFAS:\n\n';
+        tasksAgreementsData.tarefas.forEach((tarefa, index) => {
+          description += `${index + 1}. ${tarefa.descricao}\n`;
+          description += `   Responsável: ${tarefa.responsavel}\n`;
+          if (tarefa.prazo) {
+            description += `   Prazo: ${tarefa.prazo}\n`;
+          }
+          description += '\n';
+        });
+      }
+      
+      if (tasksAgreementsData.acordos && tasksAgreementsData.acordos.length > 0) {
+        if (description) description += '\n';
+        description += '🤝 ACORDOS:\n\n';
+        tasksAgreementsData.acordos.forEach((acordo, index) => {
+          description += `${index + 1}. ${acordo.descricao}\n`;
+          description += `   Responsável: ${acordo.responsavel}\n`;
+          if (acordo.quando) {
+            description += `   Quando: ${acordo.quando}\n`;
+          }
+          description += '\n';
+        });
+      }
+      
+      if (!description.trim()) {
+        description = '• Nenhuma tarefa ou acordo identificado na sessão';
+      }
+      
+      setSelectedItem({
+        id: 'tasks_agreements',
+        title: 'Tarefas e Combinados',
+        subtitle: 'Tarefas e acordos da sessão',
+        description: description.trim(),
+        createdAt: new Date().toISOString()
+      });
+      return;
+    }
+    
     const item = items.find(item => item.id === id);
     setSelectedItem(item || null);
-  }, [items, assistentClinicoData, sessionSummaryData]);
+  }, [items, assistentClinicoData, sessionSummaryData, tasksAgreementsData]);
 
   const addItems = useCallback((newItems: SupervisorItem[]) => {
     setItems(prevItems => {
@@ -268,6 +313,90 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Função para gerar tarefas e acordos
+  const generateTasksAgreements = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>): Promise<boolean> => {
+    try {
+      setIsGeneratingTasksAgreements(true);
+      setError(null); // Limpar erro anterior
+      console.log("🌐 TasksAgreements: Enviando histórico completo para extract-tasks-agreements:", conversationHistory);
+      
+      // Formatear todo o histórico da conversa para envio
+      const chatData = conversationHistory
+        .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
+        .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
+        .join('\n\n');
+      
+      console.log("🌐 TasksAgreements: Dados formatados para envio:", chatData);
+      console.log("🌐 TasksAgreements: Total de caracteres:", chatData.length);
+      
+      const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/extract-tasks-agreements', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transcription: chatData
+        })
+      });
+      
+      console.log("🌐 TasksAgreements: Resposta recebida:", response.status, response.statusText);
+      
+      if (response.ok) {
+        // Verificar se a resposta tem conteúdo antes de tentar fazer parse
+        if (response.status === 204) {
+          console.log("✅ TasksAgreements: Resposta 204 - Nenhum conteúdo para processar");
+          return false; // Não há dados para processar
+        }
+        
+        // Verificar se há conteúdo na resposta
+        const contentLength = response.headers.get('content-length');
+        if (contentLength === '0') {
+          console.log("✅ TasksAgreements: Resposta vazia - Nenhum conteúdo para processar");
+          return false; // Resposta vazia
+        }
+        
+        try {
+          const data: TasksAgreementsResponse = await response.json();
+          console.log("✅ TasksAgreements: Dados processados:", data);
+          setTasksAgreementsData(data);
+          return true; // Sucesso - dados processados
+        } catch (jsonError) {
+          console.warn("⚠️ TasksAgreements: Erro ao fazer parse do JSON:", jsonError);
+          console.log("📄 TasksAgreements: Tentando ler como texto...");
+          const textResponse = await response.text();
+          console.log("📄 TasksAgreements: Resposta como texto:", textResponse);
+          return false; // Falha no parse
+        }
+      } else {
+        const errorText = await response.text();
+        console.error("❌ TasksAgreements: Erro na resposta:", response.status, response.statusText);
+        console.error("❌ TasksAgreements: Detalhes do erro:", errorText);
+        
+        // Tentar fazer parse do erro para extrair mensagem amigável
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.details) {
+            setError(`Erro: ${errorData.details}`);
+          } else if (errorData.error) {
+            setError(`Erro: ${errorData.error}`);
+          } else {
+            setError(`Erro na API: ${response.status} ${response.statusText}`);
+          }
+        } catch {
+          setError(`Erro na API: ${response.status} ${response.statusText}`);
+        }
+        return false; // Erro na API
+      }
+    } catch (error) {
+      console.error("❌ TasksAgreements: Erro ao enviar:", error);
+      return false; // Erro de rede/conexão
+    } finally {
+      setIsGeneratingTasksAgreements(false);
+    }
+  }, []);
+
   // Função para enviar para o assistente clínico
   const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
@@ -356,6 +485,9 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     isGeneratingSessionSummary,
     generateSessionSummary,
     sendToAssistentClinico,
+    tasksAgreementsData,
+    isGeneratingTasksAgreements,
+    generateTasksAgreements,
     error,
     setError,
   };

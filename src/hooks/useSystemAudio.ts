@@ -144,7 +144,7 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
 export function useSystemAudio() {
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
-  const { addToConversationBuffer, generateSessionSummary, selectItem, sendToAssistentClinico, conversationBuffer } = useSupervisor();
+  const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, conversationBuffer } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [recordingTime, setRecordingTime] = useState("00:00");
@@ -524,6 +524,63 @@ export function useSystemAudio() {
       } else {
         console.log("❌ SessionSummary: Falha ao gerar resumo, não abrindo janela");
         // O erro já foi definido na função generateSessionSummary
+      }
+      
+      return;
+    }
+
+    // Verificar se é a ação especial "Tarefas e Combinados"
+    if (action === "Tarefas e Combinados") {
+      console.log("🔄 TasksAgreements: Verificando mensagens disponíveis...");
+      console.log("📊 TasksAgreements: conversation.messages.length:", conversation.messages.length);
+      console.log("📊 TasksAgreements: conversation.messages:", conversation.messages);
+      
+      // Aguardar um pequeno delay para garantir que o estado seja atualizado
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (conversation.messages.length === 0) {
+        console.warn("⚠️ TasksAgreements: Nenhuma mensagem na conversa para extrair tarefas");
+        setError("Nenhuma mensagem na conversa para extrair tarefas e acordos. Certifique-se de que há transcrições disponíveis.");
+        return;
+      }
+
+      // Converter mensagens da conversa para o formato esperado
+      const conversationHistory = conversation.messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp
+      }));
+
+      // Verificar se há conteúdo suficiente (pelo menos 50 caracteres)
+      const totalContent = conversationHistory
+        .map(msg => msg.content)
+        .join(' ')
+        .trim();
+      
+      console.log("📊 TasksAgreements: Total content length:", totalContent.length);
+      console.log("📊 TasksAgreements: Total content preview:", totalContent.substring(0, 100) + "...");
+      
+      if (totalContent.length < 50) {
+        console.warn("⚠️ TasksAgreements: Conteúdo insuficiente para extrair tarefas (menos de 50 caracteres)");
+        setError(`Conteúdo insuficiente para extrair tarefas. Necessário pelo menos 50 caracteres, mas encontrado apenas ${totalContent.length}.`);
+        return;
+      }
+
+      console.log("🔄 TasksAgreements: Iniciando extração de tarefas e acordos via quick action...");
+      console.log("📊 TasksAgreements: conversationHistory:", conversationHistory);
+      
+      // Aguardar a extração de tarefas e acordos e verificar se foi bem-sucedida
+      const success = await generateTasksAgreements(conversationHistory);
+      
+      if (success) {
+        console.log("✅ TasksAgreements: Tarefas e acordos extraídos com sucesso, abrindo janela...");
+        // Aguardar um pouco para garantir que o estado foi atualizado
+        setTimeout(() => {
+          selectItem('tasks_agreements');
+        }, 500);
+      } else {
+        console.log("❌ TasksAgreements: Falha ao extrair tarefas, não abrindo janela");
+        // O erro já foi definido na função generateTasksAgreements
       }
       
       return;

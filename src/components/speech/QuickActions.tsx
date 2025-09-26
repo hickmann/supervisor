@@ -18,6 +18,7 @@ interface QuickActionsProps {
   show: boolean;
   setShow: (show: boolean) => void;
   isGeneratingSessionSummary?: boolean;
+  isGeneratingTasksAgreements?: boolean;
 }
 
 export const QuickActions = ({
@@ -30,6 +31,7 @@ export const QuickActions = ({
   show,
   setShow,
   isGeneratingSessionSummary = false,
+  isGeneratingTasksAgreements = false,
 }: QuickActionsProps) => {
   const [newAction, setNewAction] = useState("");
 
@@ -65,7 +67,8 @@ export const QuickActions = ({
       {show && (
         <div className="flex flex-wrap gap-3 items-center">
           {actions.map((action) => {
-            const isLoading = action === "Recapitular Sessão Completa" && isGeneratingSessionSummary;
+            const isLoading = (action === "Recapitular Sessão Completa" && isGeneratingSessionSummary) ||
+                             (action === "Tarefas e Combinados" && isGeneratingTasksAgreements);
             
             return (
               <div key={action} className="relative group">

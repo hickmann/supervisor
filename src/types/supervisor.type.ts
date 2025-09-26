@@ -32,6 +32,18 @@ export type SessionSummaryResponse = {
   temas: string[];
 };
 
+export type TaskAgreementItem = {
+  descricao: string;
+  responsavel: "paciente" | "terapeuta" | "ambos";
+  prazo?: string | null;
+  quando?: string | null;
+};
+
+export type TasksAgreementsResponse = {
+  tarefas: TaskAgreementItem[];
+  acordos: TaskAgreementItem[];
+};
+
 export type SupervisorContextType = {
   items: SupervisorItem[];
   selectedItem: SupervisorItem | null;
@@ -44,6 +56,9 @@ export type SupervisorContextType = {
   isGeneratingSessionSummary: boolean;
   generateSessionSummary: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<boolean>;
   sendToAssistentClinico: (conversations: Array<{ role: string; content: string; timestamp: number }>) => Promise<void>;
+  tasksAgreementsData: TasksAgreementsResponse | null;
+  isGeneratingTasksAgreements: boolean;
+  generateTasksAgreements: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<boolean>;
   error: string | null;
   setError: (error: string | null) => void;
 };
