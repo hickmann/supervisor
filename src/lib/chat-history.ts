@@ -84,10 +84,16 @@ export function deleteConversation(conversationId: string): boolean {
   }
 }
 
-export function generateConversationTitle(userMessage: string): string {
+export function generateConversationTitle(userMessage: string, timestamp?: number): string {
   const words = userMessage.trim().split(" ").slice(0, 6);
-  return (
-    words.join(" ") +
-    (words.length < userMessage.trim().split(" ").length ? "..." : "")
-  );
+  const messageTitle = words.join(" ") + (words.length < userMessage.trim().split(" ").length ? "..." : "");
+  
+  if (timestamp) {
+    const date = new Date(timestamp);
+    const startTime = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const dateStr = date.toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "numeric" });
+    return `Sessão ${dateStr} ${startTime}`;
+  }
+  
+  return messageTitle;
 }

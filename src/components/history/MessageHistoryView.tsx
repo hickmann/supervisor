@@ -1,9 +1,8 @@
 import {
   ArrowLeft,
-  Check,
-  Download,
+  Copy,
   Trash2,
-  MessageCircleReplyIcon,
+  Upload,
 } from "lucide-react";
 import { Button, ScrollArea, Markdown } from "@/components";
 import { ChatConversation } from "@/types/completion";
@@ -13,27 +12,46 @@ interface MessageHistoryViewProps extends UseHistoryType {
   viewingConversation: ChatConversation;
   onBackToConversations: () => void;
   onSelectConversation: (conversation: ChatConversation) => void;
-  downloadedConversations: Set<string>;
 }
 
 export const MessageHistoryView = ({
   viewingConversation,
   onBackToConversations,
   onSelectConversation,
-  handleDownloadConversation,
   handleDeleteConfirm,
   setIsOpen,
-  downloadedConversations,
 }: MessageHistoryViewProps) => {
-  const handleUseChat = () => {
-    onSelectConversation(viewingConversation);
-    onBackToConversations();
-    setIsOpen(false);
+  const handleSupervisorEvaluation = () => {
+    // TODO: Implement supervisor evaluation functionality
+    console.log("Evaluating conversation with supervisor:", viewingConversation.id);
   };
 
-  const handleDownloadClick = (e: React.MouseEvent) => {
-    handleDownloadConversation(viewingConversation, e);
+  const handleCopyConversation = async () => {
+    try {
+      // Formatar a conversa completa para cópia
+      const conversationText = viewingConversation.messages
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map(message => {
+          const roleLabel = message.role === "user" || message.role === "paciente" ? "PACIENTE" : 
+                           message.role === "assistant" || message.role === "terapeuta" ? "TERAPEUTA" : 
+                           message.role === "system" ? "SISTEMA" : message.role.toUpperCase();
+          const time = new Date(message.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `${roleLabel} (${time}): ${message.content}`;
+        })
+        .join('\n\n');
+      
+      const fullText = `${viewingConversation.title}\n\n${conversationText}`;
+      
+      await navigator.clipboard.writeText(fullText);
+      console.log("Conversation copied to clipboard");
+    } catch (error) {
+      console.error("Failed to copy conversation:", error);
+    }
   };
+
 
   const handleDeleteClick = () => {
     handleDeleteConfirm(viewingConversation.id);
@@ -57,8 +75,15 @@ export const MessageHistoryView = ({
                 {viewingConversation.title}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {viewingConversation.messages.length} messages in this
-                conversation
+                {viewingConversation.messages.length} mensagens • Duração: {(() => {
+                  if (viewingConversation.messages.length === 0) return "0 min";
+                  const sortedMessages = [...viewingConversation.messages].sort((a, b) => a.timestamp - b.timestamp);
+                  const startTime = sortedMessages[0].timestamp;
+                  const endTime = sortedMessages[sortedMessages.length - 1].timestamp;
+                  const durationMs = endTime - startTime;
+                  const durationMinutes = Math.round(durationMs / (1000 * 60));
+                  return durationMinutes > 0 ? `${durationMinutes} min` : "< 1 min";
+                })()}
               </p>
             </div>
           </div>
@@ -66,32 +91,22 @@ export const MessageHistoryView = ({
             <Button
               size="sm"
               variant={"outline"}
-              onClick={handleUseChat}
+              onClick={handleSupervisorEvaluation}
               className="text-xs"
-              title="Use this conversation"
+              title="Avaliar conversa com supervisor"
             >
-              <MessageCircleReplyIcon className="h-3 w-3" />
-              Use Chat
+              <Upload className="h-3 w-3" />
+              Avaliar com Supervisor
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={handleDownloadClick}
+              onClick={handleCopyConversation}
               className="text-xs"
-              title="Download conversation"
-              disabled={downloadedConversations.has(viewingConversation.id)}
+              title="Copiar conversa completa"
             >
-              {downloadedConversations.has(viewingConversation.id) ? (
-                <>
-                  <Check className="h-3 w-3 text-green-600" />
-                  Downloaded
-                </>
-              ) : (
-                <>
-                  <Download className="h-3 w-3" />
-                  Download
-                </>
-              )}
+              <Copy className="h-3 w-3" />
+              Copiar
             </Button>
             <Button
               size="sm"
@@ -115,14 +130,16 @@ export const MessageHistoryView = ({
               <div
                 key={message.id}
                 className={`p-3 rounded-lg ${
-                  message.role === "user"
+                  message.role === "user" || message.role === "paciente"
                     ? "bg-primary/10 border-l-4 border-primary"
                     : "bg-muted/50"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-medium text-muted-foreground uppercase">
-                    {message.role === "user" ? "You" : "AI"}
+                    {message.role === "user" || message.role === "paciente" ? "PACIENTE" : 
+                     message.role === "assistant" || message.role === "terapeuta" ? "TERAPEUTA" : 
+                     message.role === "system" ? "SISTEMA" : message.role.toUpperCase()}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {new Date(message.timestamp).toLocaleTimeString([], {

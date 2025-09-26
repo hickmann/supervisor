@@ -52,7 +52,6 @@ export const ChatHistory = ({
               viewingConversation={historyHook.viewingConversation}
               onBackToConversations={handleBackToConversations}
               onSelectConversation={onSelectConversation}
-              downloadedConversations={historyHook.downloadedConversations}
             />
           ) : (
             <ConversationListView
