@@ -104,7 +104,7 @@ export const Audio = ({
           <div className="text-muted-foreground p-3">
             <div className="mt-2 flex flex-row gap-1 items-center text-green-600">
               <InfoIcon size={16} />
-              <span>MICROFONE → SUPERVISÃO PSICOLÓGICA</span>
+              <span>CoterapIA</span>
             </div>
 
             <p className="block mt-2">

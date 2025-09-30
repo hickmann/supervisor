@@ -259,7 +259,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
         },
         body: JSON.stringify({
           idioma: "pt-BR",
@@ -358,7 +359,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
         },
         body: JSON.stringify({
           transcription: chatData
@@ -444,7 +446,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
         },
         body: JSON.stringify({
           transcricao: chatData,

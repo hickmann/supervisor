@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useWindowResize, useGlobalShortcuts } from ".";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useApp } from "@/contexts";
+import { useApp, useAuth } from "@/contexts";
 import { useSupervisor } from "@/contexts";
 import { fetchAIResponse } from "@/lib/functions";
 import {
@@ -142,6 +142,7 @@ async function transcribeWithWhisper(audioBase64: string): Promise<string> {
 // Código removido: supervisão agora é feita pelo assistente clínico
 
 export function useSystemAudio() {
+  const { getAccessToken } = useAuth();
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
   const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, conversationBuffer, sessionSummaryData, tasksAgreementsData } = useSupervisor();
@@ -663,6 +664,7 @@ export function useSystemAudio() {
             history: previousMessages,
             userMessage: transcription,
             imagesBase64: [],
+            authToken: getAccessToken(),
           })) {
             fullResponse += chunk;
             setLastAIResponse((prev) => prev + chunk);

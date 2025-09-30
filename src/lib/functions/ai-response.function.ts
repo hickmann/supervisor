@@ -103,6 +103,7 @@ export async function* fetchAIResponse(params: {
   history?: Message[];
   userMessage: string;
   imagesBase64?: string[];
+  authToken?: string;
 }): AsyncIterable<string> {
   try {
     const {
@@ -112,6 +113,7 @@ export async function* fetchAIResponse(params: {
       history = [],
       userMessage,
       imagesBase64 = [],
+      authToken,
     } = params;
 
     // Check if we should use CoterapIA API instead
@@ -135,7 +137,7 @@ export async function* fetchAIResponse(params: {
         yield "❌ **Erro**: Chave API não configurada para o serviço de supervisão";
         return;
       }
-      yield* fetchSupervisionResponse(userMessage, apiKey);
+      yield* fetchSupervisionResponse(userMessage, apiKey, authToken);
       return;
     }
     if (!provider) {

@@ -1,4 +1,5 @@
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { useAuth } from "@/contexts/auth.context";
 
 export interface SupervisionResponse {
   avaliacao_tecnica?: Array<{
@@ -34,7 +35,8 @@ export interface SupervisionError {
 
 export async function* fetchSupervisionResponse(
   transcription: string,
-  apiKey: string
+  apiKey: string,
+  authToken?: string
 ): AsyncIterable<string> {
   try {
     if (!transcription.trim()) {
@@ -49,13 +51,22 @@ export async function* fetchSupervisionResponse(
 
     const url = "https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/analyze-supervision";
     
+    // Prepare headers with authentication token if available
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "apikey": apiKey,
+      "authorization": `Bearer ${apiKey}`,
+    };
+
+    // Add user authentication token if available
+    if (authToken) {
+      headers["x-user-token"] = authToken;
+      console.log("🔐 Supervision: Using user auth token:", authToken.substring(0, 20) + "...");
+    }
+
     const response = await tauriFetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": apiKey,
-        "authorization": `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         transcricao: transcription,
       }),

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useWindowResize } from "./useWindow";
 import { useGlobalShortcuts } from "@/hooks";
 import { MAX_FILES } from "@/config";
-import { useApp } from "@/contexts";
+import { useApp, useAuth } from "@/contexts";
 import { fetchAIResponse, safeLocalStorage } from "@/lib";
 import { STORAGE_KEYS } from "@/config";
 import { invoke } from "@tauri-apps/api/core";
@@ -43,6 +43,7 @@ interface CompletionState {
 }
 
 export const useCompletion = () => {
+  const { getAccessToken } = useAuth();
   const {
     selectedAIProvider,
     allAiProviders,
@@ -209,6 +210,7 @@ export const useCompletion = () => {
             history: messageHistory,
             userMessage: input,
             imagesBase64,
+            authToken: getAccessToken(),
           })) {
             fullResponse += chunk;
             setState((prev) => ({
@@ -551,6 +553,7 @@ export const useCompletion = () => {
             history: messageHistory,
             userMessage: prompt,
             imagesBase64: [base64],
+            authToken: getAccessToken(),
           })) {
             fullResponse += chunk;
             setState((prev) => ({
