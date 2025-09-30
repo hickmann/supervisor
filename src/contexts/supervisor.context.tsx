@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse, TasksAgreementsResponse } from "@/types/supervisor.type";
+import { useAuth } from "./auth.context";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
 
 export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
+  const { getAccessToken } = useAuth();
   const [items, setItems] = useState<SupervisorItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<SupervisorItem | null>(null);
   const [assistentClinicoData, setAssistentClinicoData] = useState<AssistentClinicoResponse | null>(null);
@@ -248,10 +250,14 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 SessionSummary: Dados formatados para envio:", chatData);
       console.log("🌐 SessionSummary: Total de caracteres:", chatData.length);
       
+      // Get user auth token
+      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      console.log("🔐 SessionSummary: Using auth token:", token.substring(0, 20) + "...");
+      
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/session-summary', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json'
         },
@@ -343,10 +349,14 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 TasksAgreements: Dados formatados para envio:", chatData);
       console.log("🌐 TasksAgreements: Total de caracteres:", chatData.length);
       
+      // Get user auth token
+      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      console.log("🔐 TasksAgreements: Using auth token:", token.substring(0, 20) + "...");
+      
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/extract-tasks-agreements', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json'
         },
@@ -425,10 +435,14 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 AssistentClinico: Dados formatados para envio (apenas 5 falas):", chatData);
       console.log("🌐 AssistentClinico: Total de caracteres:", chatData.length);
       
+      // Get user auth token
+      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      console.log("🔐 AssistentClinico: Using auth token:", token.substring(0, 20) + "...");
+      
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/assistente-clinico', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
+          'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json'
         },

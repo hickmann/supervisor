@@ -11,6 +11,7 @@ import { Disclaimer } from "./Disclaimer";
 import { AppIconToggle } from "./AppIconToggle";
 import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { DeleteChats } from "./DeleteChats";
+import { UserInfo } from "./UserInfo";
 
 export const Settings = () => {
   const settings = useSettings();
@@ -42,13 +43,16 @@ export const Settings = () => {
         <ScrollArea className="h-[calc(100vh-7.2rem)]">
           <div className="p-6 space-y-6">
 
+            {/* User Info and Logout */}
+            <UserInfo />
+
             {/* App Icon Toggle */}
             <AppIconToggle />
 
             {/* Always On Top Toggle */}
             <AlwaysOnTopToggle />
 
-            {/* Disclaimer */}
+            {/* Delete Chats */}
             <DeleteChats {...settings} />
           </div>
 

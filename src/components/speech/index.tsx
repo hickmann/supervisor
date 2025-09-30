@@ -46,18 +46,21 @@ export const SystemAudio = ({
 }: useSystemAudioType) => {
   const platform = navigator.platform.toLowerCase();
   
-  // Escutar evento para iniciar captura do sistema quando o microfone for ativado
+  // Escutar evento para abrir janela de supervisão (com ou sem captura)
   useEffect(() => {
     const handleStartSystemAudioCapture = async () => {
       console.log("🎧 System Audio: Received startSystemAudioCapture event");
-      if (!capturing) {
-        console.log("🎧 System Audio: Auto-starting system audio capture from microphone activation");
-        // Abrir a janela imediatamente quando o microfone é ativado
-        setIsPopoverOpen(true);
-        // Redimensionar a janela para acomodar o conteúdo
-        setTimeout(() => {
-          resizeWindow(true);
-        }, 100);
+      console.log("🎧 System Audio: Opening supervision window");
+      // Abrir a janela imediatamente
+      setIsPopoverOpen(true);
+      // Redimensionar a janela para acomodar o conteúdo
+      setTimeout(() => {
+        resizeWindow(true);
+      }, 100);
+      
+      // Só iniciar captura se não estiver capturando e não houver erro de setup
+      if (!capturing && !setupRequired) {
+        console.log("🎧 System Audio: Auto-starting system audio capture");
         await startCapture();
       }
     };
@@ -67,7 +70,7 @@ export const SystemAudio = ({
     return () => {
       window.removeEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
     };
-  }, [capturing, startCapture]);
+  }, [capturing, startCapture, setupRequired]);
 
   // Escutar quando o VAD é desativado para fechar a janela de supervisão
   useEffect(() => {
