@@ -1,4 +1,5 @@
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { prepareSupabaseHeaders } from "./auth-utils";
 
 export interface SupervisionResponse {
   avaliacao_tecnica?: Array<{
@@ -50,29 +51,8 @@ export async function* fetchSupervisionResponse(
 
     const url = "https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/analyze-supervision";
     
-    // Prepare headers with authentication token if available
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "apikey": apiKey,
-    };
-
-    // Add user authentication token as Bearer token if available
-    if (authToken) {
-      headers["Authorization"] = `Bearer ${authToken}`;
-      console.log("🔐 Supervision: Using user auth token as Bearer:", {
-        tokenPreview: authToken.substring(0, 50) + "...",
-        tokenParts: authToken.split('.').length,
-        isUserToken: true
-      });
-    } else {
-      // Fallback to API key as Bearer if no user token
-      headers["Authorization"] = `Bearer ${apiKey}`;
-      console.log("🔐 Supervision: Using API key as Bearer fallback:", {
-        tokenPreview: apiKey.substring(0, 50) + "...",
-        tokenParts: apiKey.split('.').length,
-        isUserToken: false
-      });
-    }
+    // Prepare headers with authentication using utility function
+    const headers = await prepareSupabaseHeaders(authToken, apiKey);
 
     const response = await tauriFetch(url, {
       method: "POST",

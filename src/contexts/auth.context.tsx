@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient, User, Session } from "@supabase/supabase-js";
+import { ensureValidUserToken } from "@/lib/functions/auth-utils";
 
 // Configuração do Supabase
 const supabaseUrl = "https://uwqdksfxzhnmkfqvnloq.supabase.co";
@@ -199,7 +200,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Função para testar se o token está funcionando
   const testToken = async () => {
-    const token = getAccessToken();
+    const currentToken = getAccessToken();
+    
+    // Garantir que temos um token válido
+    const token = await ensureValidUserToken(currentToken);
+    
     if (!token) {
       console.error("❌ Auth: Nenhum token disponível para teste");
       return false;
