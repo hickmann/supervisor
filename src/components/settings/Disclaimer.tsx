@@ -7,7 +7,7 @@ export const Disclaimer = () => {
   return (
     <div className="flex items-center justify-between py-4 px-4">
       <a
-        href="https://github.com/iamsrikanthnani/coterapia/issues/new"
+        href="http://coterapia.com.br/bug"
         target="_blank"
         rel="noopener noreferrer"
         className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
@@ -24,7 +24,7 @@ export const Disclaimer = () => {
         </div>
 
         <a
-          href="https://github.com/iamsrikanthnani/coterapia"
+          href="http://coterapia.com.br/bug"
           target="_blank"
           rel="noopener noreferrer"
           className="text-muted-foreground hover:text-primary transition-colors"

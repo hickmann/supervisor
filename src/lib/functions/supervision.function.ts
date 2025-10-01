@@ -54,13 +54,24 @@ export async function* fetchSupervisionResponse(
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "apikey": apiKey,
-      "authorization": `Bearer ${apiKey}`,
     };
 
-    // Add user authentication token if available
+    // Add user authentication token as Bearer token if available
     if (authToken) {
-      headers["x-user-token"] = authToken;
-      console.log("🔐 Supervision: Using user auth token:", authToken.substring(0, 20) + "...");
+      headers["Authorization"] = `Bearer ${authToken}`;
+      console.log("🔐 Supervision: Using user auth token as Bearer:", {
+        tokenPreview: authToken.substring(0, 50) + "...",
+        tokenParts: authToken.split('.').length,
+        isUserToken: true
+      });
+    } else {
+      // Fallback to API key as Bearer if no user token
+      headers["Authorization"] = `Bearer ${apiKey}`;
+      console.log("🔐 Supervision: Using API key as Bearer fallback:", {
+        tokenPreview: apiKey.substring(0, 50) + "...",
+        tokenParts: apiKey.split('.').length,
+        isUserToken: false
+      });
     }
 
     const response = await tauriFetch(url, {

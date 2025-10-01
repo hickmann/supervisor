@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse, TasksAgreementsResponse } from "@/types/supervisor.type";
-import { useAuth } from "./auth.context";
+import { useAuth, supabase } from "./auth.context";
 import { useApp } from "./app.context";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
@@ -252,17 +252,41 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 SessionSummary: Dados formatados para envio:", chatData);
       console.log("🌐 SessionSummary: Total de caracteres:", chatData.length);
       
-      // Get user auth token
-      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
-      console.log("🔐 SessionSummary: Using auth token:", token.substring(0, 20) + "...");
+      // Get user auth token - use user token for Supabase Edge Functions
+      let userToken = getAccessToken();
+      const fallbackToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      
+      // Se não há token do usuário, tentar renovar a sessão
+      if (!userToken) {
+        console.warn("⚠️ SessionSummary: Nenhum token do usuário encontrado, tentando renovar sessão...");
+        try {
+          const { data, error } = await supabase.auth.refreshSession();
+          if (error) {
+            console.error("❌ SessionSummary: Erro ao renovar sessão:", error);
+          } else if (data.session) {
+            userToken = data.session.access_token;
+            console.log("✅ SessionSummary: Sessão renovada, novo token:", userToken ? userToken.substring(0, 50) + "..." : "null");
+          }
+        } catch (error) {
+          console.error("❌ SessionSummary: Erro ao renovar sessão:", error);
+        }
+      }
+      
+      const token = userToken || fallbackToken;
+      console.log("🔐 SessionSummary: Token info:", {
+        hasUserToken: !!userToken,
+        usingFallback: !userToken,
+        tokenPreview: token.substring(0, 50) + "...",
+        tokenParts: token.split('.').length,
+        isUserToken: userToken === token
+      });
       
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/session-summary', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json',
-          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           idioma: "pt-BR",
@@ -352,17 +376,41 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 TasksAgreements: Dados formatados para envio:", chatData);
       console.log("🌐 TasksAgreements: Total de caracteres:", chatData.length);
       
-      // Get user auth token
-      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
-      console.log("🔐 TasksAgreements: Using auth token:", token.substring(0, 20) + "...");
+      // Get user auth token - use user token for Supabase Edge Functions
+      let userToken = getAccessToken();
+      const fallbackToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      
+      // Se não há token do usuário, tentar renovar a sessão
+      if (!userToken) {
+        console.warn("⚠️ TasksAgreements: Nenhum token do usuário encontrado, tentando renovar sessão...");
+        try {
+          const { data, error } = await supabase.auth.refreshSession();
+          if (error) {
+            console.error("❌ TasksAgreements: Erro ao renovar sessão:", error);
+          } else if (data.session) {
+            userToken = data.session.access_token;
+            console.log("✅ TasksAgreements: Sessão renovada, novo token:", userToken ? userToken.substring(0, 50) + "..." : "null");
+          }
+        } catch (error) {
+          console.error("❌ TasksAgreements: Erro ao renovar sessão:", error);
+        }
+      }
+      
+      const token = userToken || fallbackToken;
+      console.log("🔐 TasksAgreements: Token info:", {
+        hasUserToken: !!userToken,
+        usingFallback: !userToken,
+        tokenPreview: token.substring(0, 50) + "...",
+        tokenParts: token.split('.').length,
+        isUserToken: userToken === token
+      });
       
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/extract-tasks-agreements', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json',
-          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           transcription: chatData
@@ -439,17 +487,69 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🌐 AssistentClinico: Dados formatados para envio (apenas 5 falas):", chatData);
       console.log("🌐 AssistentClinico: Total de caracteres:", chatData.length);
       
-      // Get user auth token
-      const token = getAccessToken() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
-      console.log("🔐 AssistentClinico: Using auth token:", token.substring(0, 20) + "...");
+      // Get user auth token - use user token for Supabase Edge Functions
+      let userToken = getAccessToken();
+      const fallbackToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      
+      console.log("🔐 AssistentClinico: Auth debug:", {
+        hasUserToken: !!userToken,
+        userTokenPreview: userToken ? userToken.substring(0, 50) + "..." : "null",
+        fallbackTokenPreview: fallbackToken.substring(0, 50) + "...",
+        tokensMatch: userToken === fallbackToken
+      });
+      
+      // Se não há token do usuário, tentar renovar a sessão
+      if (!userToken) {
+        console.warn("⚠️ AssistentClinico: Nenhum token do usuário encontrado, tentando renovar sessão...");
+        try {
+          // Tentar renovar a sessão usando o cliente Supabase diretamente
+          const { data, error } = await supabase.auth.refreshSession();
+          if (error) {
+            console.error("❌ AssistentClinico: Erro ao renovar sessão:", error);
+          } else if (data.session) {
+            userToken = data.session.access_token;
+            console.log("✅ AssistentClinico: Sessão renovada, novo token:", userToken ? userToken.substring(0, 50) + "..." : "null");
+          }
+        } catch (error) {
+          console.error("❌ AssistentClinico: Erro ao renovar sessão:", error);
+        }
+      }
+      
+      // Decodificar tokens para comparar
+      if (userToken) {
+        try {
+          const userPayload = JSON.parse(atob(userToken.split('.')[1]));
+          console.log("🔐 AssistentClinico: User token payload:", {
+            role: userPayload.role,
+            sub: userPayload.sub,
+            email: userPayload.email,
+            iss: userPayload.iss
+          });
+        } catch (e) {
+          console.error("❌ AssistentClinico: Erro ao decodificar user token:", e);
+        }
+      }
+      
+      try {
+        const fallbackPayload = JSON.parse(atob(fallbackToken.split('.')[1]));
+        console.log("🔐 AssistentClinico: Fallback token payload:", {
+          role: fallbackPayload.role,
+          sub: fallbackPayload.sub,
+          email: fallbackPayload.email,
+          iss: fallbackPayload.iss
+        });
+      } catch (e) {
+        console.error("❌ AssistentClinico: Erro ao decodificar fallback token:", e);
+      }
+      
+      const token = userToken || fallbackToken;
       
       const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/assistente-clinico', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
-          'Content-Type': 'application/json',
-          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           transcricao: chatData,
