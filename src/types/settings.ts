@@ -46,6 +46,11 @@ export interface ScreenshotConfig {
   enabled: boolean;
 }
 
+export interface ConversationBufferConfig {
+  messageCount: number;
+  minTextLength: number;
+}
+
 // Speech-to-Text provider types
 export interface SpeechProviderRequestConfig {
   audioFormat: string;

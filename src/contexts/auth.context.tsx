@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { createClient, SupabaseClient, User, Session } from "@supabase/supabase-js";
+import { createClient, User, Session } from "@supabase/supabase-js";
 
 // Configuração do Supabase
 const supabaseUrl = "https://uwqdksfxzhnmkfqvnloq.supabase.co";
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     console.log("🔐 Auth: Tentando criar conta...");
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });

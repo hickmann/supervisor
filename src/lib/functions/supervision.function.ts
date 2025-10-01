@@ -1,5 +1,4 @@
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { useAuth } from "@/contexts/auth.context";
 
 export interface SupervisionResponse {
   avaliacao_tecnica?: Array<{

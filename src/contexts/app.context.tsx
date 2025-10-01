@@ -4,6 +4,7 @@ import {
   SPEECH_TO_TEXT_PROVIDERS,
   STORAGE_KEYS,
   DEFAULT_SUPABASE_API_KEY,
+  CONVERSATION_BUFFER_DEFAULTS,
 } from "@/config";
 import { forceSupabaseConfig, verifySupabaseConfig } from "@/lib/functions/force-supabase-config";
 import { safeLocalStorage } from "@/lib";
@@ -14,7 +15,7 @@ import {
   updateTitlesVisibility,
   CustomizableState,
 } from "@/lib/storage";
-import { IContextType, ScreenshotConfig, TYPE_PROVIDER } from "@/types";
+import { IContextType, ScreenshotConfig, ConversationBufferConfig, TYPE_PROVIDER } from "@/types";
 import curl2Json from "@bany/curl-to-json";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -101,6 +102,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       enabled: true,
     });
 
+  const [conversationBufferConfig, setConversationBufferConfig] =
+    useState<ConversationBufferConfig>({
+      messageCount: CONVERSATION_BUFFER_DEFAULTS.MESSAGE_COUNT,
+      minTextLength: CONVERSATION_BUFFER_DEFAULTS.MIN_TEXT_LENGTH,
+    });
+
   // Unified Customizable State
   const [customizable, setCustomizable] = useState<CustomizableState>({
     appIcon: { isVisible: true },
@@ -141,6 +148,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch {
         console.warn("Failed to parse screenshot configuration");
+      }
+    }
+
+    // Load conversation buffer configuration
+    const savedBufferConfig = safeLocalStorage.getItem(
+      STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG
+    );
+    if (savedBufferConfig) {
+      try {
+        const parsed = JSON.parse(savedBufferConfig);
+        if (typeof parsed === "object" && parsed !== null) {
+          // Validate and clamp messageCount between min and max
+          const messageCount = Math.max(
+            CONVERSATION_BUFFER_DEFAULTS.MIN_MESSAGE_COUNT,
+            Math.min(
+              CONVERSATION_BUFFER_DEFAULTS.MAX_MESSAGE_COUNT,
+              parsed.messageCount || CONVERSATION_BUFFER_DEFAULTS.MESSAGE_COUNT
+            )
+          );
+          
+          setConversationBufferConfig({
+            messageCount,
+            minTextLength: parsed.minTextLength || CONVERSATION_BUFFER_DEFAULTS.MIN_TEXT_LENGTH,
+          });
+        }
+      } catch {
+        console.warn("Failed to parse conversation buffer configuration");
       }
     }
 
@@ -285,6 +319,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         e.key === STORAGE_KEYS.SELECTED_STT_PROVIDER ||
         e.key === STORAGE_KEYS.SYSTEM_PROMPT ||
         e.key === STORAGE_KEYS.SCREENSHOT_CONFIG ||
+        e.key === STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG ||
         e.key === STORAGE_KEYS.CUSTOMIZABLE
       ) {
         loadData();
@@ -313,6 +348,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       );
     }
   }, [selectedSttProvider]);
+
+  // Sync conversation buffer config to localStorage
+  useEffect(() => {
+    safeLocalStorage.setItem(
+      STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG,
+      JSON.stringify(conversationBufferConfig)
+    );
+  }, [conversationBufferConfig]);
 
   // Computed all AI providers
   const allAiProviders: TYPE_PROVIDER[] = [
@@ -410,6 +453,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     onSetSelectedSttProvider,
     screenshotConfiguration,
     setScreenshotConfiguration,
+    conversationBufferConfig,
+    setConversationBufferConfig,
     customizable,
     toggleAppIconVisibility,
     toggleAlwaysOnTop,

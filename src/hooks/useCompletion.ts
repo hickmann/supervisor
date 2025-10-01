@@ -210,7 +210,7 @@ export const useCompletion = () => {
             history: messageHistory,
             userMessage: input,
             imagesBase64,
-            authToken: getAccessToken(),
+            authToken: getAccessToken() || undefined,
           })) {
             fullResponse += chunk;
             setState((prev) => ({
@@ -553,7 +553,7 @@ export const useCompletion = () => {
             history: messageHistory,
             userMessage: prompt,
             imagesBase64: [base64],
-            authToken: getAccessToken(),
+            authToken: getAccessToken() || undefined,
           })) {
             fullResponse += chunk;
             setState((prev) => ({

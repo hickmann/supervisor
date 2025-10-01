@@ -5,11 +5,16 @@ import { extractVariables, safeLocalStorage } from "@/lib";
 import { STORAGE_KEYS } from "@/config";
 
 export const useSettings = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { resizeWindow } = useWindowResize();
+  
   const {
     systemPrompt,
     setSystemPrompt,
     screenshotConfiguration,
     setScreenshotConfiguration,
+    conversationBufferConfig,
+    setConversationBufferConfig,
     allAiProviders,
     allSttProviders,
     selectedAIProvider,
@@ -17,8 +22,6 @@ export const useSettings = () => {
     onSetSelectedAIProvider,
     onSetSelectedSttProvider,
   } = useApp();
-  const { resizeWindow } = useWindowResize();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [variables, setVariables] = useState<{ key: string; value: string }[]>(
     []
   );
@@ -62,6 +65,16 @@ export const useSettings = () => {
     );
   };
 
+  const handleConversationBufferMessageCountChange = (messageCount: number) => {
+    const newConfig = { ...conversationBufferConfig, messageCount };
+    setConversationBufferConfig(newConfig);
+  };
+
+  const handleConversationBufferMinTextLengthChange = (minTextLength: number) => {
+    const newConfig = { ...conversationBufferConfig, minTextLength };
+    setConversationBufferConfig(newConfig);
+  };
+
   useEffect(() => {
     if (selectedAIProvider.provider) {
       const provider = allAiProviders.find(
@@ -102,6 +115,10 @@ export const useSettings = () => {
     handleScreenshotModeChange,
     handleScreenshotPromptChange,
     handleScreenshotEnabledChange,
+    conversationBufferConfig,
+    setConversationBufferConfig,
+    handleConversationBufferMessageCountChange,
+    handleConversationBufferMinTextLengthChange,
     allAiProviders,
     allSttProviders,
     selectedAIProvider,

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { ScreenshotConfig, TYPE_PROVIDER } from "@/types";
+import { ScreenshotConfig, ConversationBufferConfig, TYPE_PROVIDER } from "@/types";
 import { CustomizableState } from "@/lib/storage";
 
 export type IContextType = {
@@ -34,6 +34,10 @@ export type IContextType = {
   screenshotConfiguration: ScreenshotConfig;
   setScreenshotConfiguration: React.Dispatch<
     React.SetStateAction<ScreenshotConfig>
+  >;
+  conversationBufferConfig: ConversationBufferConfig;
+  setConversationBufferConfig: React.Dispatch<
+    React.SetStateAction<ConversationBufferConfig>
   >;
   customizable: CustomizableState;
   toggleAppIconVisibility: (isVisible: boolean) => Promise<void>;

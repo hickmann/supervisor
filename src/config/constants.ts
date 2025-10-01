@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   SYSTEM_AUDIO_QUICK_ACTIONS: "system_audio_quick_actions",
   CUSTOMIZABLE: "customizable",
   COTERAPIA_API_ENABLED: "coterapia_api_enabled",
+  CONVERSATION_BUFFER_CONFIG: "conversation_buffer_config",
 } as const;
 
 // Max number of files that can be attached to a message
@@ -26,3 +27,11 @@ export const DEFAULT_QUICK_ACTIONS = [
   "Recapitular Sessão Completa",
   "Tarefas e Combinados",
 ];
+
+// Conversation buffer configuration
+export const CONVERSATION_BUFFER_DEFAULTS = {
+  MESSAGE_COUNT: 6,
+  MIN_MESSAGE_COUNT: 4,
+  MAX_MESSAGE_COUNT: 15,
+  MIN_TEXT_LENGTH: 80,
+} as const;

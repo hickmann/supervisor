@@ -664,7 +664,7 @@ export function useSystemAudio() {
             history: previousMessages,
             userMessage: transcription,
             imagesBase64: [],
-            authToken: getAccessToken(),
+            authToken: getAccessToken() || undefined,
           })) {
             fullResponse += chunk;
             setLastAIResponse((prev) => prev + chunk);

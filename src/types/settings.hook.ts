@@ -1,5 +1,5 @@
 import { TYPE_PROVIDER } from "./provider.type";
-import { ScreenshotConfig, ScreenshotMode } from "./settings";
+import { ScreenshotConfig, ScreenshotMode, ConversationBufferConfig } from "./settings";
 
 export interface UseSettingsReturn {
   isPopoverOpen: boolean;
@@ -13,6 +13,10 @@ export interface UseSettingsReturn {
   handleScreenshotModeChange: (value: ScreenshotMode) => void;
   handleScreenshotPromptChange: (value: string) => void;
   handleScreenshotEnabledChange: (enabled: boolean) => void;
+  conversationBufferConfig: ConversationBufferConfig;
+  setConversationBufferConfig: React.Dispatch<React.SetStateAction<ConversationBufferConfig>>;
+  handleConversationBufferMessageCountChange: (messageCount: number) => void;
+  handleConversationBufferMinTextLengthChange: (minTextLength: number) => void;
   allAiProviders: TYPE_PROVIDER[];
   allSttProviders: TYPE_PROVIDER[];
   selectedAIProvider: { provider: string; variables: Record<string, string> };

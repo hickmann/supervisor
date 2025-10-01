@@ -12,14 +12,15 @@ import { AppIconToggle } from "./AppIconToggle";
 import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { DeleteChats } from "./DeleteChats";
 import { UserInfo } from "./UserInfo";
+import { ConversationBufferConfig } from "./ConversationBufferConfig";
 
 export const Settings = () => {
   const settings = useSettings();
 
   return (
     <AnimatedPopover
-      open={settings?.isPopoverOpen}
-      onOpenChange={settings?.setIsPopoverOpen}
+      open={settings.isPopoverOpen}
+      onOpenChange={settings.setIsPopoverOpen}
     >
       <AnimatedPopoverTrigger asChild>
         <Button
@@ -51,6 +52,13 @@ export const Settings = () => {
 
             {/* Always On Top Toggle */}
             <AlwaysOnTopToggle />
+
+            {/* Conversation Buffer Configuration */}
+            <ConversationBufferConfig 
+              conversationBufferConfig={settings.conversationBufferConfig}
+              handleConversationBufferMessageCountChange={settings.handleConversationBufferMessageCountChange}
+              handleConversationBufferMinTextLengthChange={settings.handleConversationBufferMinTextLengthChange}
+            />
 
             {/* Delete Chats */}
             <DeleteChats {...settings} />

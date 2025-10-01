@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts";
+import { invoke } from "@tauri-apps/api/core";
 import {
   Dialog,
   DialogContent,
@@ -110,6 +111,18 @@ export const LoginModal = ({ open, onOpenChange, onSuccess }: LoginModalProps) =
     resetForm();
   };
 
+  const handleCreateAccount = async () => {
+    try {
+      await invoke("open_url", { url: "http://coterapia.com.br/signup" });
+    } catch (error) {
+      console.error("Erro ao abrir URL:", error);
+      // Fallback: tentar abrir usando window.open se disponível
+      if (typeof window !== "undefined" && window.open) {
+        window.open("http://coterapia.com.br/signup", "_blank");
+      }
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -196,7 +209,7 @@ export const LoginModal = ({ open, onOpenChange, onSuccess }: LoginModalProps) =
 
             <button
               type="button"
-              onClick={toggleMode}
+              onClick={isSignUp ? toggleMode : handleCreateAccount}
               disabled={loading}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >

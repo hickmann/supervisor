@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse, TasksAgreementsResponse } from "@/types/supervisor.type";
 import { useAuth } from "./auth.context";
+import { useApp } from "./app.context";
 
 const SupervisorContext = createContext<SupervisorContextType | undefined>(undefined);
 
 export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const { getAccessToken } = useAuth();
+  const { conversationBufferConfig } = useApp();
   const [items, setItems] = useState<SupervisorItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<SupervisorItem | null>(null);
   const [assistentClinicoData, setAssistentClinicoData] = useState<AssistentClinicoResponse | null>(null);
@@ -215,23 +217,23 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🔄 ConversationBuffer: Adicionada nova fala:", newMessage);
       console.log("🔄 ConversationBuffer: Total de falas:", updated.length);
       
-      // Se chegamos a 5 falas, verificar se o texto total tem pelo menos 80 caracteres
-      if (updated.length >= 5) {
+      // Se chegamos ao número configurado de falas, verificar se o texto total tem pelo menos o mínimo configurado
+      if (updated.length >= conversationBufferConfig.messageCount) {
         const totalTextLength = updated.reduce((total, msg) => total + msg.content.length, 0);
         console.log("🔄 ConversationBuffer: Texto total:", totalTextLength, "caracteres");
         
-        if (totalTextLength >= 80) {
-          console.log("🚀 ConversationBuffer: 5 falas com texto suficiente, enviando para assistente clínico");
+        if (totalTextLength >= conversationBufferConfig.minTextLength) {
+          console.log(`🚀 ConversationBuffer: ${conversationBufferConfig.messageCount} falas com texto suficiente, enviando para assistente clínico`);
           sendToAssistentClinico(updated);
           return []; // Limpar buffer após enviar
         } else {
-          console.log("🔄 ConversationBuffer: 5 falas mas texto insuficiente, aguardando mais falas...");
+          console.log(`🔄 ConversationBuffer: ${conversationBufferConfig.messageCount} falas mas texto insuficiente, aguardando mais falas...`);
         }
       }
       
       return updated;
     });
-  }, []);
+  }, [conversationBufferConfig]);
   
   // Função para gerar resumo da sessão completa
   const generateSessionSummary = useCallback(async (conversationHistory: Array<{ role: string; content: string; timestamp: number }>): Promise<boolean> => {
@@ -260,7 +262,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json',
-          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
+          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
         },
         body: JSON.stringify({
           idioma: "pt-BR",
@@ -360,7 +362,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json',
-          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
+          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
         },
         body: JSON.stringify({
           transcription: chatData
@@ -447,7 +449,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
           'Authorization': `Bearer ${token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ',
           'Content-Type': 'application/json',
-          ...(getAccessToken() && { 'x-user-token': getAccessToken() })
+          ...(getAccessToken() ? { 'x-user-token': getAccessToken()! } : {})
         },
         body: JSON.stringify({
           transcricao: chatData,
