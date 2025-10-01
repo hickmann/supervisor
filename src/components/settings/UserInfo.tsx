@@ -10,9 +10,7 @@ export const UserInfo = ({ className }: UserInfoProps) => {
   const { user, signOut, isAuthenticated } = useAuth();
 
   const handleLogout = async () => {
-    if (confirm("Tem certeza que deseja sair?")) {
-      await signOut();
-    }
+    await signOut();
   };
 
   if (!isAuthenticated || !user) {
