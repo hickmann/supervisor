@@ -30,7 +30,7 @@
         "shadow": false
       }
     ],
-    "security": { "csp": null }
+    "security": { "csp": "" }
   },
   "bundle": {
     "active": true,
@@ -59,10 +59,6 @@
         "type": "embedBootstrapper"
       },
       "allowDowngrades": false,
-      "certificateThumbprint": null,
-      "digestAlgorithm": "sha256",
-      "timestampUrl": null,
-      "tsp": false,
       "wix": {
         "language": ["pt-BR"]
       }
@@ -87,7 +83,7 @@
   "plugins": {
     "updater": {
       "endpoints": ["https://coterapia.com.br/api/update"],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RDJBNUFFM0ZCREEyQjEKUldTeG9yMC9ycVhTWmlBRkovV2N5L3RudDhTTHFzM3QxSkF0R0doRGtvSUJKWktpdGp4cWRhcmcK",
+      "pubkey": "",
       "windows": {
         "installMode": "passive"
       }

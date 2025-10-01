@@ -82,25 +82,64 @@ pub struct WhisperState {
 }
 
 impl WhisperState {
-    pub fn new() -> Self {
-        // Configurar caminhos para o Whisper.cpp
-        let whisper_path = if cfg!(target_os = "windows") {
-            // Construir caminho absoluto correto
+    fn find_whisper_executable() -> String {
+        if cfg!(target_os = "windows") {
             let current_dir = std::env::current_dir().unwrap();
             let project_root = current_dir.parent().unwrap();
+            
+            // Lista de caminhos possíveis para o executável do Whisper
+            let possible_paths = vec![
+                format!("{}/whisper/whisper-cli.exe", project_root.display()), // Desenvolvimento
+                format!("{}/_up_/whisper/whisper-cli.exe", project_root.display()), // MSI instalado
+                format!("{}/whisper/whisper-server.exe", project_root.display()), // Alternativa
+                format!("{}/_up_/whisper/whisper-server.exe", project_root.display()), // Alternativa MSI
+            ];
+            
+            for path in possible_paths {
+                if Path::new(&path).exists() {
+                    info!("✅ WHISPER: Found executable at: {}", path);
+                    return path;
+                }
+            }
+            
+            // Se não encontrou nenhum, retorna o primeiro (para mostrar erro mais claro)
             format!("{}/whisper/whisper-cli.exe", project_root.display())
         } else {
             "../whisper/whisper-cli".to_string()
-        };
-        
-        let model_path = if cfg!(target_os = "windows") {
-            // Construir caminho absoluto correto
+        }
+    }
+    
+    fn find_whisper_model() -> String {
+        if cfg!(target_os = "windows") {
             let current_dir = std::env::current_dir().unwrap();
             let project_root = current_dir.parent().unwrap();
+            
+            // Lista de caminhos possíveis para o modelo do Whisper
+            let possible_paths = vec![
+                format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display()), // Desenvolvimento
+                format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", project_root.display()), // MSI instalado
+                format!("{}/models/ggml-base-q5_1.bin", project_root.display()), // Alternativa
+                format!("{}/_up_/models/ggml-base-q5_1.bin", project_root.display()), // Alternativa MSI
+            ];
+            
+            for path in possible_paths {
+                if Path::new(&path).exists() {
+                    info!("✅ WHISPER: Found model at: {}", path);
+                    return path;
+                }
+            }
+            
+            // Se não encontrou nenhum, retorna o primeiro (para mostrar erro mais claro)
             format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display())
         } else {
             "../whisper/models/ggml-base-q5_1.bin".to_string()
-        };
+        }
+    }
+
+    pub fn new() -> Self {
+        // Configurar caminhos para o Whisper.cpp
+        let whisper_path = Self::find_whisper_executable();
+        let model_path = Self::find_whisper_model();
         
         let whisper_state = Self {
             whisper_path,
@@ -112,17 +151,65 @@ impl WhisperState {
     }
     
     pub fn verify_setup(&self) -> Result<(), String> {
+        info!("🔍 WHISPER: Verifying setup...");
+        info!("📁 WHISPER: Looking for executable at: {}", self.whisper_path);
+        info!("📁 WHISPER: Looking for model at: {}", self.model_path);
+        
         // Verificar se o executável do Whisper existe
         if !Path::new(&self.whisper_path).exists() {
-            return Err(format!("Whisper executable not found at: {}", self.whisper_path));
+            error!("❌ WHISPER: Executable not found at: {}", self.whisper_path);
+            
+            // Mostrar caminhos alternativos que foram testados
+            if cfg!(target_os = "windows") {
+                let current_dir = std::env::current_dir().unwrap();
+                let project_root = current_dir.parent().unwrap();
+                let alternative_paths = vec![
+                    format!("{}/whisper/whisper-cli.exe", project_root.display()),
+                    format!("{}/_up_/whisper/whisper-cli.exe", project_root.display()),
+                    format!("{}/whisper/whisper-server.exe", project_root.display()),
+                    format!("{}/_up_/whisper/whisper-server.exe", project_root.display()),
+                ];
+                
+                let mut error_msg = format!("Whisper executable not found at: {}\n\nTried the following paths:", self.whisper_path);
+                for path in alternative_paths {
+                    error_msg.push_str(&format!("\n  - {}", path));
+                }
+                error_msg.push_str("\n\nPlease ensure Whisper files are properly installed.");
+                return Err(error_msg);
+            } else {
+                return Err(format!("Whisper executable not found at: {}", self.whisper_path));
+            }
         }
         
         // Verificar se o modelo existe
         if !Path::new(&self.model_path).exists() {
-            return Err(format!("Whisper model not found at: {}", self.model_path));
+            error!("❌ WHISPER: Model not found at: {}", self.model_path);
+            
+            // Mostrar caminhos alternativos que foram testados
+            if cfg!(target_os = "windows") {
+                let current_dir = std::env::current_dir().unwrap();
+                let project_root = current_dir.parent().unwrap();
+                let alternative_paths = vec![
+                    format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display()),
+                    format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", project_root.display()),
+                    format!("{}/models/ggml-base-q5_1.bin", project_root.display()),
+                    format!("{}/_up_/models/ggml-base-q5_1.bin", project_root.display()),
+                ];
+                
+                let mut error_msg = format!("Whisper model not found at: {}\n\nTried the following paths:", self.model_path);
+                for path in alternative_paths {
+                    error_msg.push_str(&format!("\n  - {}", path));
+                }
+                error_msg.push_str("\n\nPlease ensure Whisper model files are properly installed.");
+                return Err(error_msg);
+            } else {
+                return Err(format!("Whisper model not found at: {}", self.model_path));
+            }
         }
         
         info!("✅ WHISPER: Setup verification successful");
+        info!("🎯 WHISPER: Executable found at: {}", self.whisper_path);
+        info!("🎯 WHISPER: Model found at: {}", self.model_path);
         Ok(())
     }
 }

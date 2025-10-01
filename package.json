@@ -3,12 +3,12 @@
   "private": true,
   "version": "0.1.1",
   "description": "The Open Source Alternative to Cluely - A lightning-fast, privacy-first AI assistant that works seamlessly during meetings, interviews, and conversations without anyone knowing.",
-   "license": "Copyright © 2025 CoterapIA",
+  "license": "Copyright © 2025 CoterapIA",
   "homepage": "https://www.coterapia.com.br",
   "bugs": {
     "url": "https://www.coterapia.com.br/bugs"
   },
-"keywords": [
+  "keywords": [
     "assistente-de-terapia",
     "copiloto-psicologo",
     "supervisao-clinica",
@@ -28,7 +28,7 @@
     "terapia-online",
     "anotacoes-automaticas",
     "cluely-alternativa"
-],
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -47,6 +47,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@ricky0123/vad-react": "^0.0.30",
+    "@supabase/supabase-js": "^2.58.0",
     "@tailwindcss/vite": "^4.1.12",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-global-shortcut": "^2.3.0",

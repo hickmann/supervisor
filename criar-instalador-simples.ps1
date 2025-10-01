@@ -57,9 +57,14 @@ if ($LASTEXITCODE -ne 0) {
 # 5. Build do Tauri (apenas executavel)
 Write-Host "`n5. Construindo aplicacao Tauri..." -ForegroundColor Yellow
 Write-Host "   Criando apenas o executavel..." -ForegroundColor Cyan
+Write-Host "   Desabilitando assinatura de codigo..." -ForegroundColor Cyan
+
+# Desabilitar assinatura de codigo para evitar erro de chave privada
+$env:TAURI_SIGNING_PRIVATE_KEY = ""
+$env:TAURI_PRIVATE_KEY = ""
 
 cd src-tauri
-cargo tauri build
+cargo tauri build --no-bundle
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Erro: Falha no build do Tauri" -ForegroundColor Red
