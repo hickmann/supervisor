@@ -17,10 +17,16 @@ use tokio::task::JoinHandle;
 
 mod speaker;
 mod whisper_stt;
+mod mics;
+mod whisper_streamer;
 
 #[derive(Default)]
 pub struct AudioState {
     stream_task: Arc<Mutex<Option<JoinHandle<()>>>>,
+}
+
+pub struct WhisperStreamState {
+    streamer: Arc<Mutex<whisper_streamer::WhisperStreamer>>,
 }
 
 
@@ -79,12 +85,39 @@ async fn exit_app(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+// Comandos para whisper_stream
+#[tauri::command]
+async fn list_audio_devices() -> Result<Vec<mics::MicDevice>, String> {
+    mics::list_mics().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn start_terapeuta_stream(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, WhisperStreamState>,
+    mic_index: i32,
+) -> Result<(), String> {
+    let mut streamer = state.streamer.lock().unwrap();
+    streamer.start_with_mic(app, mic_index).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn stop_terapeuta_stream(
+    state: tauri::State<'_, WhisperStreamState>,
+) -> Result<(), String> {
+    let mut streamer = state.streamer.lock().unwrap();
+    streamer.stop().map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
         .manage(AudioState::default())
         .manage(shortcuts::WindowVisibility(Mutex::new(false)))
         .manage(whisper_stt::WhisperState::new())
+        .manage(WhisperStreamState {
+            streamer: Arc::new(Mutex::new(whisper_streamer::WhisperStreamer::new())),
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_http::init())
@@ -117,6 +150,9 @@ pub fn run() {
             speaker::check_system_audio_access,
             speaker::request_system_audio_access,
             whisper_stt::transcribe_audio_with_whisper,
+            list_audio_devices,
+            start_terapeuta_stream,
+            stop_terapeuta_stream,
         ])
         .setup(|app| {
             // Setup main window positioning

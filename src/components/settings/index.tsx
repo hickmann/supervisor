@@ -13,6 +13,7 @@ import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { DeleteChats } from "./DeleteChats";
 import { UserInfo } from "./UserInfo";
 import { ConversationBufferConfig } from "./ConversationBufferConfig";
+import { MicrophoneSettings } from "./MicrophoneSettings";
 
 export const Settings = () => {
   const settings = useSettings();
@@ -59,6 +60,9 @@ export const Settings = () => {
               handleConversationBufferMessageCountChange={settings.handleConversationBufferMessageCountChange}
               handleConversationBufferMinTextLengthChange={settings.handleConversationBufferMinTextLengthChange}
             />
+
+            {/* Microphone Settings */}
+            <MicrophoneSettings />
 
             {/* Delete Chats */}
             <DeleteChats {...settings} />
