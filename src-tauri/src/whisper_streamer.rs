@@ -3,7 +3,7 @@ use std::io::{BufRead, BufReader};
 use tauri::{AppHandle, Emitter};
 use serde::Serialize;
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug)]
 pub struct WhisperEvent {
     pub text: String,
     pub start: f32,
@@ -81,11 +81,14 @@ impl WhisperStreamer {
             let mut current_text = String::new();
 
             for line in reader.lines().flatten() {
+                println!("🔍 whisper_stream stdout: {}", line);
                 if let Some(evt) = parse_line_to_event(&line) {
+                    println!("✅ Parsed event: {:?}", evt);
                     // Se temos um segmento anterior, marcar como final
                     if let Some(mut prev) = last_segment.take() {
                         if prev.text != evt.text {
                             prev.is_final = true;
+                            println!("📤 Emitting final segment: {:?}", prev);
                             let _ = app.emit("whisper:segment", &prev);
                         }
                     }
@@ -97,6 +100,7 @@ impl WhisperStreamer {
                         end: evt.end,
                         is_final: false,
                     };
+                    println!("📤 Emitting partial segment: {:?}", partial);
                     let _ = app.emit("whisper:segment", &partial);
                     last_segment = Some(evt);
                 } else if !line.trim().is_empty() {
