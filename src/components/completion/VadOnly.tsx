@@ -3,8 +3,7 @@ import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { fetchSTT } from "@/lib/functions/stt.function";
-import { fetchWhisperSTTWithFallback } from "@/lib/functions/whisper-http-stt.function";
+import { getBestTranscription } from "@/lib/functions/dual-transcription.function";
 import { floatArrayToWav } from "@/lib/utils";
 
 interface VadOnlyProps {
@@ -32,8 +31,9 @@ export const VadOnly = ({
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
         console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
-        // USAR WHISPER COM FALLBACK AUTOMÁTICO - WEBSOCKET OU TAURI
-        const transcription = await fetchWhisperSTTWithFallback(audioBlob);
+        // USAR WHISPER_SERVER PRIMEIRO, TAURI COMO FALLBACK
+        console.log("🎯 VAD: Using whisper_server (HTTP) first, Tauri as fallback");
+        const transcription = await getBestTranscription(audioBlob);
 
         if (transcription) {
           console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
