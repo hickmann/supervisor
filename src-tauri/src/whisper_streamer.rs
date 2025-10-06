@@ -25,19 +25,24 @@ impl WhisperStreamer {
     }
 
     pub fn start_with_mic(&mut self, app: AppHandle, mic_index: i32) -> anyhow::Result<()> {
+        println!("🚀 WhisperStreamer::start_with_mic called with mic_index: {}", mic_index);
+        
         if self.is_running {
+            println!("❌ Whisper stream already running");
             return Err(anyhow::anyhow!("Whisper stream already running"));
         }
 
         // Verificar se o executável whisper_stream existe
-        let whisper_path = "./whisper/whisper-stream.exe";
+        let whisper_path = "../whisper/whisper-stream.exe";
         if !std::path::Path::new(whisper_path).exists() {
+            println!("❌ whisper_stream executable not found at: {}", whisper_path);
             return Err(anyhow::anyhow!("whisper_stream executable not found"));
         }
 
         // Verificar se o modelo existe
-        let model_path = "./whisper/models/ggml-base-q5_1.bin";
+        let model_path = "../whisper/models/ggml-base-q5_1.bin";
         if !std::path::Path::new(model_path).exists() {
+            println!("❌ Model file not found: {}", model_path);
             return Err(anyhow::anyhow!("Model file not found: {}", model_path));
         }
 

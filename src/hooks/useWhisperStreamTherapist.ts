@@ -23,6 +23,8 @@ export interface UseWhisperStreamTherapistReturn {
 export function useWhisperStreamTherapist(
   onFinalSegment: (segment: WhisperSegmentEvent) => Promise<void>
 ): UseWhisperStreamTherapistReturn {
+  console.log("🚀 useWhisperStreamTherapist: Hook initialized!");
+  
   const [isActive, setIsActive] = useState(false);
   const [liveText, setLiveText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,15 +48,17 @@ export function useWhisperStreamTherapist(
               end: segment.end,
               is_final: segment.is_final,
             });
+            console.log("📝 THERAPIST STREAM: Full text:", segment.text);
 
             if (segment.is_final) {
               // Segmento final - persistir no histórico
               console.log("✅ THERAPIST STREAM: Final segment - persisting to history");
-              console.log("📝 THERAPIST STREAM: Full text:", segment.text);
+              console.log("✅ THERAPIST STREAM: Calling onFinalSegment callback");
               
               try {
                 await onFinalSegment(segment);
                 setLiveText(""); // Limpar texto parcial
+                console.log("✅ THERAPIST STREAM: onFinalSegment completed successfully");
               } catch (err) {
                 console.error("❌ THERAPIST STREAM: Failed to persist segment:", err);
                 setError(err instanceof Error ? err.message : "Failed to persist segment");
@@ -91,6 +95,7 @@ export function useWhisperStreamTherapist(
   const startStream = useCallback(async () => {
     try {
       console.log("🚀 THERAPIST STREAM: Starting whisper stream...");
+      console.log("🚀 THERAPIST STREAM: Hook is being called!");
       setError(null);
       
       // Buscar índice do microfone salvo
@@ -112,7 +117,10 @@ export function useWhisperStreamTherapist(
         console.warn("⚠️ THERAPIST STREAM: Failed to load saved microphone, using default:", err);
       }
       
+      console.log("🚀 THERAPIST STREAM: Calling Tauri command with micIndex:", micIndex);
+      console.log("🚀 THERAPIST STREAM: About to call invoke('start_terapeuta_stream', { micIndex })");
       await invoke("start_terapeuta_stream", { micIndex });
+      console.log("🚀 THERAPIST STREAM: Tauri command completed successfully");
       setIsActive(true);
       console.log("✅ THERAPIST STREAM: Stream started successfully with mic index:", micIndex);
     } catch (err) {

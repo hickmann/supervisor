@@ -73,22 +73,10 @@ export const Audio = ({
     <>
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>
-        {enableVAD ? (
-          <VadOnly
-            setEnableVAD={setEnableVAD}
-            systemAudio={systemAudio}
-          />
-        ) : (
-          <Button
-            size="icon"
-            onClick={handlePlayButtonClick}
-            className="cursor-pointer"
-            title="Iniciar transcrição com a IA"
-            disabled={authLoading}
-          >
-            <PlayIcon className="h-4 w-4" />
-          </Button>
-        )}
+        <VadOnly
+          setEnableVAD={setEnableVAD}
+          systemAudio={systemAudio}
+        />
       </PopoverTrigger>
 
       <PopoverContent

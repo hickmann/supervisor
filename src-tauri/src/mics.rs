@@ -11,7 +11,7 @@ pub struct MicDevice {
 #[command]
 pub fn list_mics() -> Result<Vec<MicDevice>, String> {
     // Executar whisper_stream sem argumentos para listar dispositivos
-    let output = Command::new("./whisper/whisper-stream.exe")
+        let output = Command::new("../whisper/whisper-stream.exe")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()

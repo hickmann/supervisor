@@ -1,10 +1,8 @@
-import { fetchSTT } from "@/lib";
 import { UseCompletionReturn } from "@/types";
-import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../ui/button";
-import { floatArrayToWav } from "@/lib/utils";
+import { useWhisperStreamTherapist, WhisperSegmentEvent } from "@/hooks";
 import { useSystemAudio } from "@/hooks/useSystemAudio";
 
 interface AutoSpeechVADProps {
@@ -17,81 +15,73 @@ export const AutoSpeechVAD = ({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const systemAudio = useSystemAudio();
 
-  const vad = useMicVAD({
-    userSpeakingThreshold: 0.6,
-    startOnLoad: false, // Não iniciar automaticamente para evitar duplo clique
-    onSpeechEnd: async (audio) => {
+  // Callback para processar segmentos finais
+  const handleFinalSegment = useCallback(
+    async (segment: WhisperSegmentEvent) => {
+      console.log("🎯 THERAPIST STREAM: Final segment received:", segment.text);
+      
       try {
-        // convert float32array to blob
-        const audioBlob = floatArrayToWav(audio, 16000, "wav");
-
-        let transcription: string;
-        
-        // SEMPRE USAR WHISPER - NÃO PRECISA VERIFICAR PROVIDERS
-        console.log("🎤 VAD: Using WHISPER for all transcriptions");
-
         setIsTranscribing(true);
-
-        console.log("🎤 VAD: Starting transcription with WHISPER...");
-        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
-
-        // SEMPRE USAR WHISPER - FORÇAR USO
-        transcription = await fetchSTT({
-          provider: undefined,
-          selectedProvider: { provider: "whisper-stt", variables: {} },
-          audio: audioBlob,
-        });
-
-        if (transcription) {
-          console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
-          console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
-          
-          // SEMPRE usar o sistema de supervisão - Sistema 1 integrado com Sistema 2
-          if (systemAudio && systemAudio.processMicrophoneTranscription) {
-            console.log("🎯 VAD: Sending to psychological supervision system (Sistema 1 → Sistema 2)");
-            await systemAudio.processMicrophoneTranscription(transcription);
-          } else {
-            console.error("❌ VAD: Sistema de supervisão não disponível! Microfone não funcionará.");
-            alert("Sistema de supervisão não disponível. Reinicie a aplicação.");
-          }
+        
+        if (systemAudio && systemAudio.processMicrophoneTranscription) {
+          console.log("🎯 THERAPIST STREAM: Sending to psychological supervision system");
+          await systemAudio.processMicrophoneTranscription(segment.text);
+          setEnableVAD(true);
+        } else {
+          console.error("❌ THERAPIST STREAM: Sistema de supervisão não disponível!");
         }
       } catch (error) {
-        console.error("❌ VAD: Failed to transcribe audio:", error);
-        alert(`Erro na transcrição: ${error instanceof Error ? error.message : "Transcription failed"}`);
+        console.error("❌ THERAPIST STREAM: Failed to process final segment:", error);
       } finally {
         setIsTranscribing(false);
       }
     },
-  });
+    [systemAudio, setEnableVAD]
+  );
+
+  const { isActive, liveText, startStream, stopStream, error: streamError } = useWhisperStreamTherapist(handleFinalSegment);
+
+  // Sincronizar estado interno com o hook
+  useEffect(() => {
+    setEnableVAD(isActive);
+  }, [isActive, setEnableVAD]);
+
+  const handleToggleVAD = async () => {
+    try {
+      if (isActive) {
+        console.log("🛑 AutoSpeechVAD: Stopping whisper stream...");
+        await stopStream();
+      } else {
+        console.log("🚀 AutoSpeechVAD: Starting whisper stream...");
+        await startStream();
+      }
+    } catch (error) {
+      console.error("❌ AutoSpeechVAD: Failed to toggle stream:", error);
+    }
+  };
 
   return (
     <>
       <Button
         size="icon"
-        onClick={() => {
-          console.log("🎤 AutoSpeechVAD: Button clicked, current state - listening:", vad.listening);
-          if (vad.listening) {
-            console.log("🎤 AutoSpeechVAD: Pausing VAD");
-            vad.pause();
-            setEnableVAD(false);
-          } else {
-            console.log("🎤 AutoSpeechVAD: Starting VAD");
-            vad.start();
-            setEnableVAD(true);
-          }
-        }}
+        onClick={handleToggleVAD}
         className="cursor-pointer"
       >
         {isTranscribing ? (
           <LoaderCircleIcon className="h-4 w-4 animate-spin text-green-500" />
-        ) : vad.userSpeaking ? (
+        ) : isActive && liveText ? (
           <LoaderCircleIcon className="h-4 w-4 animate-spin" />
-        ) : vad.listening ? (
+        ) : isActive ? (
           <MicOffIcon className="h-4 w-4 animate-pulse" />
         ) : (
           <MicIcon className="h-4 w-4" />
         )}
       </Button>
+      {streamError && (
+        <div className="text-xs text-red-400 mt-1">
+          Erro: {streamError}
+        </div>
+      )}
     </>
   );
 };

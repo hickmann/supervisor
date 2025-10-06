@@ -97,8 +97,12 @@ async fn start_terapeuta_stream(
     state: tauri::State<'_, WhisperStreamState>,
     mic_index: i32,
 ) -> Result<(), String> {
+    println!("🚀 Tauri command start_terapeuta_stream called with mic_index: {}", mic_index);
     let mut streamer = state.streamer.lock().unwrap();
-    streamer.start_with_mic(app, mic_index).map_err(|e| e.to_string())
+    streamer.start_with_mic(app, mic_index).map_err(|e| {
+        println!("❌ Tauri command start_terapeuta_stream failed: {}", e);
+        e.to_string()
+    })
 }
 
 #[tauri::command]

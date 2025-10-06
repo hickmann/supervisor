@@ -1,10 +1,8 @@
 import { UseCompletionReturn } from "@/types";
-import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../ui/button";
-import { fetchSTT } from "@/lib/functions/stt.function";
-import { floatArrayToWav } from "@/lib/utils";
+import { useWhisperStreamTherapist, WhisperSegmentEvent } from "@/hooks";
 
 interface VadOnlyProps {
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
@@ -15,88 +13,78 @@ export const VadOnly = ({
   setEnableVAD,
   systemAudio,
 }: VadOnlyProps) => {
-  const [, setIsListening] = useState(false);
+  console.log("🎤 VadOnly: Component rendered!");
 
-  const vad = useMicVAD({
-    userSpeakingThreshold: 0.6,
-    startOnLoad: true, // Start automatically when component mounts
-    onSpeechStart: () => {
-      console.log("🎤 VadOnly: Speech detected - VAD activated");
-    },
-    onSpeechEnd: async (audio) => {
-      console.log("Fim da fala detectado - VAD", audio.length, "samples");
+  // Callback para processar segmentos finais
+  const handleFinalSegment = useCallback(
+    async (segment: WhisperSegmentEvent) => {
+      console.log("🎯 THERAPIST STREAM: Final segment received:", segment.text);
+      console.log("🎯 THERAPIST STREAM: systemAudio available:", !!systemAudio);
+      console.log("🎯 THERAPIST STREAM: processMicrophoneTranscription available:", !!(systemAudio && systemAudio.processMicrophoneTranscription));
       
       try {
-        // Convert float32array to blob
-        const audioBlob = floatArrayToWav(audio, 16000, "wav");
-        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
-
-        // Use Whisper for transcription
-        const transcription = await fetchSTT({
-          provider: undefined,
-          selectedProvider: { provider: "whisper-stt", variables: {} },
-          audio: audioBlob,
-        });
-
-        if (transcription) {
-          console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
-          console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
-          
-          // SEMPRE usar o sistema de supervisão - Sistema 1 integrado com Sistema 2
-          if (systemAudio && systemAudio.processMicrophoneTranscription) {
-            console.log("🎯 VAD: Sending to psychological supervision system (Sistema 1 → Sistema 2)");
-            await systemAudio.processMicrophoneTranscription(transcription);
-          } else {
-            console.error("❌ VAD: Sistema de supervisão não disponível! Microfone não funcionará.");
-            alert("Sistema de supervisão não disponível. Reinicie a aplicação.");
-          }
+        if (systemAudio && systemAudio.processMicrophoneTranscription) {
+          console.log("🎯 THERAPIST STREAM: Sending to psychological supervision system");
+          await systemAudio.processMicrophoneTranscription(segment.text);
+          setEnableVAD(true);
+        } else {
+          console.error("❌ THERAPIST STREAM: Sistema de supervisão não disponível!");
+          console.error("❌ THERAPIST STREAM: systemAudio:", systemAudio);
         }
       } catch (error) {
-        console.error("❌ VAD: Failed to transcribe audio:", error);
-        alert(`Erro na transcrição: ${error instanceof Error ? error.message : "Transcription failed"}`);
+        console.error("❌ THERAPIST STREAM: Failed to process final segment:", error);
       }
     },
-  });
+    [systemAudio, setEnableVAD]
+  );
 
-  // Auto-start VAD when component mounts
+  const { isActive, liveText, startStream, stopStream, error: streamError } = useWhisperStreamTherapist(handleFinalSegment);
+
+  // Sincronizar estado interno com o hook
   useEffect(() => {
-    if (vad && !vad.listening) {
-      console.log("🎤 VadOnly: Auto-starting VAD on component mount");
-      vad.start();
-      setIsListening(true);
-    }
-  }, [vad]);
+    setEnableVAD(isActive);
+  }, [isActive, setEnableVAD]);
 
-  const handleToggleVAD = () => {
-    if (vad.listening) {
-      vad.pause();
-      setEnableVAD(false);
-      setIsListening(false);
-    } else {
-      vad.start();
-      setEnableVAD(true);
-      setIsListening(true);
+  const handleToggleVAD = async () => {
+    try {
+      console.log("🎤 VadOnly: Button clicked! Current state - isActive:", isActive);
+      console.log("🎤 VadOnly: systemAudio available:", !!systemAudio);
+      console.log("🎤 VadOnly: startStream function:", typeof startStream);
+      console.log("🎤 VadOnly: stopStream function:", typeof stopStream);
+      
+      if (isActive) {
+        console.log("🛑 VadOnly: Stopping whisper stream...");
+        await stopStream();
+      } else {
+        console.log("🚀 VadOnly: Starting whisper stream...");
+        console.log("🚀 VadOnly: About to call startStream()");
+        await startStream();
+        console.log("🚀 VadOnly: startStream() completed");
+      }
+    } catch (error) {
+      console.error("❌ VadOnly: Failed to toggle stream:", error);
+      console.error("❌ VadOnly: Error details:", error);
     }
   };
 
   const getButtonIcon = () => {
-    if (vad.userSpeaking) {
+    if (isActive && liveText) {
       return <LoaderCircleIcon className="h-4 w-4 animate-spin text-green-500" />;
     }
-    if (vad.listening) {
+    if (isActive) {
       return <MicOffIcon className="h-4 w-4 animate-pulse text-red-500" />;
     }
     return <MicIcon className="h-4 w-4" />;
   };
 
   const getButtonTitle = () => {
-    if (vad.userSpeaking) {
-      return "Detectando fala...";
+    if (isActive && liveText) {
+      return "Transcrevendo...";
     }
-    if (vad.listening) {
-      return "Parar detecção de voz (VAD)";
+    if (isActive) {
+      return "Parar whisper_stream";
     }
-    return "Iniciar detecção de voz (VAD)";
+    return "Iniciar whisper_stream";
   };
 
   return (
@@ -109,6 +97,11 @@ export const VadOnly = ({
       >
         {getButtonIcon()}
       </Button>
+      {streamError && (
+        <div className="text-xs text-red-400 mt-1">
+          Erro: {streamError}
+        </div>
+      )}
     </>
   );
 };
