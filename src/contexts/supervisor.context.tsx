@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { SupervisorItem, SupervisorContextType, AssistentClinicoResponse, SessionSummaryResponse, TasksAgreementsResponse } from "@/types/supervisor.type";
 import { useAuth } from "./auth.context";
 import { useApp } from "./app.context";
@@ -204,6 +204,81 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       return combined;
     });
   }, []);
+
+  // Flag para evitar chamadas duplicadas
+  const [isSendingToAssistentClinico, setIsSendingToAssistentClinico] = useState(false);
+
+  // Função para enviar para o assistente clínico
+  const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
+    // Evitar chamadas duplicadas
+    if (isSendingToAssistentClinico) {
+      console.log("⚠️ AssistentClinico: Já está enviando, ignorando chamada duplicada");
+      return;
+    }
+
+    try {
+      setIsSendingToAssistentClinico(true);
+      console.log("🌐 AssistentClinico: Enviando apenas as 5 conversas coletadas:", conversations);
+      
+      // Formatear apenas as 5 conversas coletadas para envio
+      const chatData = conversations
+        .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
+        .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
+        .join('\n\n');
+      
+      console.log("🌐 AssistentClinico: Dados formatados para envio (apenas 5 falas):", chatData);
+      console.log("🌐 AssistentClinico: Total de caracteres:", chatData.length);
+      
+      // Prepare headers with authentication using utility function
+      const fallbackToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
+      const userToken = getAccessToken();
+      
+      console.log("🔐 AssistentClinico: Auth debug:", {
+        hasUserToken: !!userToken,
+        userTokenLength: userToken?.length || 0,
+        usingFallback: !userToken
+      });
+      
+      const authToken = userToken || fallbackToken;
+      
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/assistente-clinico`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          messages: chatData,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ AssistentClinico: Resposta recebida:", result);
+      
+      // Processar resposta e adicionar ao histórico
+      if (result.response) {
+        addToConversationBuffer("assistant", result.response);
+        console.log("✅ AssistentClinico: Resposta do assistente adicionada ao histórico");
+      }
+      
+      // Salvar dados do assistente clínico
+      if (result.data) {
+        setAssistentClinicoData(result.data);
+        console.log("✅ AssistentClinico: Dados do assistente clínico salvos");
+      }
+      
+    } catch (error) {
+      console.error("❌ AssistentClinico: Erro ao enviar:", error);
+      setError(error instanceof Error ? error.message : "Erro ao enviar para assistente clínico");
+    } finally {
+      setIsSendingToAssistentClinico(false);
+    }
+  }, [isSendingToAssistentClinico]);
   
   // Função para adicionar fala ao buffer da conversa
   const addToConversationBuffer = useCallback((role: string, content: string) => {
@@ -225,7 +300,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
         
         if (totalTextLength >= conversationBufferConfig.minTextLength) {
           console.log(`🚀 ConversationBuffer: ${conversationBufferConfig.messageCount} falas com texto suficiente, enviando para assistente clínico`);
-          sendToAssistentClinico(updated);
+          // Usar estado para sinalizar que precisa enviar
+          setPendingConversations(updated);
           return []; // Limpar buffer após enviar
         } else {
           console.log(`🔄 ConversationBuffer: ${conversationBufferConfig.messageCount} falas mas texto insuficiente, aguardando mais falas...`);
@@ -434,90 +510,17 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Função para enviar para o assistente clínico
-  const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
-    try {
-      console.log("🌐 AssistentClinico: Enviando apenas as 5 conversas coletadas:", conversations);
-      
-      // Formatear apenas as 5 conversas coletadas para envio
-      const chatData = conversations
-        .sort((a, b) => a.timestamp - b.timestamp) // ordem cronológica
-        .map(conv => `${conv.role.toUpperCase()}: ${conv.content}`)
-        .join('\n\n');
-      
-      console.log("🌐 AssistentClinico: Dados formatados para envio (apenas 5 falas):", chatData);
-      console.log("🌐 AssistentClinico: Total de caracteres:", chatData.length);
-      
-      // Prepare headers with authentication using utility function
-      const fallbackToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3cWRrc2Z4emhubWtmcXZubG9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4OTU5ODIsImV4cCI6MjA3MzQ3MTk4Mn0.AgKvmWbpN3WODmVEtNz6S-4XZCBR7xoMRfnGqyS-GNQ';
-      const userToken = getAccessToken();
-      
-      console.log("🔐 AssistentClinico: Auth debug:", {
-        hasUserToken: !!userToken,
-        userTokenPreview: userToken ? userToken.substring(0, 50) + "..." : "null",
-        fallbackTokenPreview: fallbackToken.substring(0, 50) + "...",
-        tokensMatch: userToken === fallbackToken
-      });
-      
-      const headers = await prepareSupabaseHeaders(userToken, fallbackToken);
-      
-      const response = await fetch('https://uwqdksfxzhnmkfqvnloq.supabase.co/functions/v1/assistente-clinico', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          transcricao: chatData,
-          idioma: "pt-BR",
-          opcoes: {
-            max_bullets_resumo: 3,
-            max_perguntas_exploratorias: 4,
-            max_proximas_falas: 3
-          }
-        })
-      });
-      
-      console.log("🌐 AssistentClinico: Resposta recebida:", response.status, response.statusText);
-      
-      if (response.ok) {
-        // Verificar se a resposta tem conteúdo antes de tentar fazer parse
-        if (response.status === 204) {
-          console.log("✅ AssistentClinico: Resposta 204 - Nenhum conteúdo para processar");
-          return; // Não há dados para processar
-        }
-        
-        // Verificar se há conteúdo na resposta
-        const contentLength = response.headers.get('content-length');
-        if (contentLength === '0') {
-          console.log("✅ AssistentClinico: Resposta vazia - Nenhum conteúdo para processar");
-          return;
-        }
-        
-        try {
-          const data: AssistentClinicoResponse = await response.json();
-          console.log("✅ AssistentClinico: Dados processados:", data);
-          console.log("✅ AssistentClinico: Estrutura dos dados:", {
-            hasTopico: !!data.topico,
-            hasResumo: !!data.resumo,
-            hasConceitoDefinicao: !!data.conceito_definicao,
-            hasPerguntaResposta: !!data.pergunta_e_resposta,
-            hasPerguntasExploratorias: !!data.perguntas_exploratorias,
-            hasProximasFalas: !!data.proximas_falas
-          });
-          setAssistentClinicoData(data);
-        } catch (jsonError) {
-          console.warn("⚠️ AssistentClinico: Erro ao fazer parse do JSON:", jsonError);
-          console.log("📄 AssistentClinico: Tentando ler como texto...");
-          const textResponse = await response.text();
-          console.log("📄 AssistentClinico: Resposta como texto:", textResponse);
-        }
-      } else {
-        const errorText = await response.text();
-        console.error("❌ AssistentClinico: Erro na resposta:", response.status, response.statusText);
-        console.error("❌ AssistentClinico: Detalhes do erro:", errorText);
-      }
-    } catch (error) {
-      console.error("❌ AssistentClinico: Erro ao enviar:", error);
+  // Estado para controlar quando enviar ao assistente clínico
+  const [pendingConversations, setPendingConversations] = useState<Array<{ role: string; content: string; timestamp: number }> | null>(null);
+
+  // useEffect para monitorar pendingConversations e enviar ao assistente clínico
+  useEffect(() => {
+    if (pendingConversations && !isSendingToAssistentClinico) {
+      console.log("🚀 Supervisor: Pending conversations detected, sending to assistente clínico");
+      sendToAssistentClinico(pendingConversations);
+      setPendingConversations(null); // Limpar estado
     }
-  }, []);
+  }, [pendingConversations, isSendingToAssistentClinico, sendToAssistentClinico]);
 
   const value: SupervisorContextType = {
     items,

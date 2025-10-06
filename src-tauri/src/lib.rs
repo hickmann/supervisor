@@ -98,11 +98,16 @@ async fn start_terapeuta_stream(
     mic_index: i32,
 ) -> Result<(), String> {
     println!("🚀 Tauri command start_terapeuta_stream called with mic_index: {}", mic_index);
+    println!("🚀 Tauri: About to lock WhisperStreamState");
     let mut streamer = state.streamer.lock().unwrap();
-    streamer.start_with_mic(app, mic_index).map_err(|e| {
+    println!("🚀 Tauri: WhisperStreamState locked successfully");
+    println!("🚀 Tauri: About to call start_with_mic");
+    let result = streamer.start_with_mic(app, mic_index).map_err(|e| {
         println!("❌ Tauri command start_terapeuta_stream failed: {}", e);
         e.to_string()
-    })
+    });
+    println!("🚀 Tauri: start_with_mic completed with result: {:?}", result);
+    result
 }
 
 #[tauri::command]

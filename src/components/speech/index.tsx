@@ -46,7 +46,7 @@ export const SystemAudio = ({
 }: useSystemAudioType) => {
   const platform = navigator.platform.toLowerCase();
   
-  // Escutar evento para abrir janela de supervisão (com ou sem captura)
+  // Escutar evento para abrir janela de supervisão (SEM iniciar captura automaticamente)
   useEffect(() => {
     const handleStartSystemAudioCapture = async () => {
       console.log("🎧 System Audio: Received startSystemAudioCapture event");
@@ -58,11 +58,8 @@ export const SystemAudio = ({
         resizeWindow(true);
       }, 100);
       
-      // Só iniciar captura se não estiver capturando e não houver erro de setup
-      if (!capturing && !setupRequired) {
-        console.log("🎧 System Audio: Auto-starting system audio capture");
-        await startCapture();
-      }
+      // NÃO iniciar captura automaticamente para evitar conflito com whisper_stream
+      console.log("🎧 System Audio: Window opened, user can manually start capture if needed");
     };
 
     window.addEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
@@ -70,7 +67,7 @@ export const SystemAudio = ({
     return () => {
       window.removeEventListener("startSystemAudioCapture", handleStartSystemAudioCapture);
     };
-  }, [capturing, startCapture, setupRequired]);
+  }, []); // SEM dependências para evitar re-execução
 
   // Escutar quando o VAD é desativado para fechar a janela de supervisão
   useEffect(() => {

@@ -30,6 +30,12 @@ export function useWhisperStreamTherapist(
   const [error, setError] = useState<string | null>(null);
   const unlistenRef = useRef<UnlistenFn | null>(null);
 
+  // Usar ref para o callback para evitar re-criação
+  const onFinalSegmentRef = useRef(onFinalSegment);
+  useEffect(() => {
+    onFinalSegmentRef.current = onFinalSegment;
+  }, [onFinalSegment]);
+
   // Configurar listener para eventos whisper:segment
   useEffect(() => {
     let mounted = true;
@@ -56,7 +62,7 @@ export function useWhisperStreamTherapist(
               console.log("✅ THERAPIST STREAM: Calling onFinalSegment callback");
               
               try {
-                await onFinalSegment(segment);
+                await onFinalSegmentRef.current(segment);
                 setLiveText(""); // Limpar texto parcial
                 console.log("✅ THERAPIST STREAM: onFinalSegment completed successfully");
               } catch (err) {
@@ -90,12 +96,14 @@ export function useWhisperStreamTherapist(
         unlistenRef.current = null;
       }
     };
-  }, [onFinalSegment]);
+  }, []); // SEM dependências - listener estável
 
   const startStream = useCallback(async () => {
     try {
       console.log("🚀 THERAPIST STREAM: Starting whisper stream...");
       console.log("🚀 THERAPIST STREAM: Hook is being called!");
+      console.log("🚀 THERAPIST STREAM: Current isActive state:", isActive);
+      console.log("🚀 THERAPIST STREAM: About to call setError(null)");
       setError(null);
       
       // Buscar índice do microfone salvo
@@ -121,6 +129,13 @@ export function useWhisperStreamTherapist(
       console.log("🚀 THERAPIST STREAM: About to call invoke('start_terapeuta_stream', { micIndex })");
       await invoke("start_terapeuta_stream", { micIndex });
       console.log("🚀 THERAPIST STREAM: Tauri command completed successfully");
+      
+      // Iniciar captura do áudio do sistema também
+      console.log("🚀 THERAPIST STREAM: Starting system audio capture...");
+      window.dispatchEvent(new CustomEvent("startSystemAudioCapture"));
+      console.log("🚀 THERAPIST STREAM: System audio capture event dispatched");
+      
+      console.log("🚀 THERAPIST STREAM: About to call setIsActive(true)");
       setIsActive(true);
       console.log("✅ THERAPIST STREAM: Stream started successfully with mic index:", micIndex);
     } catch (err) {
@@ -136,6 +151,13 @@ export function useWhisperStreamTherapist(
     try {
       console.log("🛑 THERAPIST STREAM: Stopping whisper stream...");
       await invoke("stop_terapeuta_stream");
+      
+      // Parar captura do áudio do sistema também
+      console.log("🛑 THERAPIST STREAM: Stopping system audio capture...");
+      window.dispatchEvent(new CustomEvent("stopSystemAudioCapture"));
+      console.log("🛑 THERAPIST STREAM: System audio capture stop event dispatched");
+      
+      console.log("🛑 THERAPIST STREAM: About to call setIsActive(false)");
       setIsActive(false);
       setLiveText("");
       console.log("✅ THERAPIST STREAM: Stream stopped successfully");
@@ -151,10 +173,20 @@ export function useWhisperStreamTherapist(
   useEffect(() => {
     return () => {
       if (isActive) {
+        console.log("🛑 THERAPIST STREAM: Cleanup - stopping stream on unmount");
         invoke("stop_terapeuta_stream").catch(console.error);
       }
     };
   }, [isActive]);
+
+  // Debug: Log quando o hook retorna valores
+  console.log("🚀 useWhisperStreamTherapist: Returning values:", {
+    isActive,
+    liveText: liveText.substring(0, 50) + "...",
+    hasError: !!error,
+    hasStartStream: typeof startStream === "function",
+    hasStopStream: typeof stopStream === "function"
+  });
 
   return {
     isActive,

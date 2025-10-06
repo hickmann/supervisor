@@ -1,6 +1,6 @@
 import { UseCompletionReturn } from "@/types";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { Button } from "../ui/button";
 import { useWhisperStreamTherapist, WhisperSegmentEvent } from "@/hooks";
 
@@ -16,6 +16,11 @@ export const VadOnly = ({
   const renderCount = useRef(0);
   renderCount.current++;
   console.log("🎤 VadOnly: Component rendered! (count:", renderCount.current, ")");
+  console.log("🎤 VadOnly: Props received:", {
+    hasSetEnableVAD: typeof setEnableVAD === "function",
+    hasSystemAudio: !!systemAudio,
+    systemAudioType: typeof systemAudio
+  });
 
   // Usar ref para evitar recreação do callback
   const systemAudioRef = useRef(systemAudio);
@@ -55,12 +60,40 @@ export const VadOnly = ({
     }
   }, [isActive, setEnableVAD]);
 
+  // Escutar evento para iniciar whisper_stream automaticamente
+  useEffect(() => {
+    const handleStartWhisperStream = async () => {
+      console.log("🎤 VadOnly: Received startWhisperStream event");
+      if (!isActive) {
+        console.log("🎤 VadOnly: Auto-starting whisper stream via event");
+        await handleToggleVAD();
+      }
+    };
+
+    window.addEventListener("startWhisperStream", handleStartWhisperStream);
+    
+    return () => {
+      window.removeEventListener("startWhisperStream", handleStartWhisperStream);
+    };
+  }, []); // SEM dependências para evitar loop infinito
+
+  // Debug: Log quando o componente é re-renderizado
+  useEffect(() => {
+    console.log("🎤 VadOnly: Component state changed:", {
+      isActive,
+      liveText: liveText.substring(0, 50) + "...",
+      hasError: !!streamError,
+      renderCount: renderCount.current
+    });
+  }, [isActive, liveText, streamError]);
+
   const handleToggleVAD = async () => {
     try {
       console.log("🎤 VadOnly: Button clicked! Current state - isActive:", isActive);
       console.log("🎤 VadOnly: systemAudio available:", !!systemAudio);
       console.log("🎤 VadOnly: startStream function:", typeof startStream);
       console.log("🎤 VadOnly: stopStream function:", typeof stopStream);
+      console.log("🎤 VadOnly: About to enter if/else logic");
       
       if (isActive) {
         console.log("🛑 VadOnly: Stopping whisper stream...");

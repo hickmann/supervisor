@@ -8,21 +8,13 @@ import { useAuth } from "@/contexts";
 export const Audio = ({
   micOpen,
   setMicOpen,
-  enableVAD,
   setEnableVAD,
   systemAudio,
 }: UseCompletionReturn & { systemAudio?: any }) => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Escutar quando o microfone é ativado para iniciar automaticamente a captura do sistema
-  useEffect(() => {
-    if (enableVAD) {
-      console.log("🎤 Audio: Microphone activated, starting system audio capture");
-      // Disparar evento para iniciar captura do sistema
-      window.dispatchEvent(new CustomEvent("startSystemAudioCapture"));
-    }
-  }, [enableVAD]);
+  // Remover este useEffect - a captura do sistema será iniciada diretamente no handlePlayButtonClick
 
   // Escutar evento de sucesso de login para iniciar o VAD
   useEffect(() => {
@@ -40,7 +32,7 @@ export const Audio = ({
     };
   }, [setEnableVAD, setMicOpen]);
 
-  const handlePlayButtonClick = () => {
+  const handlePlayButtonClick = async () => {
     console.log("🎤 Audio: Play button clicked, checking authentication...");
     console.log("🔐 Auth status:", { isAuthenticated, authLoading });
 
@@ -55,18 +47,37 @@ export const Audio = ({
       return;
     }
 
-    // Usuário autenticado, iniciar gravação
-    console.log("✅ User authenticated, enabling VAD");
+    // Usuário autenticado, iniciar sistema completo
+    console.log("✅ User authenticated, starting complete system");
+    
+    // 1. Ativar VAD
     setEnableVAD(true);
-    // Auto-open popover to show VAD is active
+    
+    // 2. Abrir popover
     setMicOpen(true);
+    
+    // 3. Aguardar um pouco para garantir que o popover abra
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // 4. Iniciar whisper_stream para terapeuta (sem system audio capture automático)
+    console.log("🎤 Audio: Starting whisper_stream for therapist transcription");
+    window.dispatchEvent(new CustomEvent("startWhisperStream"));
   };
 
-  const handleLoginSuccess = () => {
-    console.log("✅ Login successful, starting VAD");
+  const handleLoginSuccess = async () => {
+    console.log("✅ Login successful, starting complete system");
     setShowLoginModal(false);
+    
+    // Iniciar sistema completo após login
     setEnableVAD(true);
     setMicOpen(true);
+    
+    // Aguardar um pouco para garantir que o popover abra
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Iniciar whisper_stream para terapeuta (sem system audio capture automático)
+    console.log("🎤 Audio: Starting whisper_stream for therapist transcription");
+    window.dispatchEvent(new CustomEvent("startWhisperStream"));
   };
 
   return (

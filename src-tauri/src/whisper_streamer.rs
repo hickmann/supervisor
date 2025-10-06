@@ -47,20 +47,22 @@ impl WhisperStreamer {
         }
 
                 println!("🚀 Starting whisper_stream with mic index: {}", mic_index);
-                println!("🚀 Whisper command: {} -m {} --step 500 --length 5000 --keep 500 -c {} -l pt -vth 0.1 -fth 100.0 -kc", 
+                println!("🚀 Whisper command: {} -m {} --step 1000 --length 3000 --keep 1000 -c {} -l pt -vth 0.3 -fth 100.0 -kc -t 4 --beam-size 2", 
                     whisper_path, model_path, mic_index);
 
         let mut child = Command::new(whisper_path)
             .args([
                 "-m", model_path,
-                "--step", "500",  // 500ms step
-                "--length", "5000",  // 5s length
-                "--keep", "500",  // 500ms keep
+                "--step", "1000",  // 1000ms step (1s) - melhor latência
+                "--length", "3000",  // 3s length - melhor precisão
+                "--keep", "1000",  // 1000ms keep (1s) - melhor continuidade
                 "-c", &mic_index.to_string(),
                 "-l", "pt",  // Português
-                "-vth", "0.1",  // VAD threshold (mais sensível)
+                "-vth", "0.3",  // VAD threshold (menos sensível a ruído)
                 "-fth", "100.0",  // High-pass filter
-                "-kc"  // keep context between audio chunks
+                "-kc",  // keep context between audio chunks
+                "-t", "4",  // 4 threads
+                "--beam-size", "2"  // beam size para melhor precisão
             ])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -78,13 +80,23 @@ impl WhisperStreamer {
         });
 
         // Thread para processar stdout (transcrições)
+        let app_clone = app.clone();
         std::thread::spawn(move || {
             let reader = BufReader::new(stdout);
             let mut last_segment: Option<WhisperEvent> = None;
             let mut current_text = String::new();
 
+            println!("🎧 THERAPIST STREAM: Starting to read stdout...");
+            
             for line in reader.lines().flatten() {
                 println!("🔍 whisper_stream stdout: {}", line);
+                
+                // Verificar se o processo ainda está rodando
+                if line.trim().is_empty() {
+                    println!("⚠️ Empty line received, continuing...");
+                    continue;
+                }
+                
                 if let Some(evt) = parse_line_to_event(&line) {
                     println!("✅ Parsed event: {:?}", evt);
                     // Se temos um segmento anterior, marcar como final
@@ -92,7 +104,7 @@ impl WhisperStreamer {
                         if prev.text != evt.text {
                             prev.is_final = true;
                             println!("📤 Emitting final segment: {:?}", prev);
-                            let _ = app.emit("whisper:segment", &prev);
+                            let _ = app_clone.emit("whisper:segment", &prev);
                         }
                     }
 
@@ -104,7 +116,7 @@ impl WhisperStreamer {
                         is_final: false,
                     };
                     println!("📤 Emitting partial segment: {:?}", partial);
-                    let _ = app.emit("whisper:segment", &partial);
+                    let _ = app_clone.emit("whisper:segment", &partial);
                     last_segment = Some(evt);
                 } else if !line.trim().is_empty() {
                     // Processar linhas que não seguem o formato padrão
@@ -120,7 +132,7 @@ impl WhisperStreamer {
                                         end: seg.end,
                                         is_final: false,
                                     };
-                                    let _ = app.emit("whisper:segment", &partial);
+                                    let _ = app_clone.emit("whisper:segment", &partial);
                                 }
                             }
                         }
@@ -128,10 +140,13 @@ impl WhisperStreamer {
                 }
             }
 
+            println!("🎧 THERAPIST STREAM: Stdout reading loop ended - processo pode ter terminado prematuramente");
+
             // Marcar último segmento como final
             if let Some(mut final_seg) = last_segment {
                 final_seg.is_final = true;
-                let _ = app.emit("whisper:segment", &final_seg);
+                println!("📤 Emitting final segment (end of stream): {:?}", final_seg);
+                let _ = app_clone.emit("whisper:segment", &final_seg);
             }
         });
 
