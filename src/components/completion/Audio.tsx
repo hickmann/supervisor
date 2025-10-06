@@ -73,10 +73,14 @@ export const Audio = ({
     <>
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>
-        <VadOnly
-          setEnableVAD={setEnableVAD}
-          systemAudio={systemAudio}
-        />
+        <Button
+          size="icon"
+          onClick={handlePlayButtonClick}
+          className="cursor-pointer"
+          title="Iniciar sistema de supervisão"
+        >
+          <PlayIcon className="h-4 w-4" />
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent
@@ -100,6 +104,14 @@ export const Audio = ({
               enviadas para o sistema de supervisão psicológica em tempo real.
               Use junto com o botão de áudio do sistema para captura completa.
             </p>
+            
+            {/* VadOnly para controle do whisper_stream */}
+            <div className="mt-4 flex justify-center">
+              <VadOnly
+                setEnableVAD={setEnableVAD}
+                systemAudio={systemAudio}
+              />
+            </div>
           </div>
         </div>
             {/* Modal de Login */}

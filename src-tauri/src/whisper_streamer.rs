@@ -47,7 +47,7 @@ impl WhisperStreamer {
         }
 
                 println!("🚀 Starting whisper_stream with mic index: {}", mic_index);
-                println!("🚀 Whisper command: {} -m {} --step 500 --length 5000 --keep 500 -c {} -l ptbr -vth 0.3 -fth 50.0 -ps -kc", 
+                println!("🚀 Whisper command: {} -m {} --step 500 --length 5000 --keep 500 -c {} -l pt -vth 0.1 -fth 100.0 -kc", 
                     whisper_path, model_path, mic_index);
 
         let mut child = Command::new(whisper_path)
@@ -57,10 +57,9 @@ impl WhisperStreamer {
                 "--length", "5000",  // 5s length
                 "--keep", "500",  // 500ms keep
                 "-c", &mic_index.to_string(),
-                "-l", "ptbr",  // Português Brasil
-                "-vth", "0.3",  // VAD threshold
-                "-fth", "50.0",  // High-pass filter
-                "-ps",  // print special tokens
+                "-l", "pt",  // Português
+                "-vth", "0.1",  // VAD threshold (mais sensível)
+                "-fth", "100.0",  // High-pass filter
                 "-kc"  // keep context between audio chunks
             ])
             .stdout(Stdio::piped())
@@ -158,8 +157,33 @@ impl WhisperStreamer {
 }
 
 // Parse das linhas de saída do whisper_stream
-// Formato: "[00:00:03.120 --> 00:00:05.700]  Texto"
+// Formato esperado: "[_BEG_] Texto[_TT_100][_EOT_]" ou "[00:00:03.120 --> 00:00:05.700]  Texto"
 fn parse_line_to_event(line: &str) -> Option<WhisperEvent> {
+    // Formato 1: [_BEG_] Texto[_TT_100][_EOT_]
+    if line.contains("[_BEG_]") {
+        let text_start = line.find("[_BEG_]")? + 7;
+        let text_end = if let Some(idx) = line.find("[_TT_") {
+            idx
+        } else if let Some(idx) = line.find("[_EOT_]") {
+            idx
+        } else {
+            line.len()
+        };
+        
+        let text = line[text_start..text_end].trim();
+        if text.is_empty() || text == "[MÚSICA DE FUNDO]" || text == "[Música]" {
+            return None;
+        }
+        
+        return Some(WhisperEvent {
+            text: text.to_string(),
+            start: 0.0,
+            end: 0.0,
+            is_final: false,
+        });
+    }
+    
+    // Formato 2: [00:00:03.120 --> 00:00:05.700]  Texto
     if let Some(idx) = line.find(']') {
         let timestamp_part = &line[..idx + 1];
         let text_part = line[idx + 1..].trim();

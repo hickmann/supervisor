@@ -1,6 +1,6 @@
 import { UseCompletionReturn } from "@/types";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "../ui/button";
 import { useWhisperStreamTherapist, WhisperSegmentEvent } from "@/hooks";
 
@@ -13,36 +13,46 @@ export const VadOnly = ({
   setEnableVAD,
   systemAudio,
 }: VadOnlyProps) => {
-  console.log("🎤 VadOnly: Component rendered!");
+  const renderCount = useRef(0);
+  renderCount.current++;
+  console.log("🎤 VadOnly: Component rendered! (count:", renderCount.current, ")");
 
-  // Callback para processar segmentos finais
+  // Usar ref para evitar recreação do callback
+  const systemAudioRef = useRef(systemAudio);
+  useEffect(() => {
+    systemAudioRef.current = systemAudio;
+  }, [systemAudio]);
+
+  // Callback para processar segmentos finais - ESTÁVEL
   const handleFinalSegment = useCallback(
     async (segment: WhisperSegmentEvent) => {
       console.log("🎯 THERAPIST STREAM: Final segment received:", segment.text);
-      console.log("🎯 THERAPIST STREAM: systemAudio available:", !!systemAudio);
-      console.log("🎯 THERAPIST STREAM: processMicrophoneTranscription available:", !!(systemAudio && systemAudio.processMicrophoneTranscription));
       
       try {
-        if (systemAudio && systemAudio.processMicrophoneTranscription) {
+        const audio = systemAudioRef.current;
+        if (audio && audio.processMicrophoneTranscription) {
           console.log("🎯 THERAPIST STREAM: Sending to psychological supervision system");
-          await systemAudio.processMicrophoneTranscription(segment.text);
-          setEnableVAD(true);
+          await audio.processMicrophoneTranscription(segment.text);
         } else {
           console.error("❌ THERAPIST STREAM: Sistema de supervisão não disponível!");
-          console.error("❌ THERAPIST STREAM: systemAudio:", systemAudio);
         }
       } catch (error) {
         console.error("❌ THERAPIST STREAM: Failed to process final segment:", error);
       }
     },
-    [systemAudio, setEnableVAD]
+    [] // SEM dependências - callback estável
   );
 
   const { isActive, liveText, startStream, stopStream, error: streamError } = useWhisperStreamTherapist(handleFinalSegment);
 
-  // Sincronizar estado interno com o hook
+  // Sincronizar estado interno com o hook - APENAS UMA VEZ quando isActive muda
+  const lastIsActive = useRef(isActive);
   useEffect(() => {
-    setEnableVAD(isActive);
+    if (lastIsActive.current !== isActive) {
+      console.log("🎤 VadOnly: isActive changed from", lastIsActive.current, "to", isActive);
+      lastIsActive.current = isActive;
+      setEnableVAD(isActive);
+    }
   }, [isActive, setEnableVAD]);
 
   const handleToggleVAD = async () => {
@@ -59,13 +69,18 @@ export const VadOnly = ({
         window.dispatchEvent(new CustomEvent("stopSystemAudioCapture"));
       } else {
         console.log("🚀 VadOnly: Starting whisper stream...");
-        console.log("🚀 VadOnly: About to call startStream()");
-        await startStream();
-        console.log("🚀 VadOnly: startStream() completed");
+        
+        // ATIVAR IMEDIATAMENTE o sistema de supervisão ANTES de iniciar o stream
+        console.log("🎤 VadOnly: Activating VAD system immediately");
+        setEnableVAD(true);
         
         // Disparar evento para iniciar captura do sistema (abrir janelas de supervisão)
         console.log("🎤 VadOnly: Dispatching startSystemAudioCapture event");
         window.dispatchEvent(new CustomEvent("startSystemAudioCapture"));
+        
+        console.log("🚀 VadOnly: About to call startStream()");
+        await startStream();
+        console.log("🚀 VadOnly: startStream() completed");
       }
     } catch (error) {
       console.error("❌ VadOnly: Failed to toggle stream:", error);
