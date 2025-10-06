@@ -80,19 +80,33 @@ const App = () => {
               {/* Botão Perguntar pra IA */}
               <button
                 onClick={systemAudio.handleSendToAI}
-                className="flex items-center gap-3 px-3 py-1.5 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+                disabled={systemAudio.isAIProcessing}
+                className={`flex items-center gap-3 px-3 py-1.5 transition-all duration-200 ${
+                  systemAudio.isAIProcessing 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-white/10 cursor-pointer'
+                }`}
               >
-                <span className="text-base font-medium text-white">Perguntar pra IA</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-8 h-6 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-xs text-white/80 font-mono leading-none">
-                      {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
-                    </span>
-                  </div>
-                  <div className="w-6 h-6 border border-white/40 rounded flex items-center justify-center">
-                    <span className="text-xs text-white/80 font-mono leading-none">↵</span>
-                  </div>
-                </div>
+                {systemAudio.isAIProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-base font-medium text-white/70">Processando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-base font-medium text-white">Perguntar pra IA</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-8 h-6 border border-white/40 rounded flex items-center justify-center">
+                        <span className="text-xs text-white/80 font-mono leading-none">
+                          {navigator.platform.toLowerCase().includes('mac') ? '⌘' : 'Ctrl'}
+                        </span>
+                      </div>
+                      <div className="w-6 h-6 border border-white/40 rounded flex items-center justify-center">
+                        <span className="text-xs text-white/80 font-mono leading-none">↵</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </button>
 
               {/* Botão Mostrar/Esconder */}

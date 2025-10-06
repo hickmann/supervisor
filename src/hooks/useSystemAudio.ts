@@ -146,7 +146,7 @@ export function useSystemAudio() {
   const { getAccessToken } = useAuth();
   const { resizeWindow } = useWindowResize();
   const globalShortcuts = useGlobalShortcuts();
-  const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, conversationBuffer, sessionSummaryData, tasksAgreementsData } = useSupervisor();
+  const { addToConversationBuffer, generateSessionSummary, generateTasksAgreements, selectItem, sendToAssistentClinico, isGeneratingAssistentClinico, conversationBuffer, sessionSummaryData, tasksAgreementsData } = useSupervisor();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [recordingTime, setRecordingTime] = useState("00:00");
@@ -473,7 +473,6 @@ export function useSystemAudio() {
     console.log("📊 SendToAI: Falas:", conversationBuffer);
     
     try {
-      setIsAIProcessing(true);
       setError("");
       
       // Enviar as falas armazenadas para o assistente clínico
@@ -483,8 +482,6 @@ export function useSystemAudio() {
     } catch (error) {
       console.error("❌ SendToAI: Erro ao enviar falas:", error);
       setError("Erro ao enviar falas para a IA");
-    } finally {
-      setIsAIProcessing(false);
     }
   }, [conversationBuffer, sendToAssistentClinico]);
 
@@ -933,7 +930,7 @@ export function useSystemAudio() {
     capturing,
     recordingTime,
     isProcessing,
-    isAIProcessing,
+    isAIProcessing: isGeneratingAssistentClinico,
     lastTranscription,
     lastAIResponse,
     error,

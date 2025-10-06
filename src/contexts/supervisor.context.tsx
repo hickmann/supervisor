@@ -17,6 +17,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   const [isGeneratingSessionSummary, setIsGeneratingSessionSummary] = useState<boolean>(false);
   const [tasksAgreementsData, setTasksAgreementsData] = useState<TasksAgreementsResponse | null>(null);
   const [isGeneratingTasksAgreements, setIsGeneratingTasksAgreements] = useState<boolean>(false);
+  const [isGeneratingAssistentClinico, setIsGeneratingAssistentClinico] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectItem = useCallback((id: string | null) => {
@@ -437,6 +438,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
   // Função para enviar para o assistente clínico
   const sendToAssistentClinico = useCallback(async (conversations: Array<{ role: string; content: string; timestamp: number }>) => {
     try {
+      setIsGeneratingAssistentClinico(true);
       console.log("🌐 AssistentClinico: Enviando apenas as 5 conversas coletadas:", conversations);
       
       // Formatear apenas as 5 conversas coletadas para envio
@@ -516,6 +518,8 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("❌ AssistentClinico: Erro ao enviar:", error);
+    } finally {
+      setIsGeneratingAssistentClinico(false);
     }
   }, []);
 
@@ -531,6 +535,7 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
     isGeneratingSessionSummary,
     generateSessionSummary,
     sendToAssistentClinico,
+    isGeneratingAssistentClinico,
     tasksAgreementsData,
     isGeneratingTasksAgreements,
     generateTasksAgreements,

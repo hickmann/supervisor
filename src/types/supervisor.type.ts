@@ -56,6 +56,7 @@ export type SupervisorContextType = {
   isGeneratingSessionSummary: boolean;
   generateSessionSummary: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<boolean>;
   sendToAssistentClinico: (conversations: Array<{ role: string; content: string; timestamp: number }>) => Promise<void>;
+  isGeneratingAssistentClinico: boolean;
   tasksAgreementsData: TasksAgreementsResponse | null;
   isGeneratingTasksAgreements: boolean;
   generateTasksAgreements: (conversationHistory: Array<{ role: string; content: string; timestamp: number }>) => Promise<boolean>;
