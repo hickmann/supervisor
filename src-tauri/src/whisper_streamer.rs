@@ -46,7 +46,9 @@ impl WhisperStreamer {
             return Err(anyhow::anyhow!("Model file not found: {}", model_path));
         }
 
-        println!("🚀 Starting whisper_stream with mic index: {}", mic_index);
+                println!("🚀 Starting whisper_stream with mic index: {}", mic_index);
+                println!("🚀 Whisper command: {} -m {} --step 500 --length 5000 --keep 500 -c {} -l ptbr -vth 0.3 -fth 50.0 -ps -kc", 
+                    whisper_path, model_path, mic_index);
 
         let mut child = Command::new(whisper_path)
             .args([
@@ -55,9 +57,11 @@ impl WhisperStreamer {
                 "--length", "5000",  // 5s length
                 "--keep", "500",  // 500ms keep
                 "-c", &mic_index.to_string(),
-                "-l", "pt",  // Português
+                "-l", "ptbr",  // Português Brasil
                 "-vth", "0.3",  // VAD threshold
-                "-fth", "50.0"  // High-pass filter
+                "-fth", "50.0",  // High-pass filter
+                "-ps",  // print special tokens
+                "-kc"  // keep context between audio chunks
             ])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

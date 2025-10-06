@@ -55,11 +55,17 @@ export const VadOnly = ({
       if (isActive) {
         console.log("🛑 VadOnly: Stopping whisper stream...");
         await stopStream();
+        // Disparar evento para parar captura do sistema
+        window.dispatchEvent(new CustomEvent("stopSystemAudioCapture"));
       } else {
         console.log("🚀 VadOnly: Starting whisper stream...");
         console.log("🚀 VadOnly: About to call startStream()");
         await startStream();
         console.log("🚀 VadOnly: startStream() completed");
+        
+        // Disparar evento para iniciar captura do sistema (abrir janelas de supervisão)
+        console.log("🎤 VadOnly: Dispatching startSystemAudioCapture event");
+        window.dispatchEvent(new CustomEvent("startSystemAudioCapture"));
       }
     } catch (error) {
       console.error("❌ VadOnly: Failed to toggle stream:", error);
