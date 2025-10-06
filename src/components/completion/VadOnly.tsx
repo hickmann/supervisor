@@ -4,6 +4,7 @@ import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { fetchSTT } from "@/lib/functions/stt.function";
+import { fetchWhisperSTTWithFallback } from "@/lib/functions/whisper-http-stt.function";
 import { floatArrayToWav } from "@/lib/utils";
 
 interface VadOnlyProps {
@@ -31,12 +32,8 @@ export const VadOnly = ({
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
         console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
-        // Use Whisper for transcription
-        const transcription = await fetchSTT({
-          provider: undefined,
-          selectedProvider: { provider: "whisper-stt", variables: {} },
-          audio: audioBlob,
-        });
+        // USAR WHISPER COM FALLBACK AUTOMÁTICO - WEBSOCKET OU TAURI
+        const transcription = await fetchWhisperSTTWithFallback(audioBlob);
 
         if (transcription) {
           console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);

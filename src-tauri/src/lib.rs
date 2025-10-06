@@ -17,6 +17,7 @@ use tokio::task::JoinHandle;
 
 mod speaker;
 mod whisper_stt;
+mod whisper_server;
 
 #[derive(Default)]
 pub struct AudioState {
@@ -91,6 +92,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_keychain::init())
         .plugin(tauri_plugin_shell::init())  // Add shell plugin
+        .manage(whisper_server::WhisperServerState::default())
         .invoke_handler(tauri::generate_handler![
             get_app_version,
             set_window_height,
@@ -117,6 +119,10 @@ pub fn run() {
             speaker::check_system_audio_access,
             speaker::request_system_audio_access,
             whisper_stt::transcribe_audio_with_whisper,
+            whisper_server::start_whisper_server,
+            whisper_server::stop_whisper_server,
+            whisper_server::is_whisper_server_running,
+            whisper_server::get_whisper_server_status,
         ])
         .setup(|app| {
             // Setup main window positioning

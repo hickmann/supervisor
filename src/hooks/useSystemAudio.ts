@@ -690,6 +690,26 @@ export function useSystemAudio() {
     try {
       setError("");
 
+      // Iniciar whisper_server automaticamente
+      try {
+        console.log("🚀 System Audio: Iniciando whisper_server...");
+        const serverResult = await invoke<{
+          is_running: boolean;
+          port: number | null;
+          pid: number | null;
+          error: string | null;
+        }>("start_whisper_server");
+        
+        if (serverResult.is_running) {
+          console.log("✅ System Audio: Whisper server iniciado com sucesso!");
+        } else {
+          console.warn("⚠️ System Audio: Falha ao iniciar whisper_server:", serverResult.error);
+        }
+      } catch (serverError) {
+        console.error("❌ System Audio: Erro ao iniciar whisper_server:", serverError);
+        // Continuar mesmo se o servidor falhar - pode usar fallback Tauri
+      }
+
       const hasAccess = await invoke<boolean>("check_system_audio_access");
       if (!hasAccess) {
         setSetupRequired(true);
@@ -739,6 +759,16 @@ export function useSystemAudio() {
       console.log("🎯 System Audio: Parando captura - VAD do Sistema 1 continua independente");
 
       await invoke<string>("stop_system_audio_capture");
+
+      // Parar whisper_server quando parar a captura
+      try {
+        console.log("🛑 System Audio: Parando whisper_server...");
+        await invoke("stop_whisper_server");
+        console.log("✅ System Audio: Whisper server parado com sucesso!");
+      } catch (serverError) {
+        console.error("❌ System Audio: Erro ao parar whisper_server:", serverError);
+        // Continuar mesmo se falhar
+      }
 
       setLastTranscription("");
       setLastAIResponse("");

@@ -1,4 +1,5 @@
 import { fetchSTT } from "@/lib";
+import { fetchWhisperSTTWithFallback } from "@/lib/functions/whisper-http-stt.function";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
@@ -35,12 +36,8 @@ export const AutoSpeechVAD = ({
         console.log("🎤 VAD: Starting transcription with WHISPER...");
         console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
-        // SEMPRE USAR WHISPER - FORÇAR USO
-        transcription = await fetchSTT({
-          provider: undefined,
-          selectedProvider: { provider: "whisper-stt", variables: {} },
-          audio: audioBlob,
-        });
+        // USAR WHISPER COM FALLBACK AUTOMÁTICO - WEBSOCKET OU TAURI
+        transcription = await fetchWhisperSTTWithFallback(audioBlob);
 
         if (transcription) {
           console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
