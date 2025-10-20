@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { 
   ServerIcon, 
   PlayIcon, 
-  StopIcon, 
+  Square, 
   CheckCircleIcon,
   AlertTriangleIcon,
   LoaderIcon
@@ -25,7 +25,7 @@ export const WhisperServerStatus: React.FC = () => {
   const checkServerStatus = async () => {
     try {
       // Verificar se a porta 8000 está aberta (indicativo de que o servidor está rodando)
-      const response = await fetch('http://127.0.0.1:8000/health', { 
+      await fetch('http://127.0.0.1:8000/health', { 
         method: 'GET',
         mode: 'no-cors' // Para evitar CORS
       });
@@ -39,17 +39,15 @@ export const WhisperServerStatus: React.FC = () => {
     setIsLoading(true);
     try {
       // Usar o script PowerShell para iniciar o servidor
-      const response = await fetch('/api/start-whisper-server', {
+      await fetch('/api/start-whisper-server', {
         method: 'POST'
       });
       
-      if (response.ok) {
-        // Aguardar um pouco e verificar status
-        setTimeout(() => {
-          checkServerStatus();
-          setIsLoading(false);
-        }, 3000);
-      }
+      // Aguardar um pouco e verificar status
+      setTimeout(() => {
+        checkServerStatus();
+        setIsLoading(false);
+      }, 3000);
     } catch (error) {
       console.error('Erro ao iniciar servidor:', error);
       setIsLoading(false);
@@ -60,7 +58,7 @@ export const WhisperServerStatus: React.FC = () => {
     setIsLoading(true);
     try {
       // Matar processo do whisper-server
-      const response = await fetch('/api/stop-whisper-server', {
+      await fetch('/api/stop-whisper-server', {
         method: 'POST'
       });
       
@@ -159,7 +157,7 @@ export const WhisperServerStatus: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <StopIcon className="w-3 h-3 mr-1" />
+                  <Square className="w-3 h-3 mr-1" />
                   Parar
                 </>
               )}

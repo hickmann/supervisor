@@ -6,16 +6,13 @@ import {
   MessageHistoryView,
   DeleteConfirmationDialog,
 } from "./";
-import { ChatConversation } from "@/types/completion";
 
 interface ChatHistoryProps {
-  onSelectConversation: (conversation: ChatConversation) => void;
   onNewConversation: () => void;
   currentConversationId: string | null;
 }
 
 export const ChatHistory = ({
-  onSelectConversation,
   currentConversationId,
 }: ChatHistoryProps) => {
   const historyHook = useHistory();
@@ -56,7 +53,6 @@ export const ChatHistory = ({
               {...historyHook}
               currentConversationId={currentConversationId}
               onClosePopover={() => historyHook.setIsOpen(false)}
-              onSelectConversation={onSelectConversation}
             />
           )}
 

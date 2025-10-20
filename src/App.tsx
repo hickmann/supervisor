@@ -9,16 +9,6 @@ import { listen } from "@tauri-apps/api/event";
 const App = () => {
   const systemAudio = useSystemAudio();
   const [isHidden, setIsHidden] = useState(false);
-  const handleSelectConversation = (conversation: any) => {
-    // Use localStorage to communicate the selected conversation to Completion component
-    localStorage.setItem("selectedConversation", JSON.stringify(conversation));
-    // Trigger a custom event to notify Completion component
-    window.dispatchEvent(
-      new CustomEvent("conversationSelected", {
-        detail: conversation,
-      })
-    );
-  };
 
   const handleNewConversation = () => {
     // Clear any selected conversation and trigger new conversation
@@ -177,7 +167,6 @@ const App = () => {
             
             <div className="flex items-center gap-2">
               <ChatHistory
-                onSelectConversation={handleSelectConversation}
                 onNewConversation={handleNewConversation}
                 currentConversationId={null}
               />

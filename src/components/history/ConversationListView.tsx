@@ -2,12 +2,10 @@ import { MessageSquare } from "lucide-react";
 import { ScrollArea } from "@/components";
 import { UseHistoryType } from "@/hooks/useHistory";
 import { ConversationItem } from "./ConversationItem";
-import { ChatConversation } from "@/types/completion";
 
 interface ConversationListViewProps extends UseHistoryType {
   currentConversationId: string | null;
   onClosePopover: () => void;
-  onSelectConversation: (conversation: ChatConversation) => void;
 }
 
 export const ConversationListView = ({
@@ -15,7 +13,6 @@ export const ConversationListView = ({
   currentConversationId,
   selectedConversationId,
   handleViewConversation,
-  onSelectConversation,
   handleDeleteConfirm,
   formatDate,
   setIsOpen,
@@ -49,7 +46,6 @@ export const ConversationListView = ({
                 <ConversationItem
                   conversation={conversation}
                   currentConversationId={currentConversationId}
-                  onSelectConversation={onSelectConversation}
                   conversations={conversations}
                   isOpen={false}
                   selectedConversationId={selectedConversationId}

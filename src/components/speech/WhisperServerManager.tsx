@@ -13,14 +13,14 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { 
   ServerIcon, 
   PlayIcon, 
-  StopIcon, 
+  Square, 
   WifiIcon, 
   WifiOffIcon,
   AlertTriangleIcon,
   CheckCircleIcon,
   LoaderIcon
 } from 'lucide-react';
-import { getWhisperWebSocketClient, WhisperWebSocketClient } from '@/lib/whisper-websocket-client';
+import { getWhisperWebSocketClient } from '@/lib/whisper-websocket-client';
 import { invoke } from '@tauri-apps/api/core';
 
 interface WhisperServerStatus {
@@ -244,7 +244,7 @@ export const WhisperServerManager: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <StopIcon className="w-4 h-4 mr-2" />
+                  <Square className="w-4 h-4 mr-2" />
                   Parar Servidor
                 </>
               )}

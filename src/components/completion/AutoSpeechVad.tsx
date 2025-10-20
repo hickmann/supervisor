@@ -1,4 +1,3 @@
-import { fetchSTT } from "@/lib";
 import { getBestTranscription } from "@/lib/functions/dual-transcription.function";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";

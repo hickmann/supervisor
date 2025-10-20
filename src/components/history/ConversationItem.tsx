@@ -13,7 +13,6 @@ import { UseHistoryType } from "@/hooks/useHistory";
 interface ConversationItemProps extends UseHistoryType {
   conversation: ChatConversation;
   currentConversationId: string | null;
-  onSelectConversation: (conversation: ChatConversation) => void;
 }
 
 export const ConversationItem = ({
@@ -21,10 +20,8 @@ export const ConversationItem = ({
   currentConversationId,
   selectedConversationId,
   handleViewConversation,
-  onSelectConversation,
   handleDeleteConfirm,
   formatDate,
-  setIsOpen,
 }: ConversationItemProps) => {
   // Função para calcular a duração da conversa
   const getConversationDuration = () => {
