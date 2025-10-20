@@ -17,6 +17,7 @@ export interface UseSettingsReturn {
   setConversationBufferConfig: React.Dispatch<React.SetStateAction<ConversationBufferConfig>>;
   handleConversationBufferMessageCountChange: (messageCount: number) => void;
   handleConversationBufferMinTextLengthChange: (minTextLength: number) => void;
+  handleConversationBufferAutoSendChange: (enabled: boolean) => void;
   allAiProviders: TYPE_PROVIDER[];
   allSttProviders: TYPE_PROVIDER[];
   selectedAIProvider: { provider: string; variables: Record<string, string> };

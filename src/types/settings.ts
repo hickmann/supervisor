@@ -49,6 +49,7 @@ export interface ScreenshotConfig {
 export interface ConversationBufferConfig {
   messageCount: number;
   minTextLength: number;
+  autoSendEnabled: boolean;
 }
 
 // Speech-to-Text provider types

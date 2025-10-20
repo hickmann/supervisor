@@ -1,4 +1,4 @@
-import { Input, Label, Header } from "@/components";
+import { Input, Label, Header, Switch } from "@/components";
 import { CONVERSATION_BUFFER_DEFAULTS } from "@/config";
 import { UseSettingsReturn } from "@/types";
 
@@ -6,6 +6,7 @@ interface ConversationBufferConfigProps {
   conversationBufferConfig: UseSettingsReturn['conversationBufferConfig'];
   handleConversationBufferMessageCountChange: UseSettingsReturn['handleConversationBufferMessageCountChange'];
   handleConversationBufferMinTextLengthChange: UseSettingsReturn['handleConversationBufferMinTextLengthChange'];
+  handleConversationBufferAutoSendChange: UseSettingsReturn['handleConversationBufferAutoSendChange'];
   className?: string;
 }
 
@@ -13,6 +14,7 @@ export const ConversationBufferConfig = ({
   conversationBufferConfig,
   handleConversationBufferMessageCountChange,
   handleConversationBufferMinTextLengthChange,
+  handleConversationBufferAutoSendChange,
   className 
 }: ConversationBufferConfigProps) => {
 
@@ -45,6 +47,25 @@ export const ConversationBufferConfig = ({
       
       <div className="space-y-4">
         <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-send-enabled" className="text-sm font-medium">
+                Envio Automático
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Enviar automaticamente conversas para o servidor
+              </p>
+            </div>
+            <Switch
+              id="auto-send-enabled"
+              checked={conversationBufferConfig.autoSendEnabled}
+              onCheckedChange={handleConversationBufferAutoSendChange}
+              aria-label="Ativar envio automático"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="message-count" className="text-sm font-medium">
             Número de Mensagens
           </Label>
@@ -58,6 +79,7 @@ export const ConversationBufferConfig = ({
               onChange={(e) => handleMessageCountChange(e.target.value)}
               className="w-20"
               aria-label="Número de mensagens para buffer"
+              disabled={!conversationBufferConfig.autoSendEnabled}
             />
             <span className="text-xs text-muted-foreground">
               ({CONVERSATION_BUFFER_DEFAULTS.MIN_MESSAGE_COUNT}-{CONVERSATION_BUFFER_DEFAULTS.MAX_MESSAGE_COUNT})
@@ -81,6 +103,7 @@ export const ConversationBufferConfig = ({
               onChange={(e) => handleMinTextLengthChange(e.target.value)}
               className="w-20"
               aria-label="Comprimento mínimo do texto"
+              disabled={!conversationBufferConfig.autoSendEnabled}
             />
             <span className="text-xs text-muted-foreground">caracteres</span>
           </div>

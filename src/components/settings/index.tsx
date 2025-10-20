@@ -58,6 +58,7 @@ export const Settings = () => {
               conversationBufferConfig={settings.conversationBufferConfig}
               handleConversationBufferMessageCountChange={settings.handleConversationBufferMessageCountChange}
               handleConversationBufferMinTextLengthChange={settings.handleConversationBufferMinTextLengthChange}
+              handleConversationBufferAutoSendChange={settings.handleConversationBufferAutoSendChange}
             />
 
             {/* Delete Chats */}

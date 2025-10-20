@@ -65,14 +65,31 @@ export const useSettings = () => {
     );
   };
 
+  const handleConversationBufferAutoSendChange = (enabled: boolean) => {
+    const newConfig = { ...conversationBufferConfig, autoSendEnabled: enabled };
+    setConversationBufferConfig(newConfig);
+    safeLocalStorage.setItem(
+      STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG,
+      JSON.stringify(newConfig)
+    );
+  };
+
   const handleConversationBufferMessageCountChange = (messageCount: number) => {
     const newConfig = { ...conversationBufferConfig, messageCount };
     setConversationBufferConfig(newConfig);
+    safeLocalStorage.setItem(
+      STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG,
+      JSON.stringify(newConfig)
+    );
   };
 
   const handleConversationBufferMinTextLengthChange = (minTextLength: number) => {
     const newConfig = { ...conversationBufferConfig, minTextLength };
     setConversationBufferConfig(newConfig);
+    safeLocalStorage.setItem(
+      STORAGE_KEYS.CONVERSATION_BUFFER_CONFIG,
+      JSON.stringify(newConfig)
+    );
   };
 
   useEffect(() => {
@@ -119,6 +136,7 @@ export const useSettings = () => {
     setConversationBufferConfig,
     handleConversationBufferMessageCountChange,
     handleConversationBufferMinTextLengthChange,
+    handleConversationBufferAutoSendChange,
     allAiProviders,
     allSttProviders,
     selectedAIProvider,

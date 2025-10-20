@@ -106,6 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useState<ConversationBufferConfig>({
       messageCount: CONVERSATION_BUFFER_DEFAULTS.MESSAGE_COUNT,
       minTextLength: CONVERSATION_BUFFER_DEFAULTS.MIN_TEXT_LENGTH,
+      autoSendEnabled: CONVERSATION_BUFFER_DEFAULTS.AUTO_SEND_ENABLED,
     });
 
   // Unified Customizable State
@@ -171,6 +172,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           setConversationBufferConfig({
             messageCount,
             minTextLength: parsed.minTextLength || CONVERSATION_BUFFER_DEFAULTS.MIN_TEXT_LENGTH,
+            autoSendEnabled: parsed.autoSendEnabled !== undefined ? parsed.autoSendEnabled : CONVERSATION_BUFFER_DEFAULTS.AUTO_SEND_ENABLED,
           });
         }
       } catch {

@@ -219,6 +219,12 @@ export const SupervisorProvider = ({ children }: { children: ReactNode }) => {
       console.log("🔄 ConversationBuffer: Adicionada nova fala:", newMessage);
       console.log("🔄 ConversationBuffer: Total de falas:", updated.length);
       
+      // Verificar se o envio automático está habilitado
+      if (!conversationBufferConfig.autoSendEnabled) {
+        console.log("⏸️ ConversationBuffer: Envio automático desabilitado, apenas armazenando");
+        return updated;
+      }
+      
       // Se chegamos ao número configurado de falas, verificar se o texto total tem pelo menos o mínimo configurado
       if (updated.length >= conversationBufferConfig.messageCount) {
         const totalTextLength = updated.reduce((total, msg) => total + msg.content.length, 0);
