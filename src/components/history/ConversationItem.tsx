@@ -4,7 +4,7 @@ import {
   Trash2,
   Loader2,
   Calendar,
-  Upload,
+  // Upload, // Comentado temporariamente - não será usado por enquanto
 } from "lucide-react";
 import { Button } from "@/components";
 import { ChatConversation } from "@/types/completion";
@@ -74,11 +74,12 @@ export const ConversationItem = ({
     handleViewConversation(conversation);
   };
 
-  const handleSelectClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelectConversation(conversation);
-    setIsOpen(false);
-  };
+  // Função comentada temporariamente - não será usada por enquanto
+  // const handleSelectClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   onSelectConversation(conversation);
+  //   setIsOpen(false);
+  // };
 
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -120,6 +121,7 @@ export const ConversationItem = ({
               <span className="text-xs">Loading...</span>
             </div>
           )}
+          {/* Botão comentado temporariamente - não será usado por enquanto
           <Button
             size="icon"
             variant="ghost"
@@ -129,6 +131,7 @@ export const ConversationItem = ({
           >
             <Upload className="h-3 w-3" />
           </Button>
+          */}
           <Button
             size="icon"
             variant="ghost"

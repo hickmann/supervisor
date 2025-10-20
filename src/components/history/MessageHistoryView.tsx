@@ -2,7 +2,7 @@ import {
   ArrowLeft,
   Copy,
   Trash2,
-  Upload,
+  // Upload, // Comentado temporariamente - não será usado por enquanto
 } from "lucide-react";
 import { Button, ScrollArea, Markdown } from "@/components";
 import { ChatConversation } from "@/types/completion";
@@ -18,10 +18,11 @@ export const MessageHistoryView = ({
   onBackToConversations,
   handleDeleteConfirm,
 }: MessageHistoryViewProps) => {
-  const handleSupervisorEvaluation = () => {
-    // TODO: Implement supervisor evaluation functionality
-    console.log("Evaluating conversation with supervisor:", viewingConversation.id);
-  };
+  // Função comentada temporariamente - não será usada por enquanto
+  // const handleSupervisorEvaluation = () => {
+  //   // TODO: Implement supervisor evaluation functionality
+  //   console.log("Evaluating conversation with supervisor:", viewingConversation.id);
+  // };
 
   const handleCopyConversation = async () => {
     try {
@@ -85,6 +86,7 @@ export const MessageHistoryView = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Botão comentado temporariamente - não será usado por enquanto
             <Button
               size="sm"
               variant={"outline"}
@@ -95,6 +97,7 @@ export const MessageHistoryView = ({
               <Upload className="h-3 w-3" />
               Avaliar com Supervisor
             </Button>
+            */}
             <Button
               size="sm"
               variant="outline"

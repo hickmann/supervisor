@@ -34,5 +34,5 @@ export const CONVERSATION_BUFFER_DEFAULTS = {
   MIN_MESSAGE_COUNT: 4,
   MAX_MESSAGE_COUNT: 15,
   MIN_TEXT_LENGTH: 80,
-  AUTO_SEND_ENABLED: false, // Padrão: desligado
+  AUTO_SEND_ENABLED: true, // Padrão: ligado
 } as const;
