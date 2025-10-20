@@ -102,7 +102,7 @@ const App = () => {
                         </span>
                       </div>
                       <div className="w-6 h-6 border border-white/40 rounded flex items-center justify-center">
-                        <span className="text-xs text-white/80 font-mono leading-none">↵</span>
+                        <span className="text-xs text-white/80 font-mono leading-none">D</span>
                       </div>
                     </div>
                   </>

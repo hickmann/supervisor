@@ -27,9 +27,9 @@ const DEFAULT_SYSTEM_AUDIO_SHORTCUT: &str = "cmd+shift+m";
 const DEFAULT_SYSTEM_AUDIO_SHORTCUT: &str = "ctrl+shift+m";
 
 #[cfg(target_os = "macos")]
-const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "cmd+enter";
+const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "cmd+d";
 #[cfg(not(target_os = "macos"))]
-const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "ctrl+enter";
+const DEFAULT_SEND_TO_AI_SHORTCUT: &str = "ctrl+d";
 
 #[cfg(target_os = "macos")]
 const DEFAULT_TOGGLE_VISIBILITY_SHORTCUT: &str = "cmd+h";
