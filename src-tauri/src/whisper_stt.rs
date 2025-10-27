@@ -84,15 +84,17 @@ pub struct WhisperState {
 impl WhisperState {
     fn find_whisper_executable() -> String {
         if cfg!(target_os = "windows") {
-            let current_dir = std::env::current_dir().unwrap();
-            let project_root = current_dir.parent().unwrap();
+            // Obter o diretório do executável atual
+            let exe_path = std::env::current_exe().expect("Failed to get current exe path");
+            let exe_dir = exe_path.parent().expect("Failed to get exe directory");
             
             // Lista de caminhos possíveis para o executável do Whisper
+            // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
             let possible_paths = vec![
-                format!("{}/whisper/whisper-cli.exe", project_root.display()), // Desenvolvimento
-                format!("{}/_up_/whisper/whisper-cli.exe", project_root.display()), // MSI instalado
-                format!("{}/whisper/whisper-server.exe", project_root.display()), // Alternativa
-                format!("{}/_up_/whisper/whisper-server.exe", project_root.display()), // Alternativa MSI
+                format!("{}/_up_/whisper/whisper-cli.exe", exe_dir.display()), // MSI instalado (prioridade)
+                format!("{}/_up_/whisper/whisper-server.exe", exe_dir.display()), // MSI instalado alternativa
+                format!("{}/whisper/whisper-cli.exe", exe_dir.display()), // Desenvolvimento
+                format!("{}/whisper/whisper-server.exe", exe_dir.display()), // Desenvolvimento alternativa
             ];
             
             for path in possible_paths {
@@ -103,7 +105,7 @@ impl WhisperState {
             }
             
             // Se não encontrou nenhum, retorna o primeiro (para mostrar erro mais claro)
-            format!("{}/whisper/whisper-cli.exe", project_root.display())
+            format!("{}/whisper/whisper-cli.exe", exe_dir.display())
         } else {
             "../whisper/whisper-cli".to_string()
         }
@@ -111,15 +113,17 @@ impl WhisperState {
     
     fn find_whisper_model() -> String {
         if cfg!(target_os = "windows") {
-            let current_dir = std::env::current_dir().unwrap();
-            let project_root = current_dir.parent().unwrap();
+            // Obter o diretório do executável atual
+            let exe_path = std::env::current_exe().expect("Failed to get current exe path");
+            let exe_dir = exe_path.parent().expect("Failed to get exe directory");
             
             // Lista de caminhos possíveis para o modelo do Whisper
+            // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
             let possible_paths = vec![
-                format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display()), // Desenvolvimento
-                format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", project_root.display()), // MSI instalado
-                format!("{}/models/ggml-base-q5_1.bin", project_root.display()), // Alternativa
-                format!("{}/_up_/models/ggml-base-q5_1.bin", project_root.display()), // Alternativa MSI
+                format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado (prioridade)
+                format!("{}/_up_/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado alternativa
+                format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento
+                format!("{}/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento alternativa
             ];
             
             for path in possible_paths {
@@ -130,7 +134,7 @@ impl WhisperState {
             }
             
             // Se não encontrou nenhum, retorna o primeiro (para mostrar erro mais claro)
-            format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display())
+            format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display())
         } else {
             "../whisper/models/ggml-base-q5_1.bin".to_string()
         }
@@ -161,13 +165,13 @@ impl WhisperState {
             
             // Mostrar caminhos alternativos que foram testados
             if cfg!(target_os = "windows") {
-                let current_dir = std::env::current_dir().unwrap();
-                let project_root = current_dir.parent().unwrap();
+                let exe_path = std::env::current_exe().unwrap();
+                let exe_dir = exe_path.parent().unwrap();
                 let alternative_paths = vec![
-                    format!("{}/whisper/whisper-cli.exe", project_root.display()),
-                    format!("{}/_up_/whisper/whisper-cli.exe", project_root.display()),
-                    format!("{}/whisper/whisper-server.exe", project_root.display()),
-                    format!("{}/_up_/whisper/whisper-server.exe", project_root.display()),
+                    format!("{}/whisper/whisper-cli.exe", exe_dir.display()),
+                    format!("{}/whisper/whisper-server.exe", exe_dir.display()),
+                    format!("{}/_up_/whisper/whisper-cli.exe", exe_dir.display()),
+                    format!("{}/_up_/whisper/whisper-server.exe", exe_dir.display()),
                 ];
                 
                 let mut error_msg = format!("Whisper executable not found at: {}\n\nTried the following paths:", self.whisper_path);
@@ -187,13 +191,13 @@ impl WhisperState {
             
             // Mostrar caminhos alternativos que foram testados
             if cfg!(target_os = "windows") {
-                let current_dir = std::env::current_dir().unwrap();
-                let project_root = current_dir.parent().unwrap();
+                let exe_path = std::env::current_exe().unwrap();
+                let exe_dir = exe_path.parent().unwrap();
                 let alternative_paths = vec![
-                    format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display()),
-                    format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", project_root.display()),
-                    format!("{}/models/ggml-base-q5_1.bin", project_root.display()),
-                    format!("{}/_up_/models/ggml-base-q5_1.bin", project_root.display()),
+                    format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display()),
+                    format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", exe_dir.display()),
+                    format!("{}/models/ggml-base-q5_1.bin", exe_dir.display()),
+                    format!("{}/_up_/models/ggml-base-q5_1.bin", exe_dir.display()),
                 ];
                 
                 let mut error_msg = format!("Whisper model not found at: {}\n\nTried the following paths:", self.model_path);

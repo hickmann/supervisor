@@ -40,15 +40,16 @@ impl Default for WhisperServerState {
 
 fn find_whisper_server_executable() -> Result<String, String> {
     if cfg!(target_os = "windows") {
-        let current_dir = std::env::current_dir().map_err(|e| format!("Failed to get current dir: {}", e))?;
-        let project_root = current_dir.parent().ok_or("Failed to get project root")?;
+        let exe_path = std::env::current_exe().map_err(|e| format!("Failed to get current exe: {}", e))?;
+        let exe_dir = exe_path.parent().ok_or("Failed to get exe directory")?;
         
         // Lista de caminhos possíveis para o executável do whisper_server
+        // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
         let possible_paths = vec![
-            format!("{}/whisper/whisper-server.exe", project_root.display()),
-            format!("{}/_up_/whisper/whisper-server.exe", project_root.display()),
-            format!("{}/CoterapIA-Distribuicao/whisper/whisper-server.exe", project_root.display()),
-            format!("{}/CoterapIA-Instalador/whisper/whisper-server.exe", project_root.display()),
+            format!("{}/_up_/whisper/whisper-server.exe", exe_dir.display()), // MSI instalado (prioridade)
+            format!("{}/whisper/whisper-server.exe", exe_dir.display()), // Desenvolvimento
+            format!("{}/CoterapIA-Distribuicao/whisper/whisper-server.exe", exe_dir.display()),
+            format!("{}/CoterapIA-Instalador/whisper/whisper-server.exe", exe_dir.display()),
         ];
         
         for path in &possible_paths {
@@ -66,15 +67,16 @@ fn find_whisper_server_executable() -> Result<String, String> {
 
 fn find_whisper_model() -> Result<String, String> {
     if cfg!(target_os = "windows") {
-        let current_dir = std::env::current_dir().map_err(|e| format!("Failed to get current dir: {}", e))?;
-        let project_root = current_dir.parent().ok_or("Failed to get project root")?;
+        let exe_path = std::env::current_exe().map_err(|e| format!("Failed to get current exe: {}", e))?;
+        let exe_dir = exe_path.parent().ok_or("Failed to get exe directory")?;
         
         // Lista de caminhos possíveis para o modelo do Whisper
+        // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
         let possible_paths = vec![
-            format!("{}/whisper/models/ggml-base-q5_1.bin", project_root.display()),
-            format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", project_root.display()),
-            format!("{}/models/ggml-base-q5_1.bin", project_root.display()),
-            format!("{}/_up_/models/ggml-base-q5_1.bin", project_root.display()),
+            format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado (prioridade)
+            format!("{}/_up_/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado alternativa
+            format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento
+            format!("{}/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento alternativa
         ];
         
         for path in &possible_paths {

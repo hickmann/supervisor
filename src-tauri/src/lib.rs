@@ -80,8 +80,57 @@ async fn exit_app(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+fn setup_logging() -> Result<(), Box<dyn std::error::Error>> {
+    use std::fs;
+    use tracing_subscriber::{fmt, EnvFilter, prelude::*};
+    
+    // Obter o diretório de dados do usuário
+    let home_dir = dirs::home_dir().ok_or("Failed to get home directory")?;
+    let log_dir = home_dir.join("AppData").join("Local").join("CoterapIA").join("logs");
+    
+    // Criar diretório de logs se não existir
+    fs::create_dir_all(&log_dir)?;
+    
+    // Caminho do arquivo de log com timestamp
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let log_file = log_dir.join(format!("coterapia_{}.log", timestamp));
+    
+    // Criar arquivo de log
+    let file = std::fs::File::create(&log_file)?;
+    
+    // Configurar filtro de ambiente
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("info"));
+    
+    // Criar subscriber que escreve no arquivo
+    let file_layer = fmt::layer()
+        .with_writer(file)
+        .with_target(true)
+        .with_thread_ids(true)
+        .with_line_number(true)
+        .with_file(true)
+        .with_ansi(false);
+    
+    // Registrar o subscriber
+    tracing_subscriber::registry()
+        .with(env_filter)
+        .with(file_layer)
+        .init();
+    
+    println!("Logging configured. Log file: {:?}", log_file);
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Configurar logging para arquivo
+    setup_logging().expect("Failed to setup logging");
+    
     let builder = tauri::Builder::default()
         .manage(AudioState::default())
         .manage(shortcuts::WindowVisibility(Mutex::new(false)))
