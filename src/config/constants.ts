@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   CUSTOMIZABLE: "customizable",
   COTERAPIA_API_ENABLED: "coterapia_api_enabled",
   CONVERSATION_BUFFER_CONFIG: "conversation_buffer_config",
+  SELECTED_MICROPHONE_DEVICE_ID: "selected_microphone_device_id",
 } as const;
 
 // Max number of files that can be attached to a message

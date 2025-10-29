@@ -13,6 +13,7 @@ import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { DeleteChats } from "./DeleteChats";
 import { UserInfo } from "./UserInfo";
 import { ConversationBufferConfig } from "./ConversationBufferConfig";
+import { MicrophoneSelector } from "./MicrophoneSelector";
 
 export const Settings = () => {
   const settings = useSettings();
@@ -52,6 +53,9 @@ export const Settings = () => {
 
             {/* Always On Top Toggle */}
             <AlwaysOnTopToggle />
+
+            {/* Microphone Selection for Therapist VAD */}
+            <MicrophoneSelector />
 
             {/* Conversation Buffer Configuration */}
             <ConversationBufferConfig 

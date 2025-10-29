@@ -19,16 +19,29 @@ const PRE_SPEECH_CHUNKS: usize = 25;  // ~0.53s pre-speech buffer (maior para ca
 
 #[tauri::command]
 pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
+    use tracing::info;
+    info!("🎧 System Audio: Starting system audio capture (TERAPEUTA)");
+    
     let state = app.state::<crate::AudioState>();
     let mut guard = state.stream_task.lock().unwrap();
 
     if guard.is_some() {
+        info!("⚠️ System Audio: Capture already running");
         return Err("Capture already running".to_string());
     }
 
-    let input = SpeakerInput::new().map_err(|e| e.to_string())?;
+    info!("🎧 System Audio: Creating SpeakerInput");
+    let input = SpeakerInput::new().map_err(|e| -> String {
+        let err_msg = format!("Failed to create SpeakerInput: {}", e);
+        info!("❌ System Audio: {}", err_msg);
+        eprintln!("❌ System Audio: {}", err_msg);
+        err_msg
+    })?;
+    
+    info!("🎧 System Audio: Starting stream");
     let mut stream = input.stream();
     let sr = stream.sample_rate();
+    info!("🎧 System Audio: Sample rate: {} Hz", sr);
 
     let app_clone = app.clone();
     let task = tokio::spawn(async move {
@@ -41,6 +54,7 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
         let max_samples = sr as usize * 60;  // Safety cap: 60s (ainda mais tempo para frases longas)
 
         while let Some(sample) = stream.next().await {
+            
             buffer.push_back(sample);
 
             // Process in chunks
@@ -53,7 +67,13 @@ pub async fn start_system_audio_capture(app: AppHandle) -> Result<(), String> {
                 }
 
                 let (rms, peak) = process_chunk(&mono);
-                    let is_speech = rms > VAD_SENSITIVITY_RMS || peak > SPEECH_PEAK_THRESHOLD;
+                let is_speech = rms > VAD_SENSITIVITY_RMS || peak > SPEECH_PEAK_THRESHOLD;
+                
+                // Debug: log RMS e peak values (limitado para não spam)
+                if mono.len() == HOP_SIZE && (rms > 0.0001 || peak > 0.0001) {
+                    println!("🎤 VAD Debug: RMS={:.6}, Peak={:.6}, Thresholds: RMS>{:.6}, Peak>{:.6}, Speech={}", 
+                        rms, peak, VAD_SENSITIVITY_RMS, SPEECH_PEAK_THRESHOLD, is_speech);
+                }
 
                     if is_speech {
                         if !in_speech {

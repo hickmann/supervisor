@@ -1,4 +1,3 @@
-import { getBestTranscription } from "@/lib/functions/dual-transcription.function";
 import { UseCompletionReturn } from "@/types";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
@@ -6,6 +5,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { floatArrayToWav } from "@/lib/utils";
 import { useSystemAudio } from "@/hooks/useSystemAudio";
+import { fetchWhisperSTT } from "@/lib/functions/stt.function";
 
 interface AutoSpeechVADProps {
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
@@ -19,41 +19,34 @@ export const AutoSpeechVAD = ({
 
   const vad = useMicVAD({
     userSpeakingThreshold: 0.6,
-    startOnLoad: false, // Não iniciar automaticamente para evitar duplo clique
+    startOnLoad: false,
     onSpeechEnd: async (audio) => {
       try {
-        // convert float32array to blob
+        console.log("🎤 VAD: Speech detected, starting transcription...");
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
-
-        let transcription: string;
-        
-        // SEMPRE USAR WHISPER - NÃO PRECISA VERIFICAR PROVIDERS
-        console.log("🎤 VAD: Using WHISPER for all transcriptions");
+        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
 
         setIsTranscribing(true);
 
-        console.log("🎤 VAD: Starting transcription with WHISPER...");
-        console.log("🎤 VAD: Audio blob size:", audioBlob.size);
+        // Usar transcrição simples do Whisper via Tauri
+        const transcription = await fetchWhisperSTT(audioBlob);
+        console.log("🎤 VAD: Transcription result:", transcription);
 
-        // USAR WHISPER_SERVER PRIMEIRO, TAURI COMO FALLBACK
-        console.log("🎯 VAD: Using whisper_server (HTTP) first, Tauri as fallback");
-        transcription = await getBestTranscription(audioBlob);
-
-        if (transcription) {
+        if (transcription && transcription.trim()) {
           console.log("🎯 VAD: Microphone transcription (TERAPEUTA):", transcription);
-          console.log("🎯 VAD: Transcription length:", transcription.length, "characters");
           
-          // SEMPRE usar o sistema de supervisão - Sistema 1 integrado com Sistema 2
           if (systemAudio && systemAudio.processMicrophoneTranscription) {
-            console.log("🎯 VAD: Sending to psychological supervision system (Sistema 1 → Sistema 2)");
+            console.log("🎯 VAD: Sending to supervision system");
             await systemAudio.processMicrophoneTranscription(transcription);
           } else {
-            console.error("❌ VAD: Sistema de supervisão não disponível! Microfone não funcionará.");
+            console.error("❌ VAD: Supervision system not available");
             alert("Sistema de supervisão não disponível. Reinicie a aplicação.");
           }
+        } else {
+          console.warn("⚠️ VAD: Empty transcription received");
         }
       } catch (error) {
-        console.error("❌ VAD: Failed to transcribe audio:", error);
+        console.error("❌ VAD: Transcription failed:", error);
         alert(`Erro na transcrição: ${error instanceof Error ? error.message : "Transcription failed"}`);
       } finally {
         setIsTranscribing(false);

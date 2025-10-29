@@ -154,23 +154,64 @@ export async function transcribeWithDualSystems(audioBlob: Blob): Promise<DualTr
 }
 
 /**
- * Função otimizada que tenta HTTP primeiro, Tauri como fallback
- * Mais eficiente que executar ambos simultaneamente
+ * Garante que o whisper_server está rodando antes de tentar usar HTTP
  */
-export async function getBestTranscription(audioBlob: Blob): Promise<string> {
-  console.log('🎯 Best Transcription: Starting optimized transcription...');
-  
-  // Primeiro: tentar HTTP (whisper_server)
+async function ensureWhisperServerRunning(): Promise<boolean> {
   try {
-    console.log('🔄 Best Transcription: Trying HTTP first (whisper_server)...');
-    const httpTranscription = await transcribeWithHttp(audioBlob);
+    // Verificar se já está rodando
+    const isRunning = await invoke<boolean>('is_whisper_server_running');
+    if (isRunning) {
+      console.log('✅ Whisper Server: Already running, reusing existing server');
+      return true;
+    }
     
-    if (httpTranscription && httpTranscription.trim()) {
-      console.log('✅ Best Transcription: HTTP successful! Using whisper_server result');
-      return httpTranscription;
+    // Tentar iniciar o servidor
+    console.log('🚀 Whisper Server: Not running, starting server...');
+    const serverResult = await invoke<{
+      is_running: boolean;
+      port: number | null;
+      pid: number | null;
+      error: string | null;
+    }>('start_whisper_server');
+    
+    if (serverResult.is_running) {
+      console.log('✅ Whisper Server: Started successfully on port', serverResult.port);
+      return true;
+    } else {
+      console.warn('⚠️ Whisper Server: Failed to start:', serverResult.error);
+      return false;
     }
   } catch (error) {
-    console.warn('⚠️ Best Transcription: HTTP failed, trying Tauri fallback:', error);
+    console.error('❌ Whisper Server: Error ensuring server is running:', error);
+    return false;
+  }
+}
+
+/**
+ * Função otimizada para PACIENTE: Tenta HTTP primeiro (whisper_server), Tauri como fallback
+ * Usa o mesmo servidor compartilhado
+ */
+export async function getBestTranscription(audioBlob: Blob): Promise<string> {
+  console.log('🎯 Best Transcription (PACIENTE): Starting transcription with HTTP priority...');
+  
+  // Garantir que o servidor está rodando antes de tentar HTTP
+  const serverRunning = await ensureWhisperServerRunning();
+  
+  // Primeiro: tentar HTTP (whisper_server) - PRINCIPAL para paciente
+  if (serverRunning) {
+    try {
+      console.log('🔄 Best Transcription: Trying HTTP first (whisper_server)...');
+      const httpTranscription = await transcribeWithHttp(audioBlob);
+      
+      if (httpTranscription && httpTranscription.trim()) {
+        console.log('✅ Best Transcription: HTTP successful! Using whisper_server result');
+        return httpTranscription;
+      }
+    } catch (error) {
+      console.warn('⚠️ Best Transcription: HTTP failed, trying Tauri fallback:', error);
+    }
+  } else {
+    console.warn('⚠️ Best Transcription: Server not running, skipping HTTP and trying Tauri');
   }
   
   // Fallback: tentar Tauri (whisper_client)
@@ -189,5 +230,71 @@ export async function getBestTranscription(audioBlob: Blob): Promise<string> {
   // Se ambos falharam
   const errorMessage = 'Both HTTP and Tauri transcriptions failed';
   console.error('❌ Best Transcription:', errorMessage);
+  throw new Error(errorMessage);
+}
+
+/**
+ * Função otimizada para TERAPEUTA: Tenta HTTP primeiro (whisper_server), Tauri como fallback
+ * Usa o mesmo servidor compartilhado do paciente
+ */
+export async function getBestTranscriptionForTerapeuta(audioBlob: Blob): Promise<string> {
+  console.log('🎯 Best Transcription (TERAPEUTA): Starting transcription with HTTP priority...');
+  console.log('🎯 Best Transcription (TERAPEUTA): Audio blob size:', audioBlob.size, 'bytes');
+  console.log('🎯 Best Transcription (TERAPEUTA): Audio blob type:', audioBlob.type);
+  
+  // Garantir que o servidor está rodando antes de tentar HTTP
+  console.log('🔧 Best Transcription (TERAPEUTA): Ensuring whisper_server is running...');
+  const serverRunning = await ensureWhisperServerRunning();
+  console.log('🔧 Best Transcription (TERAPEUTA): Server running:', serverRunning);
+  
+  // Primeiro: tentar HTTP (whisper_server) - PRINCIPAL para terapeuta
+  if (serverRunning) {
+    try {
+      console.log('🔄 Best Transcription (TERAPEUTA): Trying HTTP first (whisper_server)...');
+      const httpTranscription = await transcribeWithHttp(audioBlob);
+      console.log('📥 Best Transcription (TERAPEUTA): HTTP response received:', httpTranscription ? `"${httpTranscription.substring(0, 50)}..."` : 'null/empty');
+      
+      if (httpTranscription && httpTranscription.trim()) {
+        console.log('✅ Best Transcription (TERAPEUTA): HTTP successful! Using whisper_server result');
+        return httpTranscription;
+      } else {
+        console.warn('⚠️ Best Transcription (TERAPEUTA): HTTP returned empty or invalid transcription, trying Tauri fallback');
+        console.warn('⚠️ Best Transcription (TERAPEUTA): HTTP response was:', httpTranscription);
+      }
+    } catch (error) {
+      console.warn('⚠️ Best Transcription (TERAPEUTA): HTTP failed, trying Tauri fallback');
+      console.warn('⚠️ Best Transcription (TERAPEUTA): HTTP error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
+  } else {
+    console.warn('⚠️ Best Transcription (TERAPEUTA): Server not running, skipping HTTP and trying Tauri');
+  }
+  
+  // Fallback: tentar Tauri (whisper_client)
+  try {
+    console.log('🔄 Best Transcription (TERAPEUTA): Trying Tauri fallback (whisper_client)...');
+    const tauriTranscription = await transcribeWithTauri(audioBlob);
+    console.log('📥 Best Transcription (TERAPEUTA): Tauri response received:', tauriTranscription ? `"${tauriTranscription.substring(0, 50)}..."` : 'null/empty');
+    
+    if (tauriTranscription && tauriTranscription.trim()) {
+      console.log('✅ Best Transcription (TERAPEUTA): Tauri successful! Using whisper_client result (fallback)');
+      return tauriTranscription;
+    } else {
+      console.warn('⚠️ Best Transcription (TERAPEUTA): Tauri returned empty or invalid transcription');
+      console.warn('⚠️ Best Transcription (TERAPEUTA): Tauri response was:', tauriTranscription);
+    }
+  } catch (error) {
+    console.error('❌ Best Transcription (TERAPEUTA): Tauri also failed');
+    console.error('❌ Best Transcription (TERAPEUTA): Tauri error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+  }
+  
+  // Se ambos falharam
+  const errorMessage = 'Both HTTP and Tauri transcriptions failed';
+  console.error('❌ Best Transcription (TERAPEUTA):', errorMessage);
   throw new Error(errorMessage);
 }

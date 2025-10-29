@@ -6,7 +6,6 @@
  */
 
 use std::process::{Command, Stdio};
-use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tauri::State;
 use tracing::{info, error};
@@ -46,16 +45,16 @@ fn find_whisper_server_executable() -> Result<String, String> {
         // Lista de caminhos possíveis para o executável do whisper_server
         // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
         let possible_paths = vec![
-            format!("{}/_up_/whisper/whisper-server.exe", exe_dir.display()), // MSI instalado (prioridade)
-            format!("{}/whisper/whisper-server.exe", exe_dir.display()), // Desenvolvimento
-            format!("{}/CoterapIA-Distribuicao/whisper/whisper-server.exe", exe_dir.display()),
-            format!("{}/CoterapIA-Instalador/whisper/whisper-server.exe", exe_dir.display()),
+            exe_dir.join("_up_").join("whisper").join("whisper-server.exe"), // MSI instalado (prioridade)
+            exe_dir.join("whisper").join("whisper-server.exe"), // Desenvolvimento
+            exe_dir.join("CoterapIA-Distribuicao").join("whisper").join("whisper-server.exe"),
+            exe_dir.join("CoterapIA-Instalador").join("whisper").join("whisper-server.exe"),
         ];
         
         for path in &possible_paths {
-            if Path::new(path).exists() {
-                info!("✅ WHISPER SERVER: Found executable at: {}", path);
-                return Ok(path.clone());
+            if path.exists() {
+                info!("✅ WHISPER SERVER: Found executable at: {}", path.display());
+                return Ok(path.to_string_lossy().to_string());
             }
         }
         
@@ -73,16 +72,16 @@ fn find_whisper_model() -> Result<String, String> {
         // Lista de caminhos possíveis para o modelo do Whisper
         // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
         let possible_paths = vec![
-            format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado (prioridade)
-            format!("{}/_up_/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado alternativa
-            format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento
-            format!("{}/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento alternativa
+            exe_dir.join("_up_").join("whisper").join("models").join("ggml-base-q5_1.bin"), // MSI instalado (prioridade)
+            exe_dir.join("_up_").join("models").join("ggml-base-q5_1.bin"), // MSI instalado alternativa
+            exe_dir.join("whisper").join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento
+            exe_dir.join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento alternativa
         ];
         
         for path in &possible_paths {
-            if Path::new(path).exists() {
-                info!("✅ WHISPER SERVER: Found model at: {}", path);
-                return Ok(path.clone());
+            if path.exists() {
+                info!("✅ WHISPER SERVER: Found model at: {}", path.display());
+                return Ok(path.to_string_lossy().to_string());
             }
         }
         

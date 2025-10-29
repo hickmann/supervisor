@@ -6,3 +6,4 @@ export * from "./useGlobalShortcuts";
 export * from "./useSystemAudio";
 export * from "./useHistory";
 export * from "./useCopyToClipboard";
+export * from "./useMicrophoneDevices";

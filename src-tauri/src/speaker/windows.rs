@@ -104,9 +104,9 @@ impl SpeakerStream {
                         }
                     }
 
-                    if h_event.wait_for_event(3000).is_err() {
-                        error!("CoterapIA timeout error, stopping capture");
-                        break;
+                    if h_event.wait_for_event(10000).is_err() {
+                        // Timeout é normal quando não há áudio - continuar captura
+                        continue;
                     }
 
                     let mut temp_queue = VecDeque::new();

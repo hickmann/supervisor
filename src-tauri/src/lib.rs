@@ -80,6 +80,17 @@ async fn exit_app(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn log_from_frontend(level: String, message: String) {
+    match level.as_str() {
+        "error" => tracing::error!("[FRONTEND] {}", message),
+        "warn" => tracing::warn!("[FRONTEND] {}", message),
+        "info" => tracing::info!("[FRONTEND] {}", message),
+        "debug" => tracing::debug!("[FRONTEND] {}", message),
+        _ => tracing::info!("[FRONTEND] {}", message),
+    }
+}
+
 fn setup_logging() -> Result<(), Box<dyn std::error::Error>> {
     use std::fs;
     use tracing_subscriber::{fmt, EnvFilter, prelude::*};
@@ -148,6 +159,7 @@ pub fn run() {
             capture_to_base64,
             open_url,
             exit_app,
+            log_from_frontend,
             shortcuts::get_shortcuts,
             shortcuts::check_shortcuts_registered,
             shortcuts::set_app_icon_visibility,

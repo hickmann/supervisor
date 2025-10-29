@@ -191,6 +191,9 @@ export function useSystemAudio() {
   // Função para processar transcrição do microfone (TERAPEUTA)
   const processMicrophoneTranscription = useCallback(
     async (transcription: string) => {
+      console.log("🎤 Microphone: processMicrophoneTranscription called with:", transcription);
+      console.log("🎤 Microphone: Transcription length:", transcription?.length);
+      
       if (!isValidTranscription(transcription)) {
         console.warn("⚠️ Microphone: Invalid transcription, not processing:", transcription);
         return;
@@ -259,7 +262,13 @@ export function useSystemAudio() {
       try {
         speechUnlisten = await listen("speech-detected", async (event) => {
           try {
-            if (!capturing) return;
+            console.log("🎤 System Audio: Event 'speech-detected' received!");
+            console.log("🎤 System Audio: Capturing state:", capturing);
+            
+            if (!capturing) {
+              console.log("⚠️ System Audio: Not capturing, ignoring event");
+              return;
+            }
 
             const base64Audio = event.payload as string;
             console.log("🎤 System Audio: Speech detected via system audio capture");

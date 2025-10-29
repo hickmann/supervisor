@@ -91,16 +91,16 @@ impl WhisperState {
             // Lista de caminhos possíveis para o executável do Whisper
             // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
             let possible_paths = vec![
-                format!("{}/_up_/whisper/whisper-cli.exe", exe_dir.display()), // MSI instalado (prioridade)
-                format!("{}/_up_/whisper/whisper-server.exe", exe_dir.display()), // MSI instalado alternativa
-                format!("{}/whisper/whisper-cli.exe", exe_dir.display()), // Desenvolvimento
-                format!("{}/whisper/whisper-server.exe", exe_dir.display()), // Desenvolvimento alternativa
+                exe_dir.join("_up_").join("whisper").join("whisper-cli.exe"), // MSI instalado (prioridade)
+                exe_dir.join("_up_").join("whisper").join("whisper-server.exe"), // MSI instalado alternativa
+                exe_dir.join("whisper").join("whisper-cli.exe"), // Desenvolvimento
+                exe_dir.join("whisper").join("whisper-server.exe"), // Desenvolvimento alternativa
             ];
             
             for path in possible_paths {
-                if Path::new(&path).exists() {
-                    info!("✅ WHISPER: Found executable at: {}", path);
-                    return path;
+                if path.exists() {
+                    info!("✅ WHISPER: Found executable at: {}", path.display());
+                    return path.to_string_lossy().to_string();
                 }
             }
             
@@ -120,16 +120,16 @@ impl WhisperState {
             // Lista de caminhos possíveis para o modelo do Whisper
             // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
             let possible_paths = vec![
-                format!("{}/_up_/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado (prioridade)
-                format!("{}/_up_/models/ggml-base-q5_1.bin", exe_dir.display()), // MSI instalado alternativa
-                format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento
-                format!("{}/models/ggml-base-q5_1.bin", exe_dir.display()), // Desenvolvimento alternativa
+                exe_dir.join("_up_").join("whisper").join("models").join("ggml-base-q5_1.bin"), // MSI instalado (prioridade)
+                exe_dir.join("_up_").join("models").join("ggml-base-q5_1.bin"), // MSI instalado alternativa
+                exe_dir.join("whisper").join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento
+                exe_dir.join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento alternativa
             ];
             
             for path in possible_paths {
-                if Path::new(&path).exists() {
-                    info!("✅ WHISPER: Found model at: {}", path);
-                    return path;
+                if path.exists() {
+                    info!("✅ WHISPER: Found model at: {}", path.display());
+                    return path.to_string_lossy().to_string();
                 }
             }
             
