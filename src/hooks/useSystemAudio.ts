@@ -17,7 +17,7 @@ import {
 } from "@/lib";
 import { shouldUseCoterapiaAPI } from "@/lib/functions/coterapia.api";
 import { Message } from "@/types/completion";
-import { getBestTranscription } from "@/lib/functions/dual-transcription.function";
+import { transcribePacienteAudio } from "@/lib/functions/queued-transcription.function";
 
 // Importar tipos do arquivo de tipos
 import { ChatMessage, ChatConversation } from "@/types/completion";
@@ -276,10 +276,10 @@ export function useSystemAudio() {
 
             setIsProcessing(true);
             try {
-              // Use whisper_server first, Tauri as fallback
-              console.log("🎤 System Audio: Using whisper_server first, Tauri as fallback...");
+              // Use sistema de fila para transcrição (evita sobrecarga)
+              console.log("🎤 System Audio: Using queued transcription system...");
               
-              // Converter base64 para blob para usar com getBestTranscription
+              // Converter base64 para blob para usar com transcribePacienteAudio
               const audioData = atob(base64Audio);
               const audioArray = new Uint8Array(audioData.length);
               for (let i = 0; i < audioData.length; i++) {
@@ -287,7 +287,7 @@ export function useSystemAudio() {
               }
               const audioBlob = new Blob([audioArray], { type: 'audio/wav' });
               
-              const transcription = await getBestTranscription(audioBlob);
+              const transcription = await transcribePacienteAudio(audioBlob);
 
               // Validate transcription before processing
               if (isValidTranscription(transcription)) {
