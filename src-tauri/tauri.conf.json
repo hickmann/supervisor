@@ -30,7 +30,9 @@
         "shadow": false
       }
     ],
-    "security": { "csp": "" }
+    "security": { 
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; child-src 'self' blob:; connect-src 'self' http: https: ws: wss: data: blob:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline';" 
+    }
   },
   "bundle": {
     "active": true,

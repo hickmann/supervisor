@@ -73,21 +73,53 @@ export const VadOnly = ({
       }
 
       try {
+        console.log("🎤 VadOnly: Checking microphone permissions...");
+        await logToBackend("info", "VadOnly: Checking microphone permissions...");
+        
+        // Verificar se navigator.mediaDevices está disponível
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          const errorMsg = "navigator.mediaDevices.getUserMedia is not available";
+          console.error("❌ VadOnly:", errorMsg);
+          await logToBackend("error", `VadOnly: ${errorMsg}`);
+          alert("Microfone não disponível neste navegador/contexto");
+          return;
+        }
+
         let stream: MediaStream;
         if (selectedDeviceId && selectedDeviceId !== "default") {
           const constraints: MediaStreamConstraints = {
             audio: { deviceId: { exact: selectedDeviceId } },
           };
           console.log("🎤 VadOnly: Creating stream with deviceId:", selectedDeviceId);
+          await logToBackend("info", `VadOnly: Creating stream with deviceId: ${selectedDeviceId}`);
           stream = await navigator.mediaDevices.getUserMedia(constraints);
         } else {
           console.log("🎤 VadOnly: Creating stream with default device");
+          await logToBackend("info", "VadOnly: Creating stream with default device");
           stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         }
+        
+        console.log("✅ VadOnly: Audio stream created successfully");
+        console.log("🎤 VadOnly: Stream tracks:", stream.getTracks().length);
+        await logToBackend("info", `VadOnly: Audio stream created successfully with ${stream.getTracks().length} tracks`);
+        
         currentStream = stream;
         setAudioStream(stream);
       } catch (error) {
-        console.error("❌ VadOnly: Failed to create audio stream:", error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error("❌ VadOnly: Failed to create audio stream:", errorMsg);
+        console.error("❌ VadOnly: Error details:", error);
+        await logToBackend("error", `VadOnly: Failed to create audio stream: ${errorMsg}`);
+        
+        // Mostrar erro específico para o usuário
+        if (errorMsg.includes("Permission denied") || errorMsg.includes("NotAllowedError")) {
+          alert("Permissão de microfone negada. Por favor, permita o acesso ao microfone nas configurações do Windows.");
+        } else if (errorMsg.includes("NotFoundError")) {
+          alert("Microfone não encontrado. Verifique se o microfone está conectado.");
+        } else {
+          alert(`Erro ao acessar microfone: ${errorMsg}`);
+        }
+        
         setAudioStream(null);
       }
     };
@@ -106,33 +138,38 @@ export const VadOnly = ({
   }, [selectedDeviceId]);
 
   const vadOptions: any = {
-    userSpeakingThreshold: 0.6,
-    startOnLoad: true, // Start automatically when component mounts
+    userSpeakingThreshold: 0.3, // Reduzido de 0.6 para 0.3 para ser mais sensível
+    startOnLoad: false, // Desabilitar auto-start - vamos iniciar manualmente para garantir que funciona
     onSpeechStart: () => {
       console.log("🎤 VadOnly: Speech detected - VAD activated");
+      logToBackend("info", "VadOnly: Speech detected - VAD activated");
     },
     onSpeechEnd: async (audio: Float32Array) => {
       console.log("🎤 VadOnly: Fim da fala detectado - VAD", audio.length, "samples");
       await logToBackend("info", `VadOnly: Speech detected - ${audio.length} samples`);
       console.log("🎤 VadOnly: Starting transcription process...");
+      await logToBackend("info", "VadOnly: Starting transcription process...");
       
       try {
         // Convert float32array to blob
         console.log("🎤 VadOnly: Converting audio to blob...");
+        await logToBackend("info", "VadOnly: Converting audio to blob...");
         const audioBlob = floatArrayToWav(audio, 16000, "wav");
         console.log("🎤 VadOnly: Audio blob created, size:", audioBlob.size, "bytes");
         console.log("🎤 VadOnly: Audio blob type:", audioBlob.type);
+        await logToBackend("info", `VadOnly: Audio blob created, size: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
 
         // Verificar systemAudio
         console.log("🎤 VadOnly: systemAudio available:", !!systemAudio);
         console.log("🎤 VadOnly: processMicrophoneTranscription available:", !!(systemAudio && systemAudio.processMicrophoneTranscription));
+        await logToBackend("info", `VadOnly: systemAudio available: ${!!systemAudio}, processMicrophoneTranscription available: ${!!(systemAudio && systemAudio.processMicrophoneTranscription)}`);
 
         // Usar transcrição simples do Whisper via Tauri
         console.log("🎯 VadOnly: Calling fetchWhisperSTT...");
         await logToBackend("info", `VadOnly: Calling fetchWhisperSTT with ${audioBlob.size} bytes`);
         const transcription = await fetchWhisperSTT(audioBlob);
         console.log("🎯 VadOnly: Transcription received:", transcription ? `"${transcription.substring(0, 50)}..."` : "null/empty");
-        await logToBackend("info", `VadOnly: Transcription received - ${transcription ? transcription.length : 0} chars`);
+        await logToBackend("info", `VadOnly: Transcription received - ${transcription ? transcription.length : 0} chars, text: "${transcription ? transcription.substring(0, 100) : "null/empty"}"`);
 
         if (transcription && transcription.trim()) {
           console.log("✅ VadOnly: Valid transcription received!");
@@ -170,13 +207,68 @@ export const VadOnly = ({
     vadOptions.stream = audioStream;
   }
 
-  const vad = useMicVAD(vadOptions);
+  // Interceptar erros do VAD
+  const vadOptionsWithErrorHandling = {
+    ...vadOptions,
+    onError: (error: Error) => {
+      const errorMsg = `VAD Error: ${error.message}`;
+      console.error("❌ VadOnly: VAD error:", error);
+      logToBackend("error", `VadOnly: ${errorMsg}`);
+      alert(`Erro no VAD: ${error.message}\n\nVerifique se você permitiu o acesso ao microfone nas configurações do Windows.`);
+    },
+    onLoadError: (error: Error) => {
+      const errorMsg = `VAD Load Error: ${error.message}`;
+      console.error("❌ VadOnly: VAD load error:", error);
+      logToBackend("error", `VadOnly: ${errorMsg}`);
+      alert(`Erro ao carregar modelo VAD: ${error.message}\n\nVerifique sua conexão com a internet (necessária para baixar o modelo).`);
+    },
+  };
+
+  const vad = useMicVAD(vadOptionsWithErrorHandling);
   const hasStartedRef = useRef(false);
   const lastDeviceIdRef = useRef<string | null>(null);
+  
+  // Log quando o VAD é criado ou atualizado
+  useEffect(() => {
+    console.log("🎤 VadOnly: VAD object updated - loading:", vad.loading, "listening:", vad.listening, "userSpeaking:", vad.userSpeaking, "errored:", vad.errored);
+    logToBackend("info", `VadOnly: VAD state - loading: ${vad.loading}, listening: ${vad.listening}, userSpeaking: ${vad.userSpeaking}, errored: ${vad.errored}`);
+    
+    if (vad.errored) {
+      console.error("❌ VadOnly: VAD is in errored state!");
+      logToBackend("error", "VadOnly: VAD is in errored state!");
+    }
+  }, [vad.loading, vad.listening, vad.userSpeaking, vad.errored]);
 
+  // Log inicial de montagem apenas uma vez
+  useEffect(() => {
+    console.log("🎤 VadOnly: Component mounted");
+    logToBackend("info", "VadOnly component mounted");
+    
+    // Verificar se estamos em ambiente Tauri
+    if ((window as any).__TAURI__) {
+      console.log("✅ VadOnly: Running in Tauri environment");
+      logToBackend("info", "VadOnly: Running in Tauri environment");
+    } else {
+      console.log("⚠️ VadOnly: NOT running in Tauri environment");
+      logToBackend("warn", "VadOnly: NOT running in Tauri environment");
+    }
+    
+    // Verificar disponibilidade de APIs
+    console.log("🔍 VadOnly: Checking API availability...");
+    console.log("  - navigator.mediaDevices:", !!navigator.mediaDevices);
+    console.log("  - getUserMedia:", !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+    console.log("  - AudioContext:", !!(window.AudioContext || (window as any).webkitAudioContext));
+    logToBackend("info", `VadOnly: API availability - mediaDevices: ${!!navigator.mediaDevices}, getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}, AudioContext: ${!!(window.AudioContext || (window as any).webkitAudioContext)}`);
+  }, []);
+  
   // Auto-start VAD when component mounts or device changes (sem loop)
   useEffect(() => {
+    console.log("🎤 VadOnly useEffect triggered - vad:", !!vad, "audioStream:", !!audioStream, "hasStarted:", hasStartedRef.current);
+    logToBackend("info", `VadOnly useEffect: vad=${!!vad}, audioStream=${!!audioStream}, hasStarted=${hasStartedRef.current}, deviceId=${selectedDeviceId}`);
+    
     if (!vad || !audioStream) {
+      console.log("⚠️ VadOnly: Waiting for vad or audioStream to be ready");
+      logToBackend("info", "VadOnly: Waiting for vad or audioStream to be ready");
       return; // Aguardar VAD e stream estarem prontos
     }
     
@@ -185,40 +277,42 @@ export const VadOnly = ({
     
     if (deviceChanged) {
       console.log("🎤 VadOnly: Device changed from", lastDeviceIdRef.current, "to", selectedDeviceId);
+      logToBackend("info", `VadOnly: Device changed from ${lastDeviceIdRef.current} to ${selectedDeviceId}`);
       lastDeviceIdRef.current = selectedDeviceId;
-      
-      // Se o VAD está rodando, pausar e reiniciar
-      if (vad.listening) {
-        console.log("🔄 VadOnly: Restarting VAD due to device change...");
-        vad.pause();
-        setTimeout(() => {
-          try {
-            vad.start();
-            console.log("✅ VadOnly: VAD restarted with new device");
-          } catch (error) {
-            console.error("❌ VadOnly: Failed to restart VAD:", error);
-          }
-        }, 100);
-      }
-      return;
+      hasStartedRef.current = false; // Reset para reiniciar com novo dispositivo
+      return; // Vai ser acionado novamente e vai iniciar
     }
     
     // Iniciar apenas uma vez quando o componente monta
-    if (!hasStartedRef.current && !vad.listening) {
+    console.log("🎤 VadOnly: Checking if should start VAD - hasStarted:", hasStartedRef.current);
+    logToBackend("info", `VadOnly: Checking if should start VAD - hasStarted: ${hasStartedRef.current}`);
+    
+    if (!hasStartedRef.current) {
       console.log("🎤 VadOnly: Auto-starting VAD on component mount");
+      logToBackend("info", "VadOnly: Auto-starting VAD on component mount");
       hasStartedRef.current = true;
       lastDeviceIdRef.current = selectedDeviceId;
-      try {
-        vad.start();
-        setIsListening(true);
-        console.log("✅ VadOnly: VAD started successfully");
-      } catch (error) {
-        console.error("❌ VadOnly: Failed to start VAD:", error);
-        hasStartedRef.current = false; // Reset se falhar
-      }
+      
+      // Aguardar um pouco para garantir que tudo está pronto
+      setTimeout(() => {
+        try {
+          console.log("🎤 VadOnly: Attempting to start VAD...");
+          logToBackend("info", "VadOnly: Attempting to start VAD...");
+          vad.start();
+          setIsListening(true);
+          console.log("✅ VadOnly: VAD started successfully");
+          logToBackend("info", "VadOnly: VAD started successfully");
+        } catch (error) {
+          console.error("❌ VadOnly: Failed to start VAD:", error);
+          logToBackend("error", `VadOnly: Failed to start VAD: ${error}`);
+          hasStartedRef.current = false; // Reset se falhar
+        }
+      }, 500);
+    } else {
+      console.log("⚠️ VadOnly: VAD already started, skipping");
+      logToBackend("info", "VadOnly: VAD already started, skipping");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDeviceId, audioStream]); // Removido 'vad' das dependências para evitar loop - vad é estável
+  }, [selectedDeviceId, audioStream, vad]); // Incluindo vad para reagir quando estiver pronto
 
   const handleToggleVAD = () => {
     if (vad.listening) {
