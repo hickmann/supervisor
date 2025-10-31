@@ -18,7 +18,7 @@ export const AutoSpeechVAD = ({
   const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
-    userSpeakingThreshold: 0.6,
+    userSpeakingThreshold: 0.3,
     startOnLoad: false,
     onSpeechEnd: async (audio) => {
       try {
