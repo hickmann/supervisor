@@ -223,23 +223,28 @@ pub async fn start_whisper_stream(
         return Err(error_msg);
     }
 
-    // Iniciar whisper-stream com parâmetros otimizados para PT-BR
-    // NOTA: Removido --keep-context pois causa duplicação interna das frases
+    // Iniciar whisper-stream com parâmetros OTIMIZADOS PARA QUALIDADE (PT-BR)
+    // Modelo base-q5_1 = quantizado, precisa de parâmetros agressivos para compensar
     let mut cmd = Command::new(&executable_path);
     cmd.arg("-m")
         .arg(&model_path)
         .arg("-l")
         .arg("pt") // Português (whisper detecta PT-BR automaticamente)
         .arg("--step")
-        .arg("3000") // 3s chunks - MAIS CONTEXTO = MAIS PRECISÃO
+        .arg("2500") // 2.5s - chunks menores = mais responsivo e preciso
         .arg("--length")
-        .arg("8000") // 8s janela (reduzido para menos overlap)
+        .arg("6000") // 6s janela - menor overlap = menos confusão
         .arg("--keep")
-        .arg("200") // 200ms overlap MÍNIMO (evita duplicação)
+        .arg("500") // 500ms overlap - balanceado
         .arg("-vth")
-        .arg("0.6") // VAD padrão whisper
+        .arg("0.5") // VAD menos restritivo (pega mais áudio)
+        .arg("-ac")
+        .arg("1500") // Audio context = 1500 (máximo para base model)
+        .arg("-bs")
+        .arg("5") // Beam size = 5 (busca mais inteligente, mais preciso)
         .arg("-t")
-        .arg("4"); // 4 threads
+        .arg("4") // 4 threads
+        .arg("--no-fallback"); // Sem fallback (evita transcrições ruins)
 
     // No Windows, ocultar janela do console
     #[cfg(target_os = "windows")]
@@ -268,7 +273,7 @@ pub async fn start_whisper_stream(
                     let mut last_line = String::new();
                     let mut last_update = Instant::now();
                     let mut last_emitted = String::new();
-                    let debounce_duration = Duration::from_millis(800); // 800ms para estabilizar
+                    let debounce_duration = Duration::from_millis(400); // 400ms para estabilizar (mais rápido)
                     
                     for line in reader.lines() {
                         if let Ok(line) = line {

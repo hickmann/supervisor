@@ -1,6 +1,6 @@
 import { InfoIcon, PlayIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger, Button, LoginModal } from "@/components";
-import { WhisperStreamTerapeuta } from "./WhisperStreamTerapeuta";
+import { VadOnly } from "./VadOnly";
 import { UseCompletionReturn } from "@/types";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts";
@@ -74,8 +74,7 @@ export const Audio = ({
     <Popover open={micOpen} onOpenChange={setMicOpen}>
       <PopoverTrigger asChild>
         {enableVAD ? (
-          <WhisperStreamTerapeuta
-            isEnabled={enableVAD}
+          <VadOnly
             setEnableVAD={setEnableVAD}
             systemAudio={systemAudio}
           />
