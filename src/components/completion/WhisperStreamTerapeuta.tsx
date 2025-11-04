@@ -31,6 +31,8 @@ export function WhisperStreamTerapeuta({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unlistenRef = useRef<(() => void) | null>(null);
+  const lastProcessedRef = useRef<string>(''); // Filtro de duplicação
+  const processingRef = useRef<boolean>(false); // Evita processamento paralelo
 
   // Iniciar/parar whisper_stream baseado em isEnabled
   useEffect(() => {
@@ -56,10 +58,25 @@ export function WhisperStreamTerapeuta({
       const unlisten = await listen<WhisperTranscription>(
         'whisper-stream-transcription',
         async (event) => {
-          console.log('🎤 WhisperStream: Received transcription:', event.payload);
           const { text } = event.payload;
+          console.log('🎤 WhisperStream: Received transcription:', text);
+
+          // Filtro de duplicação: ignorar se for igual à última processada
+          if (text === lastProcessedRef.current) {
+            console.log('⚠️ WhisperStream: DUPLICATED transcription, skipping!');
+            return;
+          }
+
+          // Filtro de processamento paralelo
+          if (processingRef.current) {
+            console.log('⚠️ WhisperStream: Already processing, skipping!');
+            return;
+          }
 
           if (text && text.trim().length > 0) {
+            processingRef.current = true;
+            lastProcessedRef.current = text;
+            
             console.log('✅ WhisperStream: Valid transcription, processing:', text);
             setIsTranscribing(true);
             
@@ -76,8 +93,11 @@ export function WhisperStreamTerapeuta({
               console.warn('⚠️ WhisperStream: systemAudio.processMicrophoneTranscription not available');
             }
             
-            // Reset transcribing state após 1 segundo
-            setTimeout(() => setIsTranscribing(false), 1000);
+            // Reset transcribing state e processing flag após 1 segundo
+            setTimeout(() => {
+              setIsTranscribing(false);
+              processingRef.current = false;
+            }, 1000);
           } else {
             console.log('⚠️ WhisperStream: Empty transcription, skipping');
           }

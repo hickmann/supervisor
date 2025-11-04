@@ -43,6 +43,80 @@ pub struct WhisperStreamStatus {
 }
 
 /**
+ * Verifica se uma string contém palavras repetidas (indicando duplicação)
+ */
+fn is_repeated_words(text: &str) -> bool {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    let len = words.len();
+    
+    // Se tiver menos de 10 palavras, não considerar repetição
+    if len < 10 {
+        return false;
+    }
+    
+    // Verificar múltiplos padrões de repetição:
+    
+    // 1. Repetição exata de metades (ex: "A B C. A B C.")
+    let half = len / 2;
+    let first_half = &words[..half].join(" ");
+    let second_half = &words[half..].join(" ");
+    if similarity(first_half, second_half) > 0.85 {
+        return true;
+    }
+    
+    // 2. Repetição de terços (ex: "A B. A B. A B.")
+    if len >= 12 {
+        let third = len / 3;
+        let first_third = &words[..third].join(" ");
+        let second_third = &words[third..third*2].join(" ");
+        if similarity(first_third, second_third) > 0.85 {
+            return true;
+        }
+    }
+    
+    // 3. Frases que terminam repetindo o início
+    // Ex: "Eu acho que não está perfeito. Eu acho que não está perfeito e..."
+    if len >= 15 {
+        let first_7 = &words[..7].join(" ");
+        let last_start_7 = &words[len-14..len-7].join(" ");
+        if similarity(first_7, last_start_7) > 0.85 {
+            return true;
+        }
+    }
+    
+    false
+}
+
+/**
+ * Calcula similaridade simples entre duas strings
+ */
+fn similarity(a: &str, b: &str) -> f32 {
+    if a.is_empty() || b.is_empty() {
+        return 0.0;
+    }
+    
+    let a_lower = a.to_lowercase();
+    let b_lower = b.to_lowercase();
+    
+    if a_lower == b_lower {
+        return 1.0;
+    }
+    
+    // Conta palavras em comum
+    let a_words: std::collections::HashSet<&str> = a_lower.split_whitespace().collect();
+    let b_words: std::collections::HashSet<&str> = b_lower.split_whitespace().collect();
+    
+    let intersection = a_words.intersection(&b_words).count();
+    let union = a_words.union(&b_words).count();
+    
+    if union == 0 {
+        0.0
+    } else {
+        intersection as f32 / union as f32
+    }
+}
+
+/**
  * Encontra o executável whisper-stream.exe
  */
 fn find_whisper_stream_executable() -> Result<String, String> {
@@ -149,18 +223,21 @@ pub async fn start_whisper_stream(
         return Err(error_msg);
     }
 
-    // Iniciar whisper-stream com parâmetros otimizados
+    // Iniciar whisper-stream com parâmetros otimizados para PT-BR
+    // NOTA: Removido --keep-context pois causa duplicação interna das frases
     let mut cmd = Command::new(&executable_path);
     cmd.arg("-m")
         .arg(&model_path)
         .arg("-l")
-        .arg("pt") // Português
+        .arg("pt") // Português (whisper detecta PT-BR automaticamente)
         .arg("--step")
-        .arg("3000") // 3 segundos de chunks
+        .arg("3000") // 3s chunks - MAIS CONTEXTO = MAIS PRECISÃO
         .arg("--length")
-        .arg("10000") // 10 segundos de janela
+        .arg("8000") // 8s janela (reduzido para menos overlap)
+        .arg("--keep")
+        .arg("200") // 200ms overlap MÍNIMO (evita duplicação)
         .arg("-vth")
-        .arg("0.3") // VAD threshold mais sensível
+        .arg("0.6") // VAD padrão whisper
         .arg("-t")
         .arg("4"); // 4 threads
 
@@ -185,36 +262,96 @@ pub async fn start_whisper_stream(
             if let Some(stdout) = child.stdout.take() {
                 let app_handle_clone = app_handle.clone();
                 thread::spawn(move || {
+                    use std::time::{Duration, Instant};
+                    
                     let reader = BufReader::new(stdout);
+                    let mut last_line = String::new();
+                    let mut last_update = Instant::now();
+                    let mut last_emitted = String::new();
+                    let debounce_duration = Duration::from_millis(800); // 800ms para estabilizar
+                    
                     for line in reader.lines() {
                         if let Ok(line) = line {
-                            let line = line.trim();
+                            // Remover códigos ANSI e normalizar
+                            let cleaned = line
+                                .replace("\x1B[2K", "")
+                                .replace("\x1B[K", "")
+                                .replace("\x1B[1K", "")
+                                .replace("\x1B[0K", "")
+                                .replace("\r", "")
+                                .replace("\n", "")
+                                .chars()
+                                .filter(|c| !c.is_control() || *c == ' ')
+                                .collect::<String>()
+                                .split_whitespace()
+                                .collect::<Vec<&str>>()
+                                .join(" ")
+                                .trim()
+                                .to_string();
                             
-                            // Debug: mostrar TODAS as linhas
-                            println!("📝 WHISPER STREAM stdout: {}", line);
+                            // Ignorar linhas vazias ou muito curtas
+                            if cleaned.is_empty() || cleaned.len() < 8 {
+                                continue;
+                            }
                             
-                            // Filtrar linhas vazias, timestamps e logs do sistema
-                            if !line.is_empty() 
-                                && !line.starts_with("[") 
-                                && !line.contains("whisper_") 
-                                && !line.contains("processing")
-                                && !line.contains("kHz")
-                                && line.len() > 5  // Pelo menos 5 caracteres
+                            // Ignorar logs do sistema
+                            if cleaned.starts_with("[") 
+                                || cleaned.contains("whisper_") 
+                                || cleaned.contains("processing")
+                                || cleaned.contains("kHz")
+                                || cleaned.contains("seconds")
                             {
-                                println!("🎤 WHISPER STREAM: Transcription detected: {}", line);
-                                
-                                // Emitir evento com transcrição
-                                let transcription = WhisperTranscription {
-                                    text: line.to_string(),
-                                    timestamp: chrono::Local::now().to_rfc3339(),
-                                };
-                                
-                                if let Err(e) = app_handle_clone.emit_to(EventTarget::any(), "whisper-stream-transcription", &transcription) {
-                                    eprintln!("❌ WHISPER STREAM: Failed to emit event: {}", e);
+                                continue;
+                            }
+                            
+                            // Se linha mudou, atualizar buffer
+                            if cleaned != last_line {
+                                // Se a última linha ficou estável por tempo suficiente, emitir
+                                if !last_line.is_empty() 
+                                    && last_update.elapsed() >= debounce_duration
+                                    && last_line != last_emitted
+                                    && !is_repeated_words(&last_line)
+                                {
+                                    println!("🎤 WHISPER STREAM: Final transcription: {}", last_line);
+                                    
+                                    let transcription = WhisperTranscription {
+                                        text: last_line.clone(),
+                                        timestamp: chrono::Local::now().to_rfc3339(),
+                                    };
+                                    
+                                    if let Err(e) = app_handle_clone.emit_to(EventTarget::any(), "whisper-stream-transcription", &transcription) {
+                                        eprintln!("❌ WHISPER STREAM: Failed to emit event: {}", e);
+                                    }
+                                    
+                                    last_emitted = last_line.clone();
                                 }
+                                
+                                // Atualizar buffer com nova linha
+                                println!("📝 WHISPER STREAM progress: {}", cleaned);
+                                last_line = cleaned;
+                                last_update = Instant::now();
+                            } else {
+                                // Linha repetida, atualizar timestamp
+                                last_update = Instant::now();
                             }
                         }
                     }
+                    
+                    // Emitir última linha se houver
+                    if !last_line.is_empty() 
+                        && last_line != last_emitted 
+                        && !is_repeated_words(&last_line)
+                    {
+                        println!("🎤 WHISPER STREAM: Final transcription (EOF): {}", last_line);
+                        
+                        let transcription = WhisperTranscription {
+                            text: last_line,
+                            timestamp: chrono::Local::now().to_rfc3339(),
+                        };
+                        
+                        let _ = app_handle_clone.emit_to(EventTarget::any(), "whisper-stream-transcription", &transcription);
+                    }
+                    
                     println!("🛑 WHISPER STREAM: stdout reader thread finished");
                 });
             }
