@@ -3,7 +3,7 @@ import { useMicVAD } from "@ricky0123/vad-react";
 import { LoaderCircleIcon, MicIcon, MicOffIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-import { fetchWhisperSTT } from "@/lib/functions/stt.function";
+import { transcribeTerapeutaAudio } from "@/lib/functions/queued-transcription.function";
 import { floatArrayToWav } from "@/lib/utils";
 import { invoke } from "@tauri-apps/api/core";
 import { safeLocalStorage } from "@/lib";
@@ -138,8 +138,10 @@ export const VadOnly = ({
   }, [selectedDeviceId]);
 
   const vadOptions: any = {
-    userSpeakingThreshold: 0.3, // Reduzido de 0.6 para 0.3 para ser mais sensível
+    userSpeakingThreshold: 0.15, // Muito sensível para detectar qualquer fala
     startOnLoad: false, // Desabilitar auto-start - vamos iniciar manualmente para garantir que funciona
+    redemptionFrames: 8, // Reduzir frames necessários para detectar fala
+    frameSamples: 512, // Amostras por frame
     onSpeechStart: () => {
       console.log("🎤 VadOnly: Speech detected - VAD activated");
       logToBackend("info", "VadOnly: Speech detected - VAD activated");
@@ -164,10 +166,10 @@ export const VadOnly = ({
         console.log("🎤 VadOnly: processMicrophoneTranscription available:", !!(systemAudio && systemAudio.processMicrophoneTranscription));
         await logToBackend("info", `VadOnly: systemAudio available: ${!!systemAudio}, processMicrophoneTranscription available: ${!!(systemAudio && systemAudio.processMicrophoneTranscription)}`);
 
-        // Usar transcrição simples do Whisper via Tauri
-        console.log("🎯 VadOnly: Calling fetchWhisperSTT...");
-        await logToBackend("info", `VadOnly: Calling fetchWhisperSTT with ${audioBlob.size} bytes`);
-        const transcription = await fetchWhisperSTT(audioBlob);
+        // Usar fila de transcrição (whisper_stream com fallback automático)
+        console.log("🎯 VadOnly: Queueing audio for transcription via whisper_stream...");
+        await logToBackend("info", `VadOnly: Queueing audio for whisper_stream with ${audioBlob.size} bytes`);
+        const transcription = await transcribeTerapeutaAudio(audioBlob);
         console.log("🎯 VadOnly: Transcription received:", transcription ? `"${transcription.substring(0, 50)}..."` : "null/empty");
         await logToBackend("info", `VadOnly: Transcription received - ${transcription ? transcription.length : 0} chars, text: "${transcription ? transcription.substring(0, 100) : "null/empty"}"`);
 
@@ -312,7 +314,7 @@ export const VadOnly = ({
       console.log("⚠️ VadOnly: VAD already started, skipping");
       logToBackend("info", "VadOnly: VAD already started, skipping");
     }
-  }, [selectedDeviceId, audioStream, vad]); // Incluindo vad para reagir quando estiver pronto
+  }, [selectedDeviceId, audioStream]); // Removido vad para evitar loop
 
   const handleToggleVAD = () => {
     if (vad.listening) {

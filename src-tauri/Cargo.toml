@@ -65,6 +65,7 @@ dirs = "5.0"
 ringbuf = "0.4.8"
 tauri-plugin-shell = "2.3.1"
 tempfile = "3.8"
+chrono = "0.4"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-plugin-macos-permissions = "2"
