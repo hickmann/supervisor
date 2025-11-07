@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { floatArrayToWav } from "@/lib/utils";
 import { useSystemAudio } from "@/hooks/useSystemAudio";
-import { fetchWhisperSTT } from "@/lib/functions/stt.function";
+import { getBestTranscriptionForTerapeuta } from "@/lib/functions/dual-transcription.function";
 
 interface AutoSpeechVADProps {
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
@@ -28,8 +28,9 @@ export const AutoSpeechVAD = ({
 
         setIsTranscribing(true);
 
-        // Usar transcrição simples do Whisper via Tauri
-        const transcription = await fetchWhisperSTT(audioBlob);
+        // Usar transcrição via HTTP (whisper_server) com fallback - MESMO MÉTODO QUE O PACIENTE
+        console.log("🎤 VAD: Using getBestTranscriptionForTerapeuta (HTTP + fallback)");
+        const transcription = await getBestTranscriptionForTerapeuta(audioBlob);
         console.log("🎤 VAD: Transcription result:", transcription);
 
         if (transcription && transcription.trim()) {

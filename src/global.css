@@ -45,8 +45,8 @@
   --radius: 0.625rem;
   
   /* Tech Theme Variables */
-  --tech-bg: rgba(15, 23, 42, 0.95); /* Dark blue tech background */
-  --tech-card: rgba(30, 41, 59, 0.9); /* Slightly lighter tech cards */
+  --tech-bg: rgba(15, 23, 42, 0.80); /* Dark blue tech background - mais transparente */
+  --tech-card: rgba(30, 41, 59, 0.75); /* Slightly lighter tech cards - mais transparente */
   --tech-border: rgba(59, 130, 246, 0.3); /* Blue tech borders */
   --tech-border-hover: rgba(59, 130, 246, 0.6); /* Brighter on hover */
   --tech-text: #e2e8f0; /* Light text */
@@ -66,15 +66,15 @@
   --popover-foreground: var(--tech-text);
   --primary: var(--tech-accent);
   --primary-foreground: #ffffff;
-  --secondary: rgba(51, 65, 85, 0.8);
+  --secondary: rgba(51, 65, 85, 0.7);
   --secondary-foreground: var(--tech-text);
-  --muted: rgba(51, 65, 85, 0.6);
+  --muted: rgba(51, 65, 85, 0.5);
   --muted-foreground: var(--tech-text-muted);
   --accent: var(--tech-accent);
   --accent-foreground: #ffffff;
   --destructive: var(--tech-danger);
   --border: var(--tech-border);
-  --input: rgba(30, 41, 59, 0.8);
+  --input: rgba(30, 41, 59, 0.7);
   --ring: var(--tech-accent);
   --chart-1: var(--tech-accent);
   --chart-2: var(--tech-success);
@@ -93,8 +93,8 @@
 
 .dark {
   /* Darker tech theme for dark mode */
-  --tech-bg: rgba(8, 16, 28, 0.98);
-  --tech-card: rgba(20, 30, 45, 0.95);
+  --tech-bg: rgba(8, 16, 28, 0.85);
+  --tech-card: rgba(20, 30, 45, 0.80);
   --tech-border: rgba(59, 130, 246, 0.4);
   --tech-border-hover: rgba(59, 130, 246, 0.7);
   --tech-text: #f1f5f9;
@@ -111,15 +111,15 @@
   --popover-foreground: var(--tech-text);
   --primary: var(--tech-accent);
   --primary-foreground: #ffffff;
-  --secondary: rgba(30, 41, 59, 0.9);
+  --secondary: rgba(30, 41, 59, 0.75);
   --secondary-foreground: var(--tech-text);
-  --muted: rgba(30, 41, 59, 0.7);
+  --muted: rgba(30, 41, 59, 0.6);
   --muted-foreground: var(--tech-text-muted);
   --accent: var(--tech-accent);
   --accent-foreground: #ffffff;
   --destructive: var(--tech-danger);
   --border: var(--tech-border);
-  --input: rgba(20, 30, 45, 0.9);
+  --input: rgba(20, 30, 45, 0.75);
   --ring: var(--tech-accent);
   --chart-1: var(--tech-accent);
   --chart-2: var(--tech-success);
@@ -130,7 +130,7 @@
   --sidebar-foreground: var(--tech-text);
   --sidebar-primary: var(--tech-accent);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(30, 41, 59, 0.9);
+  --sidebar-accent: rgba(30, 41, 59, 0.75);
   --sidebar-accent-foreground: var(--tech-text);
   --sidebar-border: var(--tech-border);
   --sidebar-ring: var(--tech-accent);

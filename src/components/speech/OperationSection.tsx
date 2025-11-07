@@ -2,10 +2,11 @@ import { ChatConversation } from "@/types";
 import { Button } from "../ui";
 import {
   CopyIcon,
+  CheckIcon,
 } from "lucide-react";
 import { QuickActions } from "./QuickActions";
 import { useSupervisor } from "@/contexts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   lastAIResponse: string;
@@ -40,6 +41,7 @@ export const OperationSection = ({
   lastPacienteTranscription,
 }: Props) => {
   const { selectItem, assistentClinicoData, conversationBuffer, isGeneratingSessionSummary, isGeneratingTasksAgreements, error, setError } = useSupervisor();
+  const [isCopied, setIsCopied] = useState(false);
   
   // Auto-dismiss do erro após 5 segundos
   useEffect(() => {
@@ -54,20 +56,35 @@ export const OperationSection = ({
   
   // Função para copiar toda a transcrição
   const copyTranscription = async () => {
-    const allMessages = conversation.messages
-      .sort((a, b) => a.timestamp - b.timestamp) // Ordem cronológica
-      .map(msg => {
-        const role = msg.role === 'terapeuta' ? 'TERAPEUTA' : 
-                    msg.role === 'paciente' ? 'PACIENTE' : 'SISTEMA';
-        return `${role}: ${msg.content}`;
-      })
-      .join('\n\n');
-    
     try {
+      console.log('📋 Copy: Iniciando cópia da transcrição...');
+      console.log('📋 Copy: Total de mensagens:', conversation.messages.length);
+      
+      if (conversation.messages.length === 0) {
+        console.warn('⚠️ Copy: Nenhuma mensagem para copiar');
+        return;
+      }
+      
+      const allMessages = conversation.messages
+        .sort((a, b) => a.timestamp - b.timestamp) // Ordem cronológica
+        .map(msg => {
+          const role = msg.role === 'terapeuta' ? 'TERAPEUTA' : 
+                      msg.role === 'paciente' ? 'PACIENTE' : 'SISTEMA';
+          return `${role}: ${msg.content}`;
+        })
+        .join('\n\n');
+      
+      console.log('📋 Copy: Texto formatado:', allMessages.substring(0, 100) + '...');
+      
       await navigator.clipboard.writeText(allMessages);
-      // Aqui você pode adicionar um toast de sucesso se quiser
+      console.log('✅ Copy: Transcrição copiada com sucesso!');
+      
+      // Mostrar feedback visual
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error('Erro ao copiar transcrição:', err);
+      console.error('❌ Copy: Erro ao copiar transcrição:', err);
+      alert('Erro ao copiar transcrição. Por favor, tente novamente.');
     }
   };
 
@@ -158,10 +175,18 @@ export const OperationSection = ({
                 variant="outline"
                 size="sm"
                 onClick={copyTranscription}
-                className="flex items-center gap-2 bg-white/60 hover:bg-white/80 border-slate-200/50 text-slate-700 hover:text-slate-900 transition-all duration-200 rounded-lg"
-                title="Copiar transcrição completa"
+                className={`flex items-center gap-2 border-slate-200/50 transition-all duration-200 rounded-lg ${
+                  isCopied 
+                    ? 'bg-green-100 hover:bg-green-200 text-green-700' 
+                    : 'bg-white/60 hover:bg-white/80 text-slate-700 hover:text-slate-900'
+                }`}
+                title={isCopied ? "Transcrição copiada!" : "Copiar transcrição completa"}
               >
-                <CopyIcon className="h-4 w-4" />
+                {isCopied ? (
+                  <CheckIcon className="h-4 w-4" />
+                ) : (
+                  <CopyIcon className="h-4 w-4" />
+                )}
               </Button>
             </>
           )}
