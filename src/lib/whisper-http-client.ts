@@ -30,7 +30,7 @@ export class WhisperHttpClient {
     this.config = {
       host: config.host || '127.0.0.1',
       port: config.port || 8000,
-      model: config.model || 'ggml-base-q5_1.bin',
+      model: config.model || 'ggml-small.bin',
       language: config.language || 'pt',
     };
     this.baseUrl = `http://${this.config.host}:${this.config.port}`;

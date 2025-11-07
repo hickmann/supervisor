@@ -2,7 +2,7 @@
 # Este script facilita o uso do whisper_server com as configurações corretas
 
 param(
-    [string]$Model = "ggml-base-q5_1.bin",
+    [string]$Model = "ggml-small.bin",
     [string]$Language = "pt",
     [int]$Port = 8000,
     [string]$Host = "127.0.0.1"

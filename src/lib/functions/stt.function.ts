@@ -35,7 +35,7 @@ export async function fetchCoterapiaSTT(audio: File | Blob): Promise<string> {
 export async function fetchWhisperSTT(audio: File | Blob): Promise<string> {
   console.log("🎤 WHISPER STT: Starting transcription...");
   console.log("📊 WHISPER STT: Audio size:", audio.size, "bytes");
-  console.log("🤖 WHISPER STT: Using model: ggml-base-q5_1.bin");
+  console.log("🤖 WHISPER STT: Using model: ggml-small.bin");
   
   try {
     // Convert audio to base64

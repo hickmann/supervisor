@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { floatArrayToWav } from "@/lib/utils";
 import { useSystemAudio } from "@/hooks/useSystemAudio";
-import { fetchWhisperSTT } from "@/lib/functions/stt.function";
+import { transcribeAudioWithHttp } from "@/lib/whisper-http-client";
 
 interface AutoSpeechVADProps {
   setEnableVAD: UseCompletionReturn["setEnableVAD"];
@@ -18,7 +18,13 @@ export const AutoSpeechVAD = ({
   const systemAudio = useSystemAudio();
 
   const vad = useMicVAD({
-    userSpeakingThreshold: 0.6,
+    // Configurações ajustadas para igualar os chunks do paciente
+    // Paciente usa: SILENCE_CHUNKS: 45 (~1.7s), MIN_SPEECH_CHUNKS: 10 (~0.21s), PRE_SPEECH_CHUNKS: 25 (~0.53s)
+    positiveSpeechThreshold: 0.8,          // Threshold para detectar fala (similar ao SPEECH_PEAK_THRESHOLD)
+    negativeSpeechThreshold: 0.8 - 0.15,   // Threshold para detectar silêncio
+    redemptionFrames: 45,                  // Frames de silêncio antes de finalizar (~1.7s como o paciente)
+    preSpeechPadFrames: 25,                // Buffer pré-fala (~0.53s como o paciente)
+    minSpeechFrames: 10,                   // Duração mínima de fala (~0.21s como o paciente)
     startOnLoad: false,
     onSpeechEnd: async (audio) => {
       try {
@@ -28,8 +34,9 @@ export const AutoSpeechVAD = ({
 
         setIsTranscribing(true);
 
-        // Usar transcrição simples do Whisper via Tauri
-        const transcription = await fetchWhisperSTT(audioBlob);
+        // Usar transcrição via HTTP (whisper_server) - MESMO MÉTODO QUE O PACIENTE
+        console.log("🎤 VAD: Using whisper_server HTTP (same as patient)");
+        const transcription = await transcribeAudioWithHttp(audioBlob);
         console.log("🎤 VAD: Transcription result:", transcription);
 
         if (transcription && transcription.trim()) {

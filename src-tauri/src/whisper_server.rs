@@ -8,7 +8,7 @@
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use tauri::State;
-use tracing::{info, error};
+use tracing::{info, error, warn};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,6 +34,64 @@ impl WhisperServerState {
 impl Default for WhisperServerState {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// Mata todos os processos whisper-server que estão rodando
+fn kill_all_whisper_server_processes() {
+    #[cfg(target_os = "windows")]
+    {
+        info!("🔪 WHISPER SERVER: Killing all existing whisper-server processes on Windows...");
+        
+        // Usar taskkill para matar todos os processos whisper-server.exe
+        let output = Command::new("taskkill")
+            .args(&["/F", "/IM", "whisper-server.exe"])
+            .output();
+        
+        match output {
+            Ok(result) => {
+                if result.status.success() {
+                    let stdout = String::from_utf8_lossy(&result.stdout);
+                    info!("✅ WHISPER SERVER: Kill command output: {}", stdout);
+                } else {
+                    let stderr = String::from_utf8_lossy(&result.stderr);
+                    // Não é erro se não houver processos para matar
+                    if stderr.contains("not found") || stderr.contains("não encontrado") {
+                        info!("ℹ️ WHISPER SERVER: No existing whisper-server processes found");
+                    } else {
+                        warn!("⚠️ WHISPER SERVER: Kill command stderr: {}", stderr);
+                    }
+                }
+            }
+            Err(e) => {
+                warn!("⚠️ WHISPER SERVER: Failed to execute taskkill: {}", e);
+            }
+        }
+    }
+    
+    #[cfg(not(target_os = "windows"))]
+    {
+        info!("🔪 WHISPER SERVER: Killing all existing whisper-server processes on Unix...");
+        
+        // Usar pkill para matar todos os processos whisper-server
+        let output = Command::new("pkill")
+            .arg("-9")
+            .arg("whisper-server")
+            .output();
+        
+        match output {
+            Ok(result) => {
+                if result.status.success() {
+                    info!("✅ WHISPER SERVER: Successfully killed existing processes");
+                } else {
+                    // pkill retorna 1 se não encontrou nenhum processo
+                    info!("ℹ️ WHISPER SERVER: No existing whisper-server processes found");
+                }
+            }
+            Err(e) => {
+                warn!("⚠️ WHISPER SERVER: Failed to execute pkill: {}", e);
+            }
+        }
     }
 }
 
@@ -72,10 +130,10 @@ fn find_whisper_model() -> Result<String, String> {
         // Lista de caminhos possíveis para o modelo do Whisper
         // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
         let possible_paths = vec![
-            exe_dir.join("_up_").join("whisper").join("models").join("ggml-base-q5_1.bin"), // MSI instalado (prioridade)
-            exe_dir.join("_up_").join("models").join("ggml-base-q5_1.bin"), // MSI instalado alternativa
-            exe_dir.join("whisper").join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento
-            exe_dir.join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento alternativa
+            exe_dir.join("_up_").join("whisper").join("models").join("ggml-small.bin"), // MSI instalado (prioridade)
+            exe_dir.join("_up_").join("models").join("ggml-small.bin"), // MSI instalado alternativa
+            exe_dir.join("whisper").join("models").join("ggml-small.bin"), // Desenvolvimento
+            exe_dir.join("models").join("ggml-small.bin"), // Desenvolvimento alternativa
         ];
         
         for path in &possible_paths {
@@ -87,7 +145,7 @@ fn find_whisper_model() -> Result<String, String> {
         
         Err(format!("Whisper model not found in any of the expected locations: {:?}", possible_paths))
     } else {
-        Ok("../whisper/models/ggml-base-q5_1.bin".to_string())
+        Ok("../whisper/models/ggml-small.bin".to_string())
     }
 }
 
@@ -97,7 +155,7 @@ pub async fn start_whisper_server(
 ) -> Result<WhisperServerStatus, String> {
     info!("🚀 WHISPER SERVER: Starting whisper_server...");
     
-    // Verificar se já está rodando
+    // Verificar se já está rodando no nosso estado
     {
         let mut handle = state.process_handle.lock().unwrap();
         if let Some(ref mut child) = *handle {
@@ -106,11 +164,11 @@ pub async fn start_whisper_server(
                     info!("🔄 WHISPER SERVER: Previous process finished, starting new one");
                 }
                 Ok(None) => {
-                    info!("⚠️ WHISPER SERVER: Already running");
+                    info!("✅ WHISPER SERVER: Already running in our state, reusing it");
                     return Ok(WhisperServerStatus {
                         is_running: true,
                         port: Some(8000), // Porta padrão do whisper_server
-                        pid: None,
+                        pid: Some(child.id()),
                         error: None,
                     });
                 }
@@ -120,6 +178,13 @@ pub async fn start_whisper_server(
             }
         }
     }
+    
+    // Matar TODOS os processos whisper-server que estão rodando (inclusive de outras instâncias)
+    info!("🔍 WHISPER SERVER: Checking for existing whisper-server processes...");
+    kill_all_whisper_server_processes();
+    
+    // Aguardar um momento para garantir que os processos foram finalizados
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
     
     // Encontrar executável e modelo
     let executable_path = find_whisper_server_executable()?;

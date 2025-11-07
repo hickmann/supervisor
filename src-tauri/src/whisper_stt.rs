@@ -120,10 +120,10 @@ impl WhisperState {
             // Lista de caminhos possíveis para o modelo do Whisper
             // Prioridade: 1. _up_ (MSI instalado), 2. whisper (desenvolvimento)
             let possible_paths = vec![
-                exe_dir.join("_up_").join("whisper").join("models").join("ggml-base-q5_1.bin"), // MSI instalado (prioridade)
-                exe_dir.join("_up_").join("models").join("ggml-base-q5_1.bin"), // MSI instalado alternativa
-                exe_dir.join("whisper").join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento
-                exe_dir.join("models").join("ggml-base-q5_1.bin"), // Desenvolvimento alternativa
+                exe_dir.join("_up_").join("whisper").join("models").join("ggml-small.bin"), // MSI instalado (prioridade)
+                exe_dir.join("_up_").join("models").join("ggml-small.bin"), // MSI instalado alternativa
+                exe_dir.join("whisper").join("models").join("ggml-small.bin"), // Desenvolvimento
+                exe_dir.join("models").join("ggml-small.bin"), // Desenvolvimento alternativa
             ];
             
             for path in possible_paths {
@@ -134,9 +134,9 @@ impl WhisperState {
             }
             
             // Se não encontrou nenhum, retorna o primeiro (para mostrar erro mais claro)
-            format!("{}/whisper/models/ggml-base-q5_1.bin", exe_dir.display())
+            format!("{}/whisper/models/ggml-small.bin", exe_dir.display())
         } else {
-            "../whisper/models/ggml-base-q5_1.bin".to_string()
+            "../whisper/models/ggml-small.bin".to_string()
         }
     }
 
